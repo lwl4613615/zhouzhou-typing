@@ -235,6 +235,7 @@ namespace newgdq
             TbxInput.Focus();
             UpdateProgress();
             RefreshBmTips();
+            ComputeAndShowTheoryMc();
             _chartWin?.Reset();
         }
 
@@ -340,6 +341,7 @@ namespace newgdq
         {
             if (MnuSmartCi.IsChecked != true)
             {
+                TxtTheoryMc.Text = "-";
                 HandyControl.Controls.Growl.Info("智能测词已关闭");
                 return;
             }
@@ -348,12 +350,25 @@ namespace newgdq
 
         private void ComputeAndShowTheoryMc()
         {
-            if (MnuSmartCi == null || MnuSmartCi.IsChecked != true) return;
-            if (!_dict.Loaded) { HandyControl.Controls.Growl.Warning("词典未加载"); return; }
-            if (_session.TypeText.Length == 0) return;
+            if (MnuSmartCi == null || MnuSmartCi.IsChecked != true)
+            {
+                if (TxtTheoryMc != null) TxtTheoryMc.Text = "-";
+                return;
+            }
+            if (!_dict.Loaded)
+            {
+                TxtTheoryMc.Text = "?";
+                HandyControl.Controls.Growl.Warning("词典未加载");
+                return;
+            }
+            if (_session.TypeText.Length == 0)
+            {
+                TxtTheoryMc.Text = "-";
+                return;
+            }
 
             double mc = _dict.ComputeTheoryMc(_session.TypeText);
-            HandyControl.Controls.Growl.Info($"当前文段理论码长：{mc:0.00}");
+            TxtTheoryMc.Text = mc.ToString("0.00");
         }
 
         private void MenuItem_Reset_Click(object sender, RoutedEventArgs e)
@@ -369,6 +384,7 @@ namespace newgdq
             TbxInput.Clear();
             UpdateProgress();
             RefreshBmTips();
+            if (TxtTheoryMc != null) TxtTheoryMc.Text = "-";
             _chartWin?.Reset();
             HandyControl.Controls.Growl.Info("已复位");
         }

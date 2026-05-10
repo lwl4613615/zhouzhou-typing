@@ -322,7 +322,7 @@
                     <TextBlock Grid.Row="0" Grid.Column="3" x:Name="TxtHg"  Text="0" Style="{StaticResource LblText}"/>
                     <TextBlock Grid.Row="0" Grid.Column="4" x:Name="TxtCz"  Text="0" Style="{StaticResource LblText}"/>
                     <TextBlock Grid.Row="0" Grid.Column="5" x:Name="TxtRightLast" Text="0:0" Style="{StaticResource LblText}"/>
-                    <TextBlock Grid.Row="0" Grid.Column="6" Text="100%"     Style="{StaticResource LblText}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="6" x:Name="TxtTheoryMc" Text="-" Style="{StaticResource LblText}"/>
                     <TextBlock Grid.Row="0" Grid.Column="7" x:Name="TxtTotalInfo" Text="0/2099/4天/2099"
                                Style="{StaticResource LblText}" HorizontalAlignment="Right" Margin="0,0,8,0"/>
                     <TextBlock Grid.Row="1" Grid.Column="0" x:Name="TxtCount1Pct" Text="0%" Style="{StaticResource LblText}" FontSize="10"/>
@@ -330,6 +330,7 @@
                     <TextBlock Grid.Row="1" Grid.Column="3" Text="回改" Style="{StaticResource LblText}" FontSize="10"/>
                     <TextBlock Grid.Row="1" Grid.Column="4" Text="错字" Style="{StaticResource LblText}" FontSize="10"/>
                     <TextBlock Grid.Row="1" Grid.Column="5" Text="左:右" Style="{StaticResource LblText}" FontSize="10"/>
+                    <TextBlock Grid.Row="1" Grid.Column="6" Text="理论码长" Style="{StaticResource LblText}" FontSize="10"/>
                     <Border Grid.RowSpan="2" Grid.Column="0" BorderBrush="{StaticResource GridLine}" BorderThickness="0,0,1,0"/>
                     <Border Grid.RowSpan="2" Grid.Column="1" BorderBrush="{StaticResource GridLine}" BorderThickness="0,0,1,0"/>
                     <Border Grid.RowSpan="2" Grid.Column="2" BorderBrush="{StaticResource GridLine}" BorderThickness="0,0,1,0"/>
