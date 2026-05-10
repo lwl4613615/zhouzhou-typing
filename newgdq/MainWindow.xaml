@@ -105,6 +105,9 @@
                 <MenuItem Header="跟打报告..." />
                 <Separator/>
                 <MenuItem Header="编码提示测试..." Click="MenuItem_OpenBmTips_Click"/>
+                <MenuItem Header="智能测词" x:Name="MnuSmartCi" IsCheckable="True"
+                          ToolTip="计算当前文段的理论码长（五笔/形码用户有用，纯拼音可不开）"
+                          Click="MnuSmartCi_Click"/>
             </MenuItem>
             <MenuItem Header="发文">
                 <MenuItem Header="发文状态" />

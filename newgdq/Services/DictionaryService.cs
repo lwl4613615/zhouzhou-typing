@@ -148,5 +148,35 @@ namespace newgdq.Services
             }
             return hits;
         }
+
+        /// <summary>
+        /// 计算文段理论码长 = 总编码长度 / 总字数。
+        /// 词组按最长匹配，单字按首选编码。
+        /// </summary>
+        public double ComputeTheoryMc(string text)
+        {
+            if (!Loaded || string.IsNullOrEmpty(text)) return 0;
+            int totalCode = 0;
+            int totalChar = 0;
+            int i = 0;
+            while (i < text.Length)
+            {
+                var entry = MatchAt(text, i);
+                if (entry == null)
+                {
+                    // 字典外字符（标点等）按 1 码长 1 字计
+                    totalCode += 1;
+                    totalChar += 1;
+                    i++;
+                }
+                else
+                {
+                    totalCode += entry.Code.Length;
+                    totalChar += entry.Word.Length;
+                    i += entry.Word.Length;
+                }
+            }
+            return totalChar > 0 ? (double)totalCode / totalChar : 0;
+        }
     }
 }

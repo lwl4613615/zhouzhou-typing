@@ -335,6 +335,27 @@ namespace newgdq
         }
 
         // ===== 复位 =====清空当前文章、输入区、历史不动
+        // ===== 智能测词（计算当前文段理论码长） =====
+        private void MnuSmartCi_Click(object sender, RoutedEventArgs e)
+        {
+            if (MnuSmartCi.IsChecked != true)
+            {
+                HandyControl.Controls.Growl.Info("智能测词已关闭");
+                return;
+            }
+            ComputeAndShowTheoryMc();
+        }
+
+        private void ComputeAndShowTheoryMc()
+        {
+            if (MnuSmartCi == null || MnuSmartCi.IsChecked != true) return;
+            if (!_dict.Loaded) { HandyControl.Controls.Growl.Warning("词典未加载"); return; }
+            if (_session.TypeText.Length == 0) return;
+
+            double mc = _dict.ComputeTheoryMc(_session.TypeText);
+            HandyControl.Controls.Growl.Info($"当前文段理论码长：{mc:0.00}");
+        }
+
         private void MenuItem_Reset_Click(object sender, RoutedEventArgs e)
         {
             _session.Load(string.Empty, string.Empty);
@@ -407,11 +428,22 @@ namespace newgdq
 
         private void KeyHook_KeyDown(object sender, int vk)
         {
-            // F3 重打 - 全局（不受输入框焦点限制）
-            if (vk == 0x72) // VK_F3
+            // 全局热键（不依赖输入框焦点）
+            // F2 发文 / F3 重打 / F5 复位 / F6 发文及换文
+            switch (vk)
             {
-                Dispatcher.BeginInvoke(new Action(Repeat));
-                return;
+                case 0x71: // F2 发文
+                    Dispatcher.BeginInvoke(new Action(() => HandyControl.Controls.Growl.Info("F2 发文（P4 实现）")));
+                    return;
+                case 0x72: // F3 重打
+                    Dispatcher.BeginInvoke(new Action(Repeat));
+                    return;
+                case 0x74: // F5 复位
+                    Dispatcher.BeginInvoke(new Action(() => MenuItem_Reset_Click(null, null)));
+                    return;
+                case 0x75: // F6 发文及换文
+                    Dispatcher.BeginInvoke(new Action(() => HandyControl.Controls.Growl.Info("F6 发文及换文（P4 实现）")));
+                    return;
             }
 
             if (!_session.Started) return;
