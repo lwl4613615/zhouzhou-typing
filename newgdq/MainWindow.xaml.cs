@@ -368,6 +368,24 @@ namespace newgdq
 
         private void MenuItem_SendNext_Click(object sender, RoutedEventArgs e) => SendNext();
 
+        /// <summary>乱序重抽当前发文会话：强制 IsRandom=true 后发下一段。</summary>
+        private void MenuItem_SendShuffle_Click(object sender, RoutedEventArgs e) => SendShuffle();
+
+        private void SendShuffle()
+        {
+            if (!_sending.State.Active)
+            {
+                HandyControl.Controls.Growl.Info("尚未开启发文，请先菜单 → 发文 → 发文...");
+                return;
+            }
+            _sending.State.IsRandom = true;
+            // 如果之前是顺序表刷文章，乱序只对 Single 生效。处理：强制按 Single 模式抽。
+            var origType = _sending.State.Type;
+            _sending.State.Type = SendingTextType.Single;
+            SendNext();
+            _sending.State.Type = origType;
+        }
+
         /// <summary>发下一段：从 SendingService.NextSegment() 取文本，加载到对照区。</summary>
         private void SendNext()
         {
@@ -501,8 +519,8 @@ namespace newgdq
             // F2 发文 / F3 重打 / F5 复位 / F6 发文及换文
             switch (vk)
             {
-                case 0x71: // F2 发下一段
-                    Dispatcher.BeginInvoke(new Action(SendNext));
+                case 0x71: // F2 打开发文窗口
+                    Dispatcher.BeginInvoke(new Action(OpenSendTextWindow));
                     return;
                 case 0x72: // F3 重打
                     Dispatcher.BeginInvoke(new Action(Repeat));
@@ -510,8 +528,8 @@ namespace newgdq
                 case 0x74: // F5 复位
                     Dispatcher.BeginInvoke(new Action(() => MenuItem_Reset_Click(null, null)));
                     return;
-                case 0x75: // F6 打开发文窗口
-                    Dispatcher.BeginInvoke(new Action(OpenSendTextWindow));
+                case 0x75: // F6 乱序重抽
+                    Dispatcher.BeginInvoke(new Action(SendShuffle));
                     return;
             }
 
