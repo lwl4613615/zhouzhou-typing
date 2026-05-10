@@ -166,8 +166,8 @@ namespace newgdq
             int donePct = (int)(pct * 100);
             TxtProgress.Text = total > 0 ? $"{len},{donePct}%" : "-";
 
-            // 状态条第 1 格：已打字数 / 进度%
-            TxtCount1.Text = len.ToString();
+            // 状态条第 2 格：已打字数 / 总字数、下行进度%
+            TxtCount1.Text = $"{len}/{total}";
             TxtCount1Pct.Text = (pct * 100).ToString("0.0") + "%";
 
             // 末尾汇总：今日/总字数/天数/记录字数 (P5 接持久化后上真数据)
@@ -250,8 +250,10 @@ namespace newgdq
             TxtSpeed.Text = "0.00";
             TxtJj.Text    = "0.00";
             TxtMc.Text    = "0.00";
+            TxtKeysCount.Text = "0";
             TxtHg.Text    = "0";
             TxtCz.Text    = "0";
+            TxtRightLast.Text = "0:0";
         }
 
         // ===== 词组下划线 =====
@@ -631,6 +633,8 @@ namespace newgdq
         {
             UpdateStatsDisplay();
             TxtHg.Text = _session.Hg.ToString();
+            TxtCz.Text = _session.Cz.ToString();
+            TxtKeysCount.Text = _session.Keys.ToString();
             TxtRightLast.Text = _session.LeftHand + ":" + _session.RightHand;
 
             // 速度曲线采样（仅当窗口打开 + 已开始）

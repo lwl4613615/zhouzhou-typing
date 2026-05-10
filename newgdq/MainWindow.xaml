@@ -283,17 +283,18 @@
                         <RowDefinition Height="14"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="60"/>
-                        <ColumnDefinition Width="100"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="60"/>
-                        <ColumnDefinition Width="60"/>
-                        <ColumnDefinition Width="60"/>
-                        <ColumnDefinition Width="60"/>
-                        <ColumnDefinition Width="200"/>
+                        <ColumnDefinition Width="100"/>  <!-- 时间 -->
+                        <ColumnDefinition Width="80"/>   <!-- 字数 -->
+                        <ColumnDefinition Width="*"/>    <!-- 编码提示 / 进度条 -->
+                        <ColumnDefinition Width="60"/>   <!-- 击键 -->
+                        <ColumnDefinition Width="60"/>   <!-- 回改 -->
+                        <ColumnDefinition Width="60"/>   <!-- 错字 -->
+                        <ColumnDefinition Width="70"/>   <!-- 左:右 -->
+                        <ColumnDefinition Width="80"/>   <!-- 理论码长 -->
+                        <ColumnDefinition Width="200"/>  <!-- 累计 -->
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Row="0" Grid.Column="0" x:Name="TxtCount1"    Text="0"     Style="{StaticResource LblText}"/>
-                    <TextBlock Grid.Row="0" Grid.Column="1" x:Name="TxtTime"      Text="00:00.00" Style="{StaticResource LblText}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="0" x:Name="TxtTime"      Text="00:00.00" Style="{StaticResource LblText}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1" x:Name="TxtCount1"    Text="0/0"      Style="{StaticResource LblText}"/>
                     <!-- 中间上行：编码提示三小格 (重数色块 + 字 + 码) -->
                     <Grid Grid.Row="0" Grid.Column="2" x:Name="BmTipBox" Visibility="Collapsed">
                         <Grid.ColumnDefinitions>
@@ -319,18 +320,21 @@
                         <TextBlock x:Name="TxtProgress" Text="-" Foreground="#EEE"
                                    FontSize="10" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Grid>
-                    <TextBlock Grid.Row="0" Grid.Column="3" x:Name="TxtHg"  Text="0" Style="{StaticResource LblText}"/>
-                    <TextBlock Grid.Row="0" Grid.Column="4" x:Name="TxtCz"  Text="0" Style="{StaticResource LblText}"/>
-                    <TextBlock Grid.Row="0" Grid.Column="5" x:Name="TxtRightLast" Text="0:0" Style="{StaticResource LblText}"/>
-                    <TextBlock Grid.Row="0" Grid.Column="6" x:Name="TxtTheoryMc" Text="-" Style="{StaticResource LblText}"/>
-                    <TextBlock Grid.Row="0" Grid.Column="7" x:Name="TxtTotalInfo" Text="0/2099/4天/2099"
+                    <TextBlock Grid.Row="0" Grid.Column="3" x:Name="TxtKeysCount" Text="0" Style="{StaticResource LblText}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="4" x:Name="TxtHg"  Text="0" Style="{StaticResource LblText}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="5" x:Name="TxtCz"  Text="0" Style="{StaticResource LblText}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="6" x:Name="TxtRightLast" Text="0:0" Style="{StaticResource LblText}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="7" x:Name="TxtTheoryMc" Text="-" Style="{StaticResource LblText}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="8" x:Name="TxtTotalInfo" Text="0/0/1天/0"
                                Style="{StaticResource LblText}" HorizontalAlignment="Right" Margin="0,0,8,0"/>
-                    <TextBlock Grid.Row="1" Grid.Column="0" x:Name="TxtCount1Pct" Text="0%" Style="{StaticResource LblText}" FontSize="10"/>
-                    <TextBlock Grid.Row="1" Grid.Column="1" Text="时间" Style="{StaticResource LblText}" FontSize="10"/>
-                    <TextBlock Grid.Row="1" Grid.Column="3" Text="回改" Style="{StaticResource LblText}" FontSize="10"/>
-                    <TextBlock Grid.Row="1" Grid.Column="4" Text="错字" Style="{StaticResource LblText}" FontSize="10"/>
-                    <TextBlock Grid.Row="1" Grid.Column="5" Text="左:右" Style="{StaticResource LblText}" FontSize="10"/>
-                    <TextBlock Grid.Row="1" Grid.Column="6" Text="理论码长" Style="{StaticResource LblText}" FontSize="10"/>
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="时间" Style="{StaticResource LblText}" FontSize="10"/>
+                    <TextBlock Grid.Row="1" Grid.Column="1" x:Name="TxtCount1Pct" Text="0%" Style="{StaticResource LblText}" FontSize="10"/>
+                    <TextBlock Grid.Row="1" Grid.Column="3" Text="击键" Style="{StaticResource LblText}" FontSize="10"/>
+                    <TextBlock Grid.Row="1" Grid.Column="4" Text="回改" Style="{StaticResource LblText}" FontSize="10"/>
+                    <TextBlock Grid.Row="1" Grid.Column="5" Text="错字" Style="{StaticResource LblText}" FontSize="10"/>
+                    <TextBlock Grid.Row="1" Grid.Column="6" Text="左:右" Style="{StaticResource LblText}" FontSize="10"/>
+                    <TextBlock Grid.Row="1" Grid.Column="7" Text="理论码长" Style="{StaticResource LblText}" FontSize="10"/>
+                    <TextBlock Grid.Row="1" Grid.Column="8" Text="今日/累计/天/记录" Style="{StaticResource LblText}" FontSize="10" HorizontalAlignment="Right" Margin="0,0,8,0"/>
                     <Border Grid.RowSpan="2" Grid.Column="0" BorderBrush="{StaticResource GridLine}" BorderThickness="0,0,1,0"/>
                     <Border Grid.RowSpan="2" Grid.Column="1" BorderBrush="{StaticResource GridLine}" BorderThickness="0,0,1,0"/>
                     <Border Grid.RowSpan="2" Grid.Column="2" BorderBrush="{StaticResource GridLine}" BorderThickness="0,0,1,0"/>
@@ -338,7 +342,8 @@
                     <Border Grid.RowSpan="2" Grid.Column="4" BorderBrush="{StaticResource GridLine}" BorderThickness="0,0,1,0"/>
                     <Border Grid.RowSpan="2" Grid.Column="5" BorderBrush="{StaticResource GridLine}" BorderThickness="0,0,1,0"/>
                     <Border Grid.RowSpan="2" Grid.Column="6" BorderBrush="{StaticResource GridLine}" BorderThickness="0,0,1,0"/>
-                    <Border Grid.Row="0" Grid.ColumnSpan="8" BorderBrush="{StaticResource GridLine}" BorderThickness="0,0,0,1" VerticalAlignment="Bottom"/>
+                    <Border Grid.RowSpan="2" Grid.Column="7" BorderBrush="{StaticResource GridLine}" BorderThickness="0,0,1,0"/>
+                    <Border Grid.Row="0" Grid.ColumnSpan="9" BorderBrush="{StaticResource GridLine}" BorderThickness="0,0,0,1" VerticalAlignment="Bottom"/>
                 </Grid>
             </Border>
 
