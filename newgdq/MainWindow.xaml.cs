@@ -31,6 +31,9 @@ namespace newgdq
         // 编码提示
         private readonly DictionaryService _dict = new DictionaryService();
 
+        // 发文
+        private readonly SendingService _sending = new SendingService();
+
         // 速度曲线窗口
         private SpeedChartWindow _chartWin;
 
@@ -338,7 +341,55 @@ namespace newgdq
         }
 
         // ===== 复位 =====清空当前文章、输入区、历史不动
-        // ===== 智能测词（计算当前文段理论码长） =====
+        // ===== 发文 =====
+        private void MenuItem_OpenSendText_Click(object sender, RoutedEventArgs e) => OpenSendTextWindow();
+
+        private void OpenSendTextWindow()
+        {
+            var win = new SendTextWindow { Owner = this };
+            win.OnStartSending = state =>
+            {
+                _sending.State.Active         = true;
+                _sending.State.FullText       = state.FullText;
+                _sending.State.PoolText       = state.PoolText;
+                _sending.State.Title          = state.Title;
+                _sending.State.Type           = state.Type;
+                _sending.State.IsRandom       = state.IsRandom;
+                _sending.State.RandomNoRepeat = state.RandomNoRepeat;
+                _sending.State.OneSentenceEnd = state.OneSentenceEnd;
+                _sending.State.CountPerSeg    = state.CountPerSeg;
+                _sending.State.Mark           = state.Mark;
+                _sending.State.StartSeg       = state.StartSeg;
+                _sending.State.SentSeg        = 0;
+                SendNext();   // 立即发第一段
+            };
+            win.ShowDialog();
+        }
+
+        private void MenuItem_SendNext_Click(object sender, RoutedEventArgs e) => SendNext();
+
+        /// <summary>发下一段：从 SendingService.NextSegment() 取文本，加载到对照区。</summary>
+        private void SendNext()
+        {
+            if (!_sending.State.Active)
+            {
+                HandyControl.Controls.Growl.Info("尚未开启发文，请先菜单 → 发文 → 发文...");
+                return;
+            }
+            string seg = _sending.NextSegment();
+            if (seg == null)
+            {
+                HandyControl.Controls.Growl.Success("全部发送完毕");
+                _sending.Stop();
+                return;
+            }
+            int curSeg = _sending.State.CurSeg - 1; // SentSeg 已 ++，当前段号 = StartSeg + (SentSeg - 1)
+            string title = $"{_sending.State.Title} · 第 {curSeg} 段";
+            LoadArticle(seg, title);
+            // 段尺动态游标（发文后才显示）
+            SegRulerBox.Visibility = Visibility.Visible;
+            TxtCurSeg.Text = curSeg.ToString();
+        }
         private void MnuSmartCi_Click(object sender, RoutedEventArgs e)
         {
             if (MnuSmartCi.IsChecked != true)
@@ -450,8 +501,8 @@ namespace newgdq
             // F2 发文 / F3 重打 / F5 复位 / F6 发文及换文
             switch (vk)
             {
-                case 0x71: // F2 发文
-                    Dispatcher.BeginInvoke(new Action(() => HandyControl.Controls.Growl.Info("F2 发文（P4 实现）")));
+                case 0x71: // F2 发下一段
+                    Dispatcher.BeginInvoke(new Action(SendNext));
                     return;
                 case 0x72: // F3 重打
                     Dispatcher.BeginInvoke(new Action(Repeat));
@@ -459,8 +510,8 @@ namespace newgdq
                 case 0x74: // F5 复位
                     Dispatcher.BeginInvoke(new Action(() => MenuItem_Reset_Click(null, null)));
                     return;
-                case 0x75: // F6 发文及换文
-                    Dispatcher.BeginInvoke(new Action(() => HandyControl.Controls.Growl.Info("F6 发文及换文（P4 实现）")));
+                case 0x75: // F6 打开发文窗口
+                    Dispatcher.BeginInvoke(new Action(OpenSendTextWindow));
                     return;
             }
 

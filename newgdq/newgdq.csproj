@@ -83,11 +83,14 @@
     <Compile Include="Services\ImeWatcher.cs" />
     <Compile Include="Services\ArticleLoader.cs" />
     <Compile Include="Services\DictionaryService.cs" />
+    <Compile Include="Services\TextProcessor.cs" />
+    <Compile Include="Services\SendingService.cs" />
     <Compile Include="Models\HistoryRow.cs" />
     <Compile Include="Models\TypeDate.cs" />
     <Compile Include="Models\TypingSession.cs" />
     <Compile Include="Models\BmEntry.cs" />
     <Compile Include="Models\WordHit.cs" />
+    <Compile Include="Models\SendingState.cs" />
     <Page Include="Views\BmTipsWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -102,6 +105,14 @@
     </Page>
     <Compile Include="Views\SpeedChartWindow.xaml.cs">
       <DependentUpon>SpeedChartWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Page Include="Views\SendTextWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="Views\SendTextWindow.xaml.cs">
+      <DependentUpon>SendTextWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

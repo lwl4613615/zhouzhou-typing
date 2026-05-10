@@ -73,7 +73,7 @@
         <!-- 1. 顶部菜单栏 -->
         <Menu DockPanel.Dock="Top" Background="{StaticResource PanelBG}" x:Name="MainMenu">
             <MenuItem Header="菜单">
-                <MenuItem Header="发文..." />
+                <MenuItem Header="发文..." Click="MenuItem_OpenSendText_Click"/>
                 <MenuItem Header="外观..." />
                 <MenuItem Header="暂停" x:Name="MnuPause" Click="MenuItem_Pause_Click"/>
                 <Separator/>
@@ -110,8 +110,8 @@
                           Click="MnuSmartCi_Click"/>
             </MenuItem>
             <MenuItem Header="发文">
-                <MenuItem Header="发文状态" />
-                <MenuItem Header="发下一段" />
+                <MenuItem Header="发文状态" IsEnabled="False"/>
+                <MenuItem Header="发下一段 (F2)" Click="MenuItem_SendNext_Click"/>
             </MenuItem>
             <MenuItem Header="帮助">
                 <MenuItem Header="快捷键列表" />

@@ -1,0 +1,119 @@
+<Window x:Class="newgdq.Views.SendTextWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
+        Title="州州发文设置" Width="760" Height="540"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource RegionBrush}"
+        Foreground="{DynamicResource PrimaryTextBrush}"
+        FontFamily="微软雅黑">
+    <DockPanel>
+
+        <!-- 底部公共操作区 -->
+        <Border DockPanel.Dock="Bottom" Background="#2D2D30" Padding="8,6" BorderBrush="#555" BorderThickness="0,1,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- 左：信息 + 模式选项 -->
+                <StackPanel Grid.Column="0" Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                        <TextBlock Text="标题:" Width="40" VerticalAlignment="Center" Foreground="#AAA"/>
+                        <TextBlock x:Name="LblTitle" Text="-" Width="160" Foreground="#FFD24C" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="字数:" Width="40" VerticalAlignment="Center" Foreground="#AAA"/>
+                        <TextBlock x:Name="LblTextCount" Text="0" Width="60" Foreground="#FFF" VerticalAlignment="Center"/>
+                        <TextBlock Text="类型:" Width="40" VerticalAlignment="Center" Foreground="#AAA"/>
+                        <TextBlock x:Name="LblStyle" Text="-" Width="60" Foreground="#4FC3F7" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                        <RadioButton x:Name="RbnInOrder"  Content="顺序" GroupName="Order" IsChecked="True" Margin="0,0,12,0" Foreground="#EEE"/>
+                        <RadioButton x:Name="RbnOutOrder" Content="乱序" GroupName="Order" Margin="0,0,12,0" Foreground="#EEE"/>
+                        <CheckBox x:Name="ChkOneEnd" Content="以一句结束" Margin="0,0,12,0" Foreground="#EEE"/>
+                        <CheckBox x:Name="ChkNoRepeat" Content="乱序全段不重复" Margin="0,0,12,0" Foreground="#EEE"/>
+                        <CheckBox x:Name="ChkTickOut" Content="自动剔除空格" IsChecked="True" Foreground="#EEE"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="发送字数" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="#AAA"/>
+                        <TextBox x:Name="TbxSendCount" Width="50" Text="25" Margin="0,0,8,0" PreviewTextInput="DigitOnly_PreviewTextInput"/>
+                        <TextBlock Text="起始位置" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="#AAA"/>
+                        <TextBox x:Name="TbxSendStart" Width="50" Text="0" Margin="0,0,8,0" PreviewTextInput="DigitOnly_PreviewTextInput"/>
+                        <TextBlock Text="始段号" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="#AAA"/>
+                        <TextBox x:Name="TbxStartSeg" Width="50" Text="1" PreviewTextInput="DigitOnly_PreviewTextInput"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- 右：动作按钮 -->
+                <StackPanel Grid.Column="1" Orientation="Vertical" VerticalAlignment="Bottom">
+                    <Button x:Name="BtnGoSend" Content="开启发文" Width="120" Height="38"
+                            Background="#0E7C42" Foreground="#FFF" FontSize="14" FontWeight="Bold"
+                            BorderThickness="0" Click="BtnGoSend_Click"/>
+                    <Button Content="关闭" Width="120" Height="28" Margin="0,4,0,0" Click="BtnClose_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- 顶部 4 Tab -->
+        <TabControl x:Name="MainTab" Background="Transparent" BorderThickness="0">
+            <!-- Tab 1 自带文章 -->
+            <TabItem Header="自带文章">
+                <Grid Margin="6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="220"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <ListBox Grid.Column="0" x:Name="LbxBuiltin" SelectionChanged="LbxBuiltin_SelectionChanged"
+                             Background="#1E1E1E" Foreground="#EEE" BorderBrush="#555"/>
+                    <Border Grid.Column="1" Margin="6,0,0,0" Background="#1E1E1E" BorderBrush="#555" BorderThickness="1">
+                        <TextBlock x:Name="TxtBuiltinPreview" Text="选择左侧文章查看预览" TextWrapping="Wrap"
+                                   Padding="6" Foreground="#CCC" VerticalAlignment="Top"/>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- Tab 2 自定义 -->
+            <TabItem Header="自定义文章">
+                <Grid Margin="6">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,4">
+                        <TextBlock Text="标题:" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                        <TextBox x:Name="TbxCustomTitle" Width="260" Text="自定义文章" TextChanged="TbxCustom_TextChanged"/>
+                    </StackPanel>
+                    <TextBox Grid.Row="1" x:Name="TbxCustomBody" AcceptsReturn="True" TextWrapping="Wrap"
+                             VerticalScrollBarVisibility="Auto" TextChanged="TbxCustom_TextChanged"/>
+                </Grid>
+            </TabItem>
+
+            <!-- Tab 3 剪切板 -->
+            <TabItem Header="来自剪切板">
+                <Grid Margin="6">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,4">
+                        <Button Content="重新获取"   Click="BtnReGet_Click"   Margin="0,0,4,0"/>
+                        <Button Content="去掉空格"   Click="BtnTickBlock_Click" Margin="0,0,4,0"/>
+                        <Button Content="标点填充"   Click="BtnFillIt_Click"  Margin="0,0,8,0"/>
+                        <TextBlock Text="标题:" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                        <TextBox x:Name="TbxClipTitle" Width="200" Text="来自剪切板" TextChanged="TbxClip_TextChanged"/>
+                    </StackPanel>
+                    <TextBox Grid.Row="1" x:Name="TbxClipBody" AcceptsReturn="True" TextWrapping="Wrap"
+                             VerticalScrollBarVisibility="Auto" TextChanged="TbxClip_TextChanged"/>
+                </Grid>
+            </TabItem>
+
+            <!-- Tab 4 配置（占位，未实现） -->
+            <TabItem Header="配置与设置">
+                <Border Margin="6" Padding="20" Background="#1E1E1E" BorderBrush="#555" BorderThickness="1">
+                    <TextBlock Text="配置保存与加载功能将在 P5 上线。&#10;&#10;当前仅支持单次发文。&#10;选择前 3 个 Tab 之一获取文章 → 设置参数 → 点【开启发文】"
+                               TextWrapping="Wrap" Foreground="#888" FontSize="13"/>
+                </Border>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</Window>
