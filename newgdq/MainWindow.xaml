@@ -115,13 +115,14 @@
                 <MenuItem Header="乱序重抽 (F6)" Click="MenuItem_SendShuffle_Click"/>
             </MenuItem>
             <MenuItem Header="帮助">
-                <MenuItem Header="快捷键列表" />
+                <MenuItem Header="快捷键列表" Click="MenuItem_Hotkeys_Click"/>
                 <Separator/>
-                <MenuItem Header="访问 项目主页" />
-                <MenuItem Header="关于 州州跟打器..." />
+                <MenuItem Header="访问 项目主页" Click="MenuItem_Homepage_Click"/>
+                <MenuItem Header="加入 QQ 交流群" Click="MenuItem_JoinQQ_Click"/>
+                <MenuItem Header="关于 州州跟打器..." Click="MenuItem_About_Click"/>
             </MenuItem>
             <MenuItem Header="复位" Click="MenuItem_Reset_Click"/>
-            <MenuItem Header="捐助"/>
+            <MenuItem Header="捐助" Click="MenuItem_JoinQQ_Click"/>
         </Menu>
 
         <!-- 2. 段号刻度尺：17 等分格 (4..11 每号占 2 格 + "12+") -->

@@ -442,6 +442,50 @@ namespace newgdq
             TxtTheoryMc.Text = mc.ToString("0.00");
         }
 
+        // ===== 帮助菜单 =====
+        private const string QQ_GROUP_URL = "https://qm.qq.com/q/eb2iF433q2";
+        private const string QQ_GROUP_ID  = "17079867";
+        private const string PROJECT_URL  = "https://github.com/lwl4613615/zhouzhou-typing";
+
+        private void MenuItem_Hotkeys_Click(object sender, RoutedEventArgs e)
+        {
+            HandyControl.Controls.MessageBox.Show(
+                "F2  打开发文窗口\n" +
+                "F3  重打当前段（全局）\n" +
+                "F5  复位\n" +
+                "F6  乱序重抽\n\n" +
+                "暂停：菜单 → 暂停（输入框失焦也会自动暂停）\n" +
+                "继续：回到输入框敲任意键自动继续",
+                "快捷键列表");
+        }
+
+        private void MenuItem_Homepage_Click(object sender, RoutedEventArgs e)
+        {
+            try { System.Diagnostics.Process.Start(PROJECT_URL); }
+            catch (Exception ex) { HandyControl.Controls.Growl.Error(ex.Message); }
+        }
+
+        private void MenuItem_JoinQQ_Click(object sender, RoutedEventArgs e)
+        {
+            try { System.Diagnostics.Process.Start(QQ_GROUP_URL); }
+            catch (Exception ex) { HandyControl.Controls.Growl.Error(ex.Message); }
+        }
+
+        private void MenuItem_About_Click(object sender, RoutedEventArgs e)
+        {
+            var ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.1.0";
+            string msg =
+                "州州跟打器 v" + ver + "\n\n" +
+                "现代 WPF 跟打练习器，基于 taliove/tygdq 重写。\n" +
+                "已砍掉所有 QQ / 比赛 / 检查更新功能。\n\n" +
+                "项目主页：" + PROJECT_URL + "\n" +
+                "QQ 群：  " + QQ_GROUP_ID + "\n" +
+                "加群链接：" + QQ_GROUP_URL + "\n" +
+                "作者：    4613615@qq.com\n" +
+                "协议：    Apache-2.0";
+            HandyControl.Controls.MessageBox.Show(msg, "关于 州州跟打器");
+        }
+
         private void MenuItem_Reset_Click(object sender, RoutedEventArgs e)
         {
             _session.Load(string.Empty, string.Empty);
