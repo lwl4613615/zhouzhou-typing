@@ -86,5 +86,23 @@ namespace newgdq.Views
             _speedArea.Points.Add(new DataPoint(seconds, speed));
             _model.InvalidatePlot(true);
         }
+
+        /// <summary>跟打完成时在末点画金色圆点 + 一条虚线。</summary>
+        public void MarkFinish()
+        {
+            if (_speedArea.Points.Count == 0) return;
+            var last = _speedArea.Points[_speedArea.Points.Count - 1];
+            var marker = new ScatterSeries
+            {
+                MarkerType = MarkerType.Circle,
+                MarkerSize = 8,
+                MarkerFill = OxyColor.FromRgb(0xFF, 0xD2, 0x4C),
+                MarkerStroke = OxyColors.White,
+                MarkerStrokeThickness = 2,
+            };
+            marker.Points.Add(new ScatterPoint(last.X, last.Y));
+            _model.Series.Add(marker);
+            _model.InvalidatePlot(true);
+        }
     }
 }

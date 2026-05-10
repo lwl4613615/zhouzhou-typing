@@ -240,6 +240,9 @@ namespace newgdq
         {
             _timerTime.Stop();
             _timerStats.Stop();
+            _isPaused = false;
+            _pauseAccumulated = TimeSpan.Zero;
+            if (MnuPause != null) MnuPause.Header = "暂停";
             TxtTime.Text  = "00:00.00";
             TxtSpeed.Text = "0.00";
             TxtJj.Text    = "0.00";
@@ -345,6 +348,40 @@ namespace newgdq
             RefreshBmTips();
             _chartWin?.Reset();
             HandyControl.Controls.Growl.Info("已复位");
+        }
+
+        // ===== 暂停 / 继续 =====
+        private TimeSpan _pauseAccumulated;
+        private DateTime _pauseStart;
+        private bool _isPaused;
+
+        private void MenuItem_Pause_Click(object sender, RoutedEventArgs e)
+        {
+            if (!_session.Started || _session.Finished) return;
+            if (!_isPaused)
+            {
+                _isPaused = true;
+                _pauseStart = DateTime.Now;
+                _timerTime.Stop();
+                _timerStats.Stop();
+                MnuPause.Header = "继续";
+                TbxInput.IsReadOnly = true;
+                HandyControl.Controls.Growl.Info("已暂停");
+            }
+            else
+            {
+                _isPaused = false;
+                // 累加暂停时长，纠正 StartTime 让计时连续
+                var paused = DateTime.Now - _pauseStart;
+                _session.StartTime = _session.StartTime.Add(paused);
+                _pauseAccumulated += paused;
+                _timerTime.Start();
+                _timerStats.Start();
+                MnuPause.Header = "暂停";
+                TbxInput.IsReadOnly = false;
+                TbxInput.Focus();
+                HandyControl.Controls.Growl.Info("已继续");
+            }
         }
 
         // ===== 键盘钩子 =====
@@ -581,6 +618,8 @@ namespace newgdq
             HandyControl.Controls.Growl.Success(
                 $"完成！速度 {speed:0.00} | 击键 {jj:0.00} | 码长 {mc:0.00} | 用时 {sec:0.00}s\n" +
                 $"错字 {_session.Cz} | 回改 {_session.Hg} | 键数 {_session.Keys} | 左:右 {_session.LeftHand}:{_session.RightHand}");
+
+            _chartWin?.MarkFinish();
         }
     }
 }

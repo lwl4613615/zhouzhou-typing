@@ -75,7 +75,7 @@
             <MenuItem Header="菜单">
                 <MenuItem Header="发文..." />
                 <MenuItem Header="外观..." />
-                <MenuItem Header="暂停" />
+                <MenuItem Header="暂停" x:Name="MnuPause" Click="MenuItem_Pause_Click"/>
                 <Separator/>
                 <MenuItem Header="复制成绩" />
                 <MenuItem Header="退出" />
@@ -149,7 +149,7 @@
                 <!-- 起始段号格 (i=0,2,4,...,14 显示 4..11) -->
                 <TextBlock Grid.Column="0"  Text="4"   Style="{StaticResource TickNum}"/>
                 <!-- i=1：当前段号游标位（动态写入），这里默认显示 14 -->
-                <TextBlock Grid.Column="1"  x:Name="TxtCurSeg" Text="14" Style="{StaticResource TickNum}" FontWeight="Bold" Foreground="#C00"/>
+                <TextBlock Grid.Column="1"  x:Name="TxtCurSeg" Text="" Style="{StaticResource TickNum}" FontWeight="Bold" Foreground="#C00"/>
                 <TextBlock Grid.Column="2"  Text="5"   Style="{StaticResource TickNum}"/>
                 <TextBlock Grid.Column="4"  Text="6"   Style="{StaticResource TickNum}"/>
                 <TextBlock Grid.Column="6"  Text="7"   Style="{StaticResource TickNum}"/>
