@@ -1,0 +1,25 @@
+﻿<Application x:Class="newgdq.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:hc="https://handyorg.github.io/handycontrol"
+             xmlns:local="clr-namespace:newgdq"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDark.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- 全局调色板（窗口属性 StaticResource 求值需早于 Window.Resources，故放此处） -->
+            <SolidColorBrush x:Key="PanelBG"   Color="#2D2D30"/>
+            <SolidColorBrush x:Key="CellBG"    Color="#3F3F46"/>
+            <SolidColorBrush x:Key="DarkBG"    Color="#1E1E1E"/>
+            <SolidColorBrush x:Key="TickBG"    Color="#252526"/>
+            <SolidColorBrush x:Key="GridLine"  Color="#555555"/>
+            <SolidColorBrush x:Key="LabelFG"   Color="#A0A0A0"/>
+            <SolidColorBrush x:Key="ValueFG"   Color="#FFFFFF"/>
+            <SolidColorBrush x:Key="AccentFG"  Color="#FFD24C"/>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

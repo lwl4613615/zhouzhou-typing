@@ -1,0 +1,30 @@
+# Build outputs
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+
+# VS / VSCode
+.vs/
+.vscode/
+*.suo
+*.user
+*.userprefs
+*.cache
+
+# NuGet
+packages/
+*.nupkg
+nuget.exe
+
+# Resharper
+_ReSharper*/
+
+# Misc
+*.swp
+*.tmp
+Thumbs.db
+.DS_Store
+
+# Memory tool（个人笔记，不发开源）
+/memories/

@@ -1,0 +1,34 @@
+<Window x:Class="newgdq.Views.SpeedChartWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
+        xmlns:oxy="http://oxyplot.org/wpf"
+        Title="速度曲线"
+        Width="700" Height="280"
+        WindowStyle="None" ResizeMode="CanResizeWithGrip"
+        AllowsTransparency="False"
+        ShowInTaskbar="False"
+        Topmost="False"
+        Background="#1E1E1E">
+    <Border BorderBrush="#555" BorderThickness="1" Padding="2">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="240"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- 左：速度曲线 -->
+            <oxy:PlotView Grid.Column="0" x:Name="Plot" Background="#1E1E1E"/>
+
+            <!-- 右：击键比例饼图 + 速度仪表盘 -->
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <oxy:PlotView Grid.Row="0" x:Name="PiePlot" Background="#1E1E1E"/>
+                <oxy:PlotView Grid.Row="1" x:Name="GaugePlot" Background="#1E1E1E"/>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

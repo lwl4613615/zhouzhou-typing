@@ -1,0 +1,19 @@
+<Window x:Class="newgdq.Views.BmTipsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="编码提示"
+        Width="600" Height="80"
+        WindowStyle="None" ResizeMode="NoResize"
+        AllowsTransparency="True"
+        ShowInTaskbar="False"
+        Topmost="True"
+        Background="#E62D2D30"
+        Foreground="#EEE">
+    <Border BorderBrush="#555" BorderThickness="1" CornerRadius="4" Padding="6">
+        <StackPanel Orientation="Vertical">
+            <TextBlock x:Name="TxtTitle" Text="编码提示" FontSize="11" Foreground="#888" Margin="0,0,0,4"/>
+            <TextBlock x:Name="TxtContent" Text="-" FontSize="14" FontFamily="Consolas, 微软雅黑"
+                       TextWrapping="Wrap"/>
+        </StackPanel>
+    </Border>
+</Window>
