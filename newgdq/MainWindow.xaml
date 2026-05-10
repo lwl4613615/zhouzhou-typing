@@ -125,6 +125,7 @@
 
         <!-- 2. 段号刻度尺：17 等分格 (4..11 每号占 2 格 + "12+") -->
         <Border DockPanel.Dock="Top" Background="{StaticResource TickBG}" x:Name="SegRulerBox"
+                Visibility="Collapsed"
                 BorderBrush="#666" BorderThickness="0,1,0,1" Height="20">
             <Grid x:Name="SegRuler">
                 <Grid.ColumnDefinitions>
