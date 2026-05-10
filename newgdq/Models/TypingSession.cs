@@ -23,6 +23,7 @@ namespace newgdq.Models
         public int Cz;          // 错字（已打部分中错的字数）
         public int LeftHand;    // 左手键击键次数
         public int RightHand;   // 右手键击键次数
+        public int PauseTimes;  // 暂停次数
 
         public int LastInputLen;
         public int EventIndex;
@@ -49,6 +50,7 @@ namespace newgdq.Models
             Cz = 0;
             LeftHand = 0;
             RightHand = 0;
+            PauseTimes = 0;
             LastInputLen = 0;
             EventIndex = 0;
             Report.Clear();

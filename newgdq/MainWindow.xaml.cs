@@ -64,6 +64,8 @@ namespace newgdq
             TbxInput.TextChanged += TbxInput_TextChanged;
             TbxInput.PreviewKeyDown += TbxInput_PreviewKeyDown;
             _ime.Attach(TbxInput);
+            TbxInput.LostFocus += (s, e) => PauseType();
+            _flashTimer.Tick += FlashTimer_Tick;
 
             DgvHistory.ItemsSource = History;
 
@@ -240,9 +242,9 @@ namespace newgdq
         {
             _timerTime.Stop();
             _timerStats.Stop();
+            _flashTimer.Stop();
             _isPaused = false;
-            _pauseAccumulated = TimeSpan.Zero;
-            if (MnuPause != null) MnuPause.Header = "暂停";
+            TxtTime.Foreground = NormalTimeBrush;
             TxtTime.Text  = "00:00.00";
             TxtSpeed.Text = "0.00";
             TxtJj.Text    = "0.00";
@@ -350,38 +352,55 @@ namespace newgdq
             HandyControl.Controls.Growl.Info("已复位");
         }
 
-        // ===== 暂停 / 继续 =====
-        private TimeSpan _pauseAccumulated;
+        // ===== 暂停 / 继续（与原版一致：菜单点 或 输入框失焦则暂停；敢一个键自动继续）=====
         private DateTime _pauseStart;
         private bool _isPaused;
+        private readonly DispatcherTimer _flashTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
+        private bool _flashOn;
+        private static readonly Brush PauseFlashBrush = new SolidColorBrush(Color.FromRgb(0xCD, 0x5C, 0x5C));
+        private static readonly Brush NormalTimeBrush = new SolidColorBrush(Color.FromRgb(0xA0, 0xA0, 0xA0));
 
-        private void MenuItem_Pause_Click(object sender, RoutedEventArgs e)
+        private void MenuItem_Pause_Click(object sender, RoutedEventArgs e) => PauseType();
+
+        /// <summary>暂停（幂等）。返回是否真的暂停了。</summary>
+        private bool PauseType()
         {
-            if (!_session.Started || _session.Finished) return;
-            if (!_isPaused)
-            {
-                _isPaused = true;
-                _pauseStart = DateTime.Now;
-                _timerTime.Stop();
-                _timerStats.Stop();
-                MnuPause.Header = "继续";
-                TbxInput.IsReadOnly = true;
-                HandyControl.Controls.Growl.Info("已暂停");
-            }
-            else
-            {
-                _isPaused = false;
-                // 累加暂停时长，纠正 StartTime 让计时连续
-                var paused = DateTime.Now - _pauseStart;
-                _session.StartTime = _session.StartTime.Add(paused);
-                _pauseAccumulated += paused;
-                _timerTime.Start();
-                _timerStats.Start();
-                MnuPause.Header = "暂停";
-                TbxInput.IsReadOnly = false;
-                TbxInput.Focus();
-                HandyControl.Controls.Growl.Info("已继续");
-            }
+            if (_isPaused) return false;
+            if (!_session.Started || _session.Finished) return false;
+            int len = _session.LastInputLen;
+            if (len <= 0 || len >= _session.TypeText.Length) return false;
+
+            _isPaused = true;
+            _pauseStart = DateTime.Now;
+            _timerTime.Stop();
+            _timerStats.Stop();
+            _session.PauseTimes++;
+            this.Title += " [已暂停]";
+            _flashOn = false;
+            _flashTimer.Start();
+            return true;
+        }
+
+        private void EndPause()
+        {
+            if (!_isPaused) return;
+            // 纯上原版逻辑：暂停期间不计时间 → 重启时把 StartTime 后推过去的量
+            var paused = DateTime.Now - _pauseStart;
+            _session.StartTime = _session.StartTime.Add(paused);
+            _isPaused = false;
+            _flashTimer.Stop();
+            TxtTime.Foreground = NormalTimeBrush;
+            // 窗口标题去掉 [已暂停] 后缀
+            if (this.Title.EndsWith(" [已暂停]"))
+                this.Title = this.Title.Substring(0, this.Title.Length - " [已暂停]".Length);
+            _timerTime.Start();
+            _timerStats.Start();
+        }
+
+        private void FlashTimer_Tick(object sender, EventArgs e)
+        {
+            _flashOn = !_flashOn;
+            TxtTime.Foreground = _flashOn ? PauseFlashBrush : NormalTimeBrush;
         }
 
         // ===== 键盘钩子 =====
@@ -440,6 +459,9 @@ namespace newgdq
         {
             if (_session.TypeText.Length == 0) return;
             if (_session.Finished) return;
+
+            // \u6682\u505c\u4e2d\u6562\u952e \u2192 \u81ea\u52a8\u7ee7\u7eed\uff08\u539f\u7248\u903b\u8f91\uff09
+            if (_isPaused) EndPause();
 
             // IME 合成中（拼音未提交）跳过染色，避免字母被判成"错字"
             if (_ime.IsComposing) return;

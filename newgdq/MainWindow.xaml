@@ -80,16 +80,12 @@
                 <MenuItem Header="复制成绩" />
                 <MenuItem Header="退出" />
             </MenuItem>
-            <MenuItem Header="换群">
-                <MenuItem Header="（占位 - 群组列表）" IsEnabled="False"/>
-            </MenuItem>
             <MenuItem Header="功能">
                 <MenuItem Header="文章处理">
                     <MenuItem Header="将目前文章乱序" />
                     <MenuItem Header="英文标点换中文标点" />
                     <MenuItem Header="删除空格（包含全角）" />
                 </MenuItem>
-                <MenuItem Header="打开练习" />
                 <MenuItem Header="内部测速">
                     <MenuItem Header="10字测试"     Tag="10字测试.txt"     Click="MenuItem_LoadInternal_Click"/>
                     <Separator/>
@@ -101,10 +97,6 @@
                     <MenuItem Header="为人民服务节选" Tag="为人民服务节选.txt" Click="MenuItem_LoadInternal_Click"/>
                     <MenuItem Header="前1500单字"     Tag="前1500单字.txt"     Click="MenuItem_LoadInternal_Click"/>
                 </MenuItem>
-                <MenuItem Header="其它功能">
-                    <MenuItem Header="检验真伪" />
-                    <MenuItem Header="发送到桌面的快捷方式" />
-                </MenuItem>
                 <Separator/>
                 <MenuItem Header="发送图片成绩" />
                 <MenuItem Header="平均成绩..." />
@@ -113,7 +105,6 @@
                 <MenuItem Header="跟打报告..." />
                 <Separator/>
                 <MenuItem Header="编码提示测试..." Click="MenuItem_OpenBmTips_Click"/>
-                <MenuItem Header="智能测词" IsCheckable="True"/>
             </MenuItem>
             <MenuItem Header="发文">
                 <MenuItem Header="发文状态" />
@@ -121,10 +112,8 @@
             </MenuItem>
             <MenuItem Header="帮助">
                 <MenuItem Header="快捷键列表" />
-                <MenuItem Header="重打 (F3)" Click="MenuItem_Repeat_Click"/>
-                <MenuItem Header="载文 (F4)" />
                 <Separator/>
-                <MenuItem Header="访问 官方网站" />
+                <MenuItem Header="访问 项目主页" />
                 <MenuItem Header="关于 州州跟打器..." />
             </MenuItem>
             <MenuItem Header="复位" Click="MenuItem_Reset_Click"/>
@@ -275,7 +264,7 @@
                          Padding="0">
                 <FlowDocument PagePadding="0">
                     <Paragraph Margin="0">
-                        <Run Text="帮助请查看必看说明。快捷键：F3 重打或激活跟打器、F4 载文（跟打中无效）、F5 换群"/>
+                        <Run Text="州州跟打器 · 快捷键 F3 重打 · 菜单 → 功能 → 内部测速 选一篇开始跟打。点“菜单 → 暂停”可暂停计时（输入框失焦也会自动暂停）。"/>
                     </Paragraph>
                 </FlowDocument>
             </RichTextBox>
