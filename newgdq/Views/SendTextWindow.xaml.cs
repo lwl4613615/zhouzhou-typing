@@ -69,6 +69,7 @@ namespace newgdq.Views
         // ===== Tab 2 自定义 =====
         private void TbxCustom_TextChanged(object sender, TextChangedEventArgs e)
         {
+            if (TbxCustomBody == null || TbxCustomTitle == null) return;  // XAML 加载中
             _currentText = TbxCustomBody.Text ?? "";
             _currentTitle = string.IsNullOrEmpty(TbxCustomTitle.Text) ? "自定义文章" : TbxCustomTitle.Text;
             RefreshInfo();
@@ -93,6 +94,7 @@ namespace newgdq.Views
 
         private void TbxClip_TextChanged(object sender, TextChangedEventArgs e)
         {
+            if (TbxClipBody == null || TbxClipTitle == null) return;
             _currentText = TbxClipBody.Text ?? "";
             _currentTitle = string.IsNullOrEmpty(TbxClipTitle.Text) ? "来自剪切板" : TbxClipTitle.Text;
             RefreshInfo();
