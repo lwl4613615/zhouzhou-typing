@@ -74,6 +74,7 @@
         <Menu DockPanel.Dock="Top" Background="{StaticResource PanelBG}" x:Name="MainMenu">
             <MenuItem Header="菜单">
                 <MenuItem Header="发文... (F2)" Click="MenuItem_OpenSendText_Click"/>
+                <MenuItem Header="载文 (F4)" Click="MenuItem_LoadClipboard_Click"/>
                 <MenuItem Header="外观..." />
                 <MenuItem Header="暂停" x:Name="MnuPause" Click="MenuItem_Pause_Click"/>
                 <Separator/>

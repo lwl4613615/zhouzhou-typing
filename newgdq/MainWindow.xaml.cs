@@ -344,6 +344,34 @@ namespace newgdq
         // ===== 发文 =====
         private void MenuItem_OpenSendText_Click(object sender, RoutedEventArgs e) => OpenSendTextWindow();
 
+        private void MenuItem_LoadClipboard_Click(object sender, RoutedEventArgs e) => LoadFromClipboard();
+
+        /// <summary>F4 载文：从剪贴板拉一段文字直接载入对照区（不走发文窗口）。</summary>
+        private void LoadFromClipboard()
+        {
+            try
+            {
+                string raw = System.Windows.Clipboard.GetText();
+                if (string.IsNullOrWhiteSpace(raw))
+                {
+                    HandyControl.Controls.Growl.Warning("剪贴板为空");
+                    return;
+                }
+                string text = TextProcessor.TickBlock(raw);
+                if (text.Length == 0)
+                {
+                    HandyControl.Controls.Growl.Warning("剪贴板内容剔除空格后为空");
+                    return;
+                }
+                LoadArticle(text, "来自剪切板");
+                HandyControl.Controls.Growl.Info($"已载入 {text.Length} 字");
+            }
+            catch (Exception ex)
+            {
+                HandyControl.Controls.Growl.Error("载文失败：" + ex.Message);
+            }
+        }
+
         private void OpenSendTextWindow()
         {
             var win = new SendTextWindow { Owner = this };
@@ -452,6 +480,7 @@ namespace newgdq
             HandyControl.Controls.MessageBox.Show(
                 "F2  打开发文窗口\n" +
                 "F3  重打当前段（全局）\n" +
+                "F4  载文（剪贴板内容直接进对照区）\n" +
                 "F5  复位\n" +
                 "F6  乱序重抽\n\n" +
                 "暂停：菜单 → 暂停（输入框失焦也会自动暂停）\n" +
@@ -565,6 +594,9 @@ namespace newgdq
             {
                 case 0x71: // F2 打开发文窗口
                     Dispatcher.BeginInvoke(new Action(OpenSendTextWindow));
+                    return;
+                case 0x73: // F4 载文（拉剪贴板直接进对照区）
+                    Dispatcher.BeginInvoke(new Action(LoadFromClipboard));
                     return;
                 case 0x72: // F3 重打
                     Dispatcher.BeginInvoke(new Action(Repeat));
