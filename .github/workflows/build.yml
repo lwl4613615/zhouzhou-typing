@@ -8,6 +8,9 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: write   # softprops/action-gh-release 创建 Release 需要写权限
+
 jobs:
   build:
     runs-on: windows-latest
