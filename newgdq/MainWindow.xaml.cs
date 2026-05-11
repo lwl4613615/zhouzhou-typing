@@ -346,9 +346,20 @@ namespace newgdq
 
         private void MenuItem_LoadClipboard_Click(object sender, RoutedEventArgs e) => LoadFromClipboard();
 
-        /// <summary>F4 载文：从剪贴板拉一段文字直接载入对照区（不走发文窗口）。</summary>
+        /// <summary>F4 载文：从剪贴板拉一段文字直接载入对照区（不走发文窗口）。
+        /// - 跟打中（已开始且未完成）→ 改为重打当前段，不覆盖（与原版一致）
+        /// - 识别原版 "-----第N段 标题" 发文格式：自动剥发文头取正文 + 段号 + 标题
+        /// - 否则整段作为正文载入</summary>
         private void LoadFromClipboard()
         {
+            // 跟打中按 F4：重打当前段，不覆盖
+            if (_session.Started && !_session.Finished && _session.TypeText.Length > 0)
+            {
+                Repeat();
+                HandyControl.Controls.Growl.Info("跟打中，已重打当前段（如需载入新文请先按 F5 复位）");
+                return;
+            }
+
             try
             {
                 string raw = System.Windows.Clipboard.GetText();
@@ -357,14 +368,27 @@ namespace newgdq
                     HandyControl.Controls.Growl.Warning("剪贴板为空");
                     return;
                 }
-                string text = TextProcessor.TickBlock(raw);
+
+                // 尝试识别原版"-----第N段 标题\n正文\n-----"格式
+                string title = "来自剪切板";
+                string body  = raw;
+                var m = System.Text.RegularExpressions.Regex.Match(
+                    raw,
+                    @"-{3,}\s*第(\d+)段\s*([^\r\n]*)\r?\n([\s\S]+?)(?:\r?\n-{3,}|$)");
+                if (m.Success)
+                {
+                    title = $"第{m.Groups[1].Value}段 {m.Groups[2].Value.Trim()}".TrimEnd();
+                    body  = m.Groups[3].Value;
+                }
+
+                string text = TextProcessor.TickBlock(body);
                 if (text.Length == 0)
                 {
                     HandyControl.Controls.Growl.Warning("剪贴板内容剔除空格后为空");
                     return;
                 }
-                LoadArticle(text, "来自剪切板");
-                HandyControl.Controls.Growl.Info($"已载入 {text.Length} 字");
+                LoadArticle(text, title);
+                HandyControl.Controls.Growl.Info($"已载入 {text.Length} 字 · {title}");
             }
             catch (Exception ex)
             {
