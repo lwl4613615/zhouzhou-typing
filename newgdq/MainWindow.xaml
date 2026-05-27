@@ -341,15 +341,17 @@
                     <Grid Grid.Row="0" Grid.Column="2" x:Name="BmTipBox" Visibility="Collapsed">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="18"/>
-                            <ColumnDefinition Width="30"/>
+                            <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Border Grid.Column="0" x:Name="BmRankBox" Background="#4A90E2"/>
                         <TextBlock Grid.Column="1" x:Name="BmChar" Text="-" Foreground="#EEE"
                                    FontSize="12" FontFamily="宋体"
+                                   TextTrimming="CharacterEllipsis"
                                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         <TextBlock Grid.Column="2" x:Name="BmCode" Text="-" Foreground="#FFD24C"
                                    FontSize="12" FontFamily="Consolas"
+                                   TextTrimming="CharacterEllipsis"
                                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         <Border Grid.Column="0" BorderBrush="{StaticResource GridLine}" BorderThickness="0,0,1,0"/>
                         <Border Grid.Column="1" BorderBrush="{StaticResource GridLine}" BorderThickness="0,0,1,0"/>
