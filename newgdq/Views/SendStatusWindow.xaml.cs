@@ -19,8 +19,10 @@ namespace newgdq.Views
             if (owner != null)
             {
                 Owner = owner;
-                // 贴主窗右上角外侧
-                Left = owner.Left + owner.Width + 4;
+                // 紧贴主窗左上角外侧；若左侧空间不够（会跑屏外）则贴在右侧
+                double left = owner.Left - this.Width - 4;
+                if (left < 0) left = owner.Left + owner.Width + 4;
+                Left = left;
                 Top  = owner.Top;
             }
             _timer.Tick += (s, e) => Refresh();
