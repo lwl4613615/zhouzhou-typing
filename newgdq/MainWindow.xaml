@@ -301,7 +301,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Border Grid.Column="0" x:Name="BmRankBox" Background="#4A90E2"/>
-                        <TextBlock Grid.Column="1" x:Name="BmChar" Text="-" Foreground="#EEE"
+                        <TextBlock Grid.Column="1" x:Name="BmChar" Text="-" Foreground="{DynamicResource ValueFG}"
                                    FontSize="12" FontFamily="宋体"
                                    TextTrimming="CharacterEllipsis"
                                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -314,10 +314,10 @@
                     </Grid>
                     <!-- 中间下行：字数进度条 -->
                     <Grid Grid.Row="1" Grid.Column="2" Margin="3,1" SizeChanged="ProgHost_SizeChanged">
-                        <Border Background="#1E1E1E" CornerRadius="2"/>
+                        <Border Background="{DynamicResource AltRowBG}" CornerRadius="2"/>
                         <Border x:Name="ProgFill" Background="#4FC3F7" CornerRadius="2"
                                 HorizontalAlignment="Left" Width="0" Opacity="0.85"/>
-                        <TextBlock x:Name="TxtProgress" Text="-" Foreground="#EEE"
+                        <TextBlock x:Name="TxtProgress" Text="-" Foreground="{DynamicResource ValueFG}"
                                    FontSize="10" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Grid>
                     <TextBlock Grid.Row="0" Grid.Column="3" x:Name="TxtKeysCount" Text="0" Style="{StaticResource LblText}"/>
@@ -375,7 +375,7 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- 左：嵌入式速度曲线（TogChart 切换可见性） -->
-                <Border Grid.Column="0" Background="#1E1E1E" BorderBrush="#444" BorderThickness="0,0,0,0">
+                <Border Grid.Column="0" Background="{DynamicResource AltRowBG}" BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,0,0">
                     <oxy:PlotView x:Name="InlineChart" Background="Transparent"/>
                 </Border>
                 <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Stretch"

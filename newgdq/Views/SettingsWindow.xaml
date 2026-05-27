@@ -58,27 +58,27 @@
 
                     <TextBlock Grid.Row="0" Grid.Column="0" Text="正确字 前景"   VerticalAlignment="Center"/>
                     <TextBox Grid.Row="0" Grid.Column="1" x:Name="TxtColorRight"   Margin="0,4" VerticalContentAlignment="Center"/>
-                    <Border  Grid.Row="0" Grid.Column="2" x:Name="PvwColorRight"   Margin="6,4,0,4" BorderBrush="#666" BorderThickness="1"/>
+                    <Border  Grid.Row="0" Grid.Column="2" x:Name="PvwColorRight"   Margin="6,4,0,4" BorderBrush="#666" BorderThickness="1" Cursor="Hand" MouseLeftButtonUp="Pvw_Click" Tag="TxtColorRight"/>
 
                     <TextBlock Grid.Row="1" Grid.Column="0" Text="正确字 背景"   VerticalAlignment="Center"/>
                     <TextBox Grid.Row="1" Grid.Column="1" x:Name="TxtColorRightBg" Margin="0,4" VerticalContentAlignment="Center"/>
-                    <Border  Grid.Row="1" Grid.Column="2" x:Name="PvwColorRightBg" Margin="6,4,0,4" BorderBrush="#666" BorderThickness="1"/>
+                    <Border  Grid.Row="1" Grid.Column="2" x:Name="PvwColorRightBg" Margin="6,4,0,4" BorderBrush="#666" BorderThickness="1" Cursor="Hand" MouseLeftButtonUp="Pvw_Click" Tag="TxtColorRightBg"/>
 
                     <TextBlock Grid.Row="2" Grid.Column="0" Text="错误字 前景"   VerticalAlignment="Center"/>
                     <TextBox Grid.Row="2" Grid.Column="1" x:Name="TxtColorWrong"   Margin="0,4" VerticalContentAlignment="Center"/>
-                    <Border  Grid.Row="2" Grid.Column="2" x:Name="PvwColorWrong"   Margin="6,4,0,4" BorderBrush="#666" BorderThickness="1"/>
+                    <Border  Grid.Row="2" Grid.Column="2" x:Name="PvwColorWrong"   Margin="6,4,0,4" BorderBrush="#666" BorderThickness="1" Cursor="Hand" MouseLeftButtonUp="Pvw_Click" Tag="TxtColorWrong"/>
 
                     <TextBlock Grid.Row="3" Grid.Column="0" Text="错误字 背景"   VerticalAlignment="Center"/>
                     <TextBox Grid.Row="3" Grid.Column="1" x:Name="TxtColorWrongBg" Margin="0,4" VerticalContentAlignment="Center"/>
-                    <Border  Grid.Row="3" Grid.Column="2" x:Name="PvwColorWrongBg" Margin="6,4,0,4" BorderBrush="#666" BorderThickness="1"/>
+                    <Border  Grid.Row="3" Grid.Column="2" x:Name="PvwColorWrongBg" Margin="6,4,0,4" BorderBrush="#666" BorderThickness="1" Cursor="Hand" MouseLeftButtonUp="Pvw_Click" Tag="TxtColorWrongBg"/>
 
                     <TextBlock Grid.Row="4" Grid.Column="0" Text="对照区 背景"   VerticalAlignment="Center"/>
                     <TextBox Grid.Row="4" Grid.Column="1" x:Name="TxtColorCompareBg" Margin="0,4" VerticalContentAlignment="Center"/>
-                    <Border  Grid.Row="4" Grid.Column="2" x:Name="PvwColorCompareBg" Margin="6,4,0,4" BorderBrush="#666" BorderThickness="1"/>
+                    <Border  Grid.Row="4" Grid.Column="2" x:Name="PvwColorCompareBg" Margin="6,4,0,4" BorderBrush="#666" BorderThickness="1" Cursor="Hand" MouseLeftButtonUp="Pvw_Click" Tag="TxtColorCompareBg"/>
 
                     <TextBlock Grid.Row="5" Grid.Column="0" Text="输入区 背景"   VerticalAlignment="Center"/>
                     <TextBox Grid.Row="5" Grid.Column="1" x:Name="TxtColorInputBg" Margin="0,4" VerticalContentAlignment="Center"/>
-                    <Border  Grid.Row="5" Grid.Column="2" x:Name="PvwColorInputBg" Margin="6,4,0,4" BorderBrush="#666" BorderThickness="1"/>
+                    <Border  Grid.Row="5" Grid.Column="2" x:Name="PvwColorInputBg" Margin="6,4,0,4" BorderBrush="#666" BorderThickness="1" Cursor="Hand" MouseLeftButtonUp="Pvw_Click" Tag="TxtColorInputBg"/>
                 </Grid>
             </TabItem>
 
