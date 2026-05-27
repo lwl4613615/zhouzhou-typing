@@ -290,12 +290,12 @@
         <!-- 4. 主体：对照区 + 状态条 + 输入区 + 历史 Grid -->
         <Grid Background="{StaticResource PanelBG}">
             <Grid.RowDefinitions>
-                <RowDefinition Height="*" MinHeight="100"/>
-                <RowDefinition Height="3"/>
+                <RowDefinition Height="3*" MinHeight="100"/>
+                <RowDefinition Height="4"/>
                 <RowDefinition Height="34"/>
-                <RowDefinition Height="60" MinHeight="30"/>
-                <RowDefinition Height="3"/>
-                <RowDefinition Height="140" MinHeight="60"/>
+                <RowDefinition Height="1*" MinHeight="60"/>
+                <RowDefinition Height="4"/>
+                <RowDefinition Height="2*" MinHeight="80"/>
             </Grid.RowDefinitions>
 
             <!-- 对照区 -->
@@ -389,15 +389,17 @@
             </Border>
 
             <!-- 输入区（去 HC 样式以消除内置 padding） -->
-            <TextBox Grid.Row="3" x:Name="TbxInput"
-                     Style="{x:Null}"
-                     IsReadOnly="True"
-                     BorderThickness="0" Background="White" Foreground="#222"
-                     CaretBrush="#222"
-                     FontSize="18" FontFamily="宋体"
-                     AcceptsReturn="False" TextWrapping="Wrap"
-                     VerticalScrollBarVisibility="Auto"
-                     Padding="0"/>
+            <Border Grid.Row="3" BorderBrush="#4FC3F7" BorderThickness="0,2,0,2">
+                <TextBox x:Name="TbxInput"
+                         Style="{x:Null}"
+                         IsReadOnly="True"
+                         BorderThickness="0" Background="White" Foreground="#222"
+                         CaretBrush="#222"
+                         FontSize="18" FontFamily="宋体"
+                         AcceptsReturn="False" TextWrapping="Wrap"
+                         VerticalScrollBarVisibility="Auto"
+                         Padding="0"/>
+            </Border>
 
             <GridSplitter Grid.Row="4" Height="4" HorizontalAlignment="Stretch"
                           ResizeDirection="Rows" ResizeBehavior="PreviousAndNext" ShowsPreview="True"
