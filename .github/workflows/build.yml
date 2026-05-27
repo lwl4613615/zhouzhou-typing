@@ -41,12 +41,15 @@ jobs:
           }
           $zip = "zhouzhou-typing-v$version.zip"
           $out = "newgdq\bin\Release"
-          Compress-Archive `
-            -Path "$out\newgdq.exe","$out\newgdq.exe.config",
-                  "$out\HandyControl.dll",
-                  "$out\OxyPlot.dll","$out\OxyPlot.Wpf.dll","$out\OxyPlot.Wpf.Shared.dll",
-                  "README.md","LICENSE","NOTICE" `
-            -DestinationPath $zip -Force
+          $stage = "stage"
+          if (Test-Path $stage) { Remove-Item -Recurse -Force $stage }
+          New-Item -ItemType Directory -Path $stage | Out-Null
+          # 拷整个 Release 目录，排除调试文件（.pdb / .xml）减小体积
+          Copy-Item -Recurse -Force "$out\*" $stage
+          Get-ChildItem -Recurse $stage -Include *.pdb,*.xml | Remove-Item -Force
+          # 附带项目根的文档文件
+          Copy-Item -Force README.md,LICENSE,NOTICE $stage
+          Compress-Archive -Path "$stage\*" -DestinationPath $zip -Force
           "zip=$zip"     | Out-File $env:GITHUB_OUTPUT -Append
           "version=$version" | Out-File $env:GITHUB_OUTPUT -Append
 
