@@ -9,7 +9,7 @@
         mc:Ignorable="d"
         Title="州州跟打器" Height="620" Width="940"
         FontFamily="微软雅黑" FontSize="12"
-        Icon="pack://application:,,,/Resources/app.ico"
+        Icon="pack://application:,,,/Resources/myicon.ico"
         Background="{DynamicResource RegionBrush}"
         Foreground="{DynamicResource PrimaryTextBrush}"
         NonClientAreaBackground="{StaticResource PanelBG}"
@@ -74,7 +74,7 @@
 
         <!-- 托盘图标：左键点击还原；右键弹菜单 -->
         <tb:TaskbarIcon x:Name="TrayIcon"
-                        IconSource="pack://application:,,,/Resources/app.ico"
+                        IconSource="pack://application:,,,/Resources/myicon.ico"
                         ToolTipText="州州跟打器"
                         TrayLeftMouseDown="TrayIcon_LeftClick">
             <tb:TaskbarIcon.ContextMenu>

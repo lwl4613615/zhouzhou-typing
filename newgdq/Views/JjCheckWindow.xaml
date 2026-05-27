@@ -4,6 +4,7 @@
         xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:oxy="http://oxyplot.org/wpf"
         Title="击键评定" Height="480" Width="640"
+        Icon="pack://application:,,,/Resources/myicon.ico"
         FontFamily="微软雅黑" FontSize="12"
         Background="{DynamicResource RegionBrush}"
         WindowStartupLocation="CenterOwner">

@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:hc="https://handyorg.github.io/handycontrol"
         Title="平均成绩" Height="320" Width="520"
+        Icon="pack://application:,,,/Resources/myicon.ico"
         FontFamily="微软雅黑" FontSize="12"
         Background="{DynamicResource RegionBrush}"
         WindowStartupLocation="CenterOwner"
