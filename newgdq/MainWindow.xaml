@@ -1,4 +1,4 @@
-ï»¿<hc:Window x:Class="newgdq.MainWindow"
+<hc:Window x:Class="newgdq.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -8,8 +8,8 @@
         xmlns:tb="http://www.hardcodet.net/taskbar"
         xmlns:local="clr-namespace:newgdq"
         mc:Ignorable="d"
-        Title="å·žå·žè·Ÿæ‰“å™¨" Height="620" Width="940"
-        FontFamily="å¾®è½¯é›…é»‘" FontSize="12"
+        Title="ÖÝÖÝ¸ú´òÆ÷" Height="620" Width="940"
+        FontFamily="Î¢ÈíÑÅºÚ" FontSize="12"
         Icon="pack://application:,,,/Resources/myicon.ico"
         Background="{DynamicResource RegionBrush}"
         Foreground="{DynamicResource PrimaryTextBrush}"
@@ -17,7 +17,7 @@
         NonClientAreaForeground="#DDD"
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
-        <!-- ä¿¡æ¯æ¡æ ‡ç­¾ -->
+        <!-- ÐÅÏ¢Ìõ±êÇ© -->
         <Style x:Key="LblText" TargetType="TextBlock">
             <Setter Property="Foreground" Value="{StaticResource LabelFG}"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -31,7 +31,7 @@
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="Bold"/>
         </Style>
-        <!-- æ®µå·åˆ»åº¦å°ºæ•°å­—ï¼ˆæ·±è‰²ä¸»é¢˜ï¼‰ -->
+        <!-- ¶ÎºÅ¿Ì¶È³ßÊý×Ö£¨ÉîÉ«Ö÷Ìâ£© -->
         <Style x:Key="TickNum" TargetType="TextBlock">
             <Setter Property="Foreground" Value="#DDD"/>
             <Setter Property="HorizontalAlignment" Value="Left"/>
@@ -39,7 +39,7 @@
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="Margin" Value="4,0,0,0"/>
         </Style>
-        <!-- æ ‡è®°æ çº¯æ–‡å­—æŒ‰é’®ï¼ˆæ¿€æ´»äº®é»„ + ä¸‹åˆ’çº¿ + hoverå˜äº®ï¼‰ -->
+        <!-- ±ê¼ÇÀ¸´¿ÎÄ×Ö°´Å¥£¨¼¤»îÁÁ»Æ + ÏÂ»®Ïß + hover±äÁÁ£© -->
         <Style x:Key="MarkerText" TargetType="ToggleButton">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -73,80 +73,80 @@
 
     <DockPanel LastChildFill="True">
 
-        <!-- æ‰˜ç›˜å›¾æ ‡ï¼šå·¦é”®ç‚¹å‡»è¿˜åŽŸï¼›å³é”®å¼¹èœå• -->
+        <!-- ÍÐÅÌÍ¼±ê£º×ó¼üµã»÷»¹Ô­£»ÓÒ¼üµ¯²Ëµ¥ -->
         <tb:TaskbarIcon x:Name="TrayIcon"
                         IconSource="pack://application:,,,/Resources/myicon.ico"
-                        ToolTipText="å·žå·žè·Ÿæ‰“å™¨"
+                        ToolTipText="ÖÝÖÝ¸ú´òÆ÷"
                         TrayLeftMouseDown="TrayIcon_LeftClick">
             <tb:TaskbarIcon.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="æ˜¾ç¤ºä¸»çª—å£" Click="TrayMenu_Show_Click"/>
-                    <MenuItem Header="é‡æ‰“"      InputGestureText="F3" Click="MenuItem_Repeat_Click"/>
-                    <MenuItem Header="å‘ä¸‹ä¸€æ®µ" InputGestureText="F6" Click="MenuItem_SendNext_Click"/>
-                    <MenuItem Header="æš‚åœ / ç»§ç»­" InputGestureText="F8" Click="MenuItem_Pause_Click"/>
+                    <MenuItem Header="ÏÔÊ¾Ö÷´°¿Ú" Click="TrayMenu_Show_Click"/>
+                    <MenuItem Header="ÖØ´ò"      InputGestureText="F3" Click="MenuItem_Repeat_Click"/>
+                    <MenuItem Header="·¢ÏÂÒ»¶Î" InputGestureText="F6 / Ctrl+R" Click="MenuItem_SendNext_Click"/>
+                    <MenuItem Header="ÔÝÍ£ / ¼ÌÐø" InputGestureText="F8" Click="MenuItem_Pause_Click"/>
                     <Separator/>
-                    <MenuItem Header="é€€å‡º" Click="TrayMenu_Exit_Click"/>
+                    <MenuItem Header="ÍË³ö" Click="TrayMenu_Exit_Click"/>
                 </ContextMenu>
             </tb:TaskbarIcon.ContextMenu>
         </tb:TaskbarIcon>
 
-        <!-- 1. é¡¶éƒ¨èœå•æ  -->
+        <!-- 1. ¶¥²¿²Ëµ¥À¸ -->
         <Menu DockPanel.Dock="Top" Background="{StaticResource PanelBG}" x:Name="MainMenu">
-            <MenuItem Header="èœå•">
-                <MenuItem Header="å‘æ–‡..."    InputGestureText="F2" Click="MenuItem_OpenSendText_Click"/>
-                <MenuItem Header="è½½æ–‡"       InputGestureText="F4" Click="MenuItem_LoadClipboard_Click"/>
-                <MenuItem Header="å¤–è§‚..." Click="MenuItem_OpenSettings_Click"/>
-                <MenuItem Header="æš‚åœ"   InputGestureText="F8" x:Name="MnuPause" Click="MenuItem_Pause_Click"/>
+            <MenuItem Header="²Ëµ¥">
+                <MenuItem Header="·¢ÎÄ..."    InputGestureText="F2" Click="MenuItem_OpenSendText_Click"/>
+                <MenuItem Header="ÔØÎÄ"       InputGestureText="F4" Click="MenuItem_LoadClipboard_Click"/>
+                <MenuItem Header="Íâ¹Û..." Click="MenuItem_OpenSettings_Click"/>
+                <MenuItem Header="ÔÝÍ£"   InputGestureText="F8" x:Name="MnuPause" Click="MenuItem_Pause_Click"/>
                 <Separator/>
-                <MenuItem Header="å¤åˆ¶æˆç»©" InputGestureText="F9"     Click="MenuItem_CopyResult_Click"/>
-                <MenuItem Header="é€€å‡º"     Click="MenuItem_Exit_Click"/>
+                <MenuItem Header="¸´ÖÆ³É¼¨" InputGestureText="F9"     Click="MenuItem_CopyResult_Click"/>
+                <MenuItem Header="ÍË³ö"     Click="MenuItem_Exit_Click"/>
             </MenuItem>
-            <MenuItem Header="åŠŸèƒ½">
-                <MenuItem Header="æ–‡ç« å¤„ç†">
-                    <MenuItem Header="å°†ç›®å‰æ–‡ç« ä¹±åº"     InputGestureText="Ctrl+Q" Click="MenuItem_ShuffleArticle_Click"/>
-                    <MenuItem Header="è‹±æ–‡æ ‡ç‚¹æ¢ä¸­æ–‡æ ‡ç‚¹" InputGestureText="Ctrl+W" Click="MenuItem_En2CnPunct_Click"/>
-                    <MenuItem Header="åˆ é™¤ç©ºæ ¼ï¼ˆåŒ…å«å…¨è§’ï¼‰"   Click="MenuItem_StripSpace_Click"/>
+            <MenuItem Header="¹¦ÄÜ">
+                <MenuItem Header="ÎÄÕÂ´¦Àí">
+                    <MenuItem Header="½«Ä¿Ç°ÎÄÕÂÂÒÐò"     InputGestureText="Ctrl+Q" Click="MenuItem_ShuffleArticle_Click"/>
+                    <MenuItem Header="Ó¢ÎÄ±êµã»»ÖÐÎÄ±êµã" InputGestureText="Ctrl+W" Click="MenuItem_En2CnPunct_Click"/>
+                    <MenuItem Header="É¾³ý¿Õ¸ñ£¨°üº¬È«½Ç£©"   Click="MenuItem_StripSpace_Click"/>
                 </MenuItem>
-                <MenuItem Header="å†…éƒ¨æµ‹é€Ÿ">
-                    <MenuItem Header="10å­—æµ‹è¯•"     Tag="10å­—æµ‹è¯•.txt"     Click="MenuItem_LoadInternal_Click"/>
+                <MenuItem Header="ÄÚ²¿²âËÙ">
+                    <MenuItem Header="10×Ö²âÊÔ"     Tag="10×Ö²âÊÔ.txt"     Click="MenuItem_LoadInternal_Click"/>
                     <Separator/>
-                    <MenuItem Header="å¸¸ç”¨å•å­—å‰äº”ç™¾" Tag="å¸¸ç”¨å•å­—å‰äº”ç™¾.txt" Click="MenuItem_LoadInternal_Click"/>
-                    <MenuItem Header="å¸¸ç”¨å•å­—ä¸­äº”ç™¾" Tag="å¸¸ç”¨å•å­—ä¸­äº”ç™¾.txt" Click="MenuItem_LoadInternal_Click"/>
-                    <MenuItem Header="å¸¸ç”¨å•å­—åŽäº”ç™¾" Tag="å¸¸ç”¨å•å­—åŽäº”ç™¾.txt" Click="MenuItem_LoadInternal_Click"/>
-                    <MenuItem Header="å¸¸ç”¨è¯ç»„å‰ä¸‰ç™¾" Tag="å¸¸ç”¨è¯ç»„å‰ä¸‰ç™¾.txt" Click="MenuItem_LoadInternal_Click"/>
-                    <MenuItem Header="å²³é˜³æ¥¼è®°"       Tag="å²³é˜³æ¥¼è®°.txt"       Click="MenuItem_LoadInternal_Click"/>
-                    <MenuItem Header="ä¸ºäººæ°‘æœåŠ¡èŠ‚é€‰" Tag="ä¸ºäººæ°‘æœåŠ¡èŠ‚é€‰.txt" Click="MenuItem_LoadInternal_Click"/>
-                    <MenuItem Header="å‰1500å•å­—"     Tag="å‰1500å•å­—.txt"     Click="MenuItem_LoadInternal_Click"/>
+                    <MenuItem Header="³£ÓÃµ¥×ÖÇ°Îå°Ù" Tag="³£ÓÃµ¥×ÖÇ°Îå°Ù.txt" Click="MenuItem_LoadInternal_Click"/>
+                    <MenuItem Header="³£ÓÃµ¥×ÖÖÐÎå°Ù" Tag="³£ÓÃµ¥×ÖÖÐÎå°Ù.txt" Click="MenuItem_LoadInternal_Click"/>
+                    <MenuItem Header="³£ÓÃµ¥×ÖºóÎå°Ù" Tag="³£ÓÃµ¥×ÖºóÎå°Ù.txt" Click="MenuItem_LoadInternal_Click"/>
+                    <MenuItem Header="³£ÓÃ´Ê×éÇ°Èý°Ù" Tag="³£ÓÃ´Ê×éÇ°Èý°Ù.txt" Click="MenuItem_LoadInternal_Click"/>
+                    <MenuItem Header="ÔÀÑôÂ¥¼Ç"       Tag="ÔÀÑôÂ¥¼Ç.txt"       Click="MenuItem_LoadInternal_Click"/>
+                    <MenuItem Header="ÎªÈËÃñ·þÎñ½ÚÑ¡" Tag="ÎªÈËÃñ·þÎñ½ÚÑ¡.txt" Click="MenuItem_LoadInternal_Click"/>
+                    <MenuItem Header="Ç°1500µ¥×Ö"     Tag="Ç°1500µ¥×Ö.txt"     Click="MenuItem_LoadInternal_Click"/>
                 </MenuItem>
                 <Separator/>
-                <MenuItem Header="å‘é€å›¾ç‰‡æˆç»©" InputGestureText="Ctrl+T" Click="MenuItem_SendImageScore_Click"/>
-                <MenuItem Header="å¹³å‡æˆç»©..." Click="MenuItem_OpenAverage_Click"/>
-                <MenuItem Header="å‡»é”®è¯„å®š..." InputGestureText="Ctrl+B" Click="MenuItem_OpenJjCheck_Click"/>
-                <MenuItem Header="é€Ÿåº¦åˆ†æž..." InputGestureText="Ctrl+E" Click="MenuItem_OpenSpeedAnalysis_Click"/>
-                <MenuItem Header="è·Ÿæ‰“æŠ¥å‘Š..." InputGestureText="Ctrl+G" Click="MenuItem_OpenReport_Click"/>
+                <MenuItem Header="·¢ËÍÍ¼Æ¬³É¼¨" InputGestureText="Ctrl+T" Click="MenuItem_SendImageScore_Click"/>
+                <MenuItem Header="Æ½¾ù³É¼¨..." Click="MenuItem_OpenAverage_Click"/>
+                <MenuItem Header="»÷¼üÆÀ¶¨..." InputGestureText="Ctrl+B" Click="MenuItem_OpenJjCheck_Click"/>
+                <MenuItem Header="ËÙ¶È·ÖÎö..." InputGestureText="Ctrl+E" Click="MenuItem_OpenSpeedAnalysis_Click"/>
+                <MenuItem Header="¸ú´ò±¨¸æ..." InputGestureText="Ctrl+G" Click="MenuItem_OpenReport_Click"/>
                 <Separator/>
-                <MenuItem Header="æµ‹è¯•è‡ªå®šä¹‰ bm.txt..." Click="MenuItem_TestBmFile_Click"
-                          ToolTip="é€‰ä¸€ä¸ª bm.txt æ–‡ä»¶ï¼ŒéªŒè¯æ ¼å¼æ˜¯å¦åˆæ³• + æ˜¾ç¤ºç»Ÿè®¡ä¿¡æ¯&#10;ä¸ä¼šæ›¿æ¢å½“å‰è¯å…¸ï¼Œä»…ç”¨äºŽè‡ªæ£€"/>
-                <MenuItem Header="è¯ç»„æ¨¡å¼" x:Name="MnuSmartCi" IsCheckable="True"
-                          ToolTip="å¼€ï¼šæŒ‰æœ€é•¿è¯ç»„åˆ’ä¸‹åˆ’çº¿ + ç†è®ºç é•¿æŒ‰è¯ç®—ï¼›å…³ï¼šæ— ä¸‹åˆ’çº¿ï¼ŒåªæŸ¥å•å­—"
+                <MenuItem Header="²âÊÔ×Ô¶¨Òå bm.txt..." Click="MenuItem_TestBmFile_Click"
+                          ToolTip="Ñ¡Ò»¸ö bm.txt ÎÄ¼þ£¬ÑéÖ¤¸ñÊ½ÊÇ·ñºÏ·¨ + ÏÔÊ¾Í³¼ÆÐÅÏ¢&#10;²»»áÌæ»»µ±Ç°´Êµä£¬½öÓÃÓÚ×Ô¼ì"/>
+                <MenuItem Header="´Ê×éÄ£Ê½" x:Name="MnuSmartCi" IsCheckable="True"
+                          ToolTip="¿ª£º°´×î³¤´Ê×é»®ÏÂ»®Ïß + ÀíÂÛÂë³¤°´´ÊËã£»¹Ø£ºÎÞÏÂ»®Ïß£¬Ö»²éµ¥×Ö"
                           Click="MnuSmartCi_Click"/>
             </MenuItem>
-            <MenuItem Header="å‘æ–‡">
-                <MenuItem Header="å‘æ–‡çŠ¶æ€" Click="MenuItem_SendStatus_Click"/>
-                <MenuItem Header="å‘ä¸‹ä¸€æ®µ" InputGestureText="F6" Click="MenuItem_SendNext_Click"/>
-                <MenuItem Header="ä¹±åºé‡æŠ½" Click="MenuItem_SendShuffle_Click"/>
+            <MenuItem Header="·¢ÎÄ">
+                <MenuItem Header="·¢ÎÄ×´Ì¬" Click="MenuItem_SendStatus_Click"/>
+                <MenuItem Header="·¢ÏÂÒ»¶Î" InputGestureText="F6 / Ctrl+R" Click="MenuItem_SendNext_Click"/>
+                <MenuItem Header="ÂÒÐòÖØ³é" Click="MenuItem_SendShuffle_Click"/>
             </MenuItem>
-            <MenuItem Header="å¸®åŠ©">
-                <MenuItem Header="å¿«æ·é”®åˆ—è¡¨" Click="MenuItem_Hotkeys_Click"/>
+            <MenuItem Header="°ïÖú">
+                <MenuItem Header="¿ì½Ý¼üÁÐ±í" Click="MenuItem_Hotkeys_Click"/>
                 <Separator/>
-                <MenuItem Header="è®¿é—® é¡¹ç›®ä¸»é¡µ" Click="MenuItem_Homepage_Click"/>
-                <MenuItem Header="åŠ å…¥ QQ äº¤æµç¾¤" Click="MenuItem_JoinQQ_Click"/>
-                <MenuItem Header="å…³äºŽ å·žå·žè·Ÿæ‰“å™¨..." Click="MenuItem_About_Click"/>
+                <MenuItem Header="·ÃÎÊ ÏîÄ¿Ö÷Ò³" Click="MenuItem_Homepage_Click"/>
+                <MenuItem Header="¼ÓÈë QQ ½»Á÷Èº" Click="MenuItem_JoinQQ_Click"/>
+                <MenuItem Header="¹ØÓÚ ÖÝÖÝ¸ú´òÆ÷..." Click="MenuItem_About_Click"/>
             </MenuItem>
-            <MenuItem Header="å¤ä½" Click="MenuItem_Reset_Click"/>
+            <MenuItem Header="¸´Î»" Click="MenuItem_Reset_Click"/>
         </Menu>
 
-        <!-- 2. æ®µå·åˆ»åº¦å°ºï¼š17 ç­‰åˆ†æ ¼ (4..11 æ¯å·å  2 æ ¼ + "12+") -->
+        <!-- 2. ¶ÎºÅ¿Ì¶È³ß£º17 µÈ·Ö¸ñ (4..11 Ã¿ºÅÕ¼ 2 ¸ñ + "12+") -->
         <Border DockPanel.Dock="Top" Background="{StaticResource TickBG}" x:Name="SegRulerBox"
                 Visibility="Collapsed"
                 BorderBrush="#666" BorderThickness="0,1,0,1" Height="20">
@@ -162,9 +162,9 @@
                     <ColumnDefinition/><ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <!-- èµ·å§‹æ®µå·æ ¼ (i=0,2,4,...,14 æ˜¾ç¤º 4..11) -->
+                <!-- ÆðÊ¼¶ÎºÅ¸ñ (i=0,2,4,...,14 ÏÔÊ¾ 4..11) -->
                 <TextBlock Grid.Column="0"  Text="4"   Style="{StaticResource TickNum}"/>
-                <!-- i=1ï¼šå½“å‰æ®µå·æ¸¸æ ‡ä½ï¼ˆåŠ¨æ€å†™å…¥ï¼‰ï¼Œè¿™é‡Œé»˜è®¤æ˜¾ç¤º 14 -->
+                <!-- i=1£ºµ±Ç°¶ÎºÅÓÎ±êÎ»£¨¶¯Ì¬Ð´Èë£©£¬ÕâÀïÄ¬ÈÏÏÔÊ¾ 14 -->
                 <TextBlock Grid.Column="1"  x:Name="TxtCurSeg" Text="" Style="{StaticResource TickNum}" FontWeight="Bold" Foreground="#C00"/>
                 <TextBlock Grid.Column="2"  Text="5"   Style="{StaticResource TickNum}"/>
                 <TextBlock Grid.Column="4"  Text="6"   Style="{StaticResource TickNum}"/>
@@ -174,7 +174,7 @@
                 <TextBlock Grid.Column="12" Text="10"  Style="{StaticResource TickNum}"/>
                 <TextBlock Grid.Column="14" Text="11"  Style="{StaticResource TickNum}"/>
                 <TextBlock Grid.Column="16" Text="12+" Style="{StaticResource TickNum}"/>
-                <!-- ç«–å‘åˆ†éš”çº¿ï¼ˆæ¯æ ¼å³ä¾§ï¼‰ -->
+                <!-- ÊúÏò·Ö¸ôÏß£¨Ã¿¸ñÓÒ²à£© -->
                 <Border Grid.Column="0"  BorderBrush="#888" BorderThickness="0,0,1,0"/>
                 <Border Grid.Column="1"  BorderBrush="#888" BorderThickness="0,0,1,0"/>
                 <Border Grid.Column="2"  BorderBrush="#888" BorderThickness="0,0,1,0"/>
@@ -194,7 +194,7 @@
             </Grid>
         </Border>
 
-        <!-- 3. ä¿¡æ¯æ¡ï¼ˆä¸¤è¡Œç´§è´´ï¼šä¸Š=æ ‡ç­¾ / ä¸‹=å€¼ï¼Œæ¯ä¸ªæ•°æ®ç‹¬å ä¸€åˆ—ï¼‰ -->
+        <!-- 3. ÐÅÏ¢Ìõ£¨Á½ÐÐ½ôÌù£ºÉÏ=±êÇ© / ÏÂ=Öµ£¬Ã¿¸öÊý¾Ý¶ÀÕ¼Ò»ÁÐ£© -->
         <Border DockPanel.Dock="Top" Background="{StaticResource PanelBG}" Padding="0">
             <Grid>
                 <Grid.RowDefinitions>
@@ -202,43 +202,43 @@
                     <RowDefinition Height="22"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="60"/>   <!-- æ®µå· -->
-                    <ColumnDefinition Width="*"/>    <!-- æ ‡é¢˜ -->
-                    <ColumnDefinition Width="80"/>   <!-- å­—æ•° -->
-                    <ColumnDefinition Width="140"/>  <!-- çŠ¶æ€ï¼šé‡æ‰“/å‘å‘†/é”®å‡† -->
-                    <ColumnDefinition Width="80"/>   <!-- é€Ÿåº¦ -->
-                    <ColumnDefinition Width="80"/>   <!-- å‡»é”® -->
-                    <ColumnDefinition Width="80"/>   <!-- ç é•¿ -->
-                    <ColumnDefinition Width="110"/>   <!-- è”ç³»å·žå·ž -->
+                    <ColumnDefinition Width="60"/>   <!-- ¶ÎºÅ -->
+                    <ColumnDefinition Width="*"/>    <!-- ±êÌâ -->
+                    <ColumnDefinition Width="80"/>   <!-- ×ÖÊý -->
+                    <ColumnDefinition Width="140"/>  <!-- ×´Ì¬£ºÖØ´ò/·¢´ô/¼ü×¼ -->
+                    <ColumnDefinition Width="80"/>   <!-- ËÙ¶È -->
+                    <ColumnDefinition Width="80"/>   <!-- »÷¼ü -->
+                    <ColumnDefinition Width="80"/>   <!-- Âë³¤ -->
+                    <ColumnDefinition Width="110"/>   <!-- ÁªÏµÖÝÖÝ -->
                 </Grid.ColumnDefinitions>
 
-                <!-- ä¸Šè¡Œï¼šæ ‡ç­¾ -->
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="æ®µå·"   Style="{StaticResource LblText}"/>
-                <TextBlock Grid.Row="0" Grid.Column="1" Text="æ ‡é¢˜"   Style="{StaticResource LblText}"/>
-                <TextBlock Grid.Row="0" Grid.Column="2" Text="å­—æ•°"   Style="{StaticResource LblText}"/>
-                <TextBlock Grid.Row="0" Grid.Column="3" Text="çŠ¶æ€" Style="{StaticResource LblText}"
-                           ToolTip="é‡æ‰“æ¬¡æ•° / å‘å‘†ç§’ / é”®å‡†ç™¾åˆ†æ¯”"/>
-                <TextBlock Grid.Row="0" Grid.Column="4" Text="é€Ÿåº¦"   Style="{StaticResource LblText}"/>
-                <TextBlock Grid.Row="0" Grid.Column="5" Text="å‡»é”®"   Style="{StaticResource LblText}"/>
-                <TextBlock Grid.Row="0" Grid.Column="6" Text="ç é•¿"   Style="{StaticResource LblText}"/>
-                <TextBlock Grid.Row="0" Grid.Column="7" Text="è”ç³»å·žå·ž"   Style="{StaticResource LblText}"
-                           ToolTip="ç‚¹å‡»å¤åˆ¶ QQ ç¾¤å·"/>
+                <!-- ÉÏÐÐ£º±êÇ© -->
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="¶ÎºÅ"   Style="{StaticResource LblText}"/>
+                <TextBlock Grid.Row="0" Grid.Column="1" Text="±êÌâ"   Style="{StaticResource LblText}"/>
+                <TextBlock Grid.Row="0" Grid.Column="2" Text="×ÖÊý"   Style="{StaticResource LblText}"/>
+                <TextBlock Grid.Row="0" Grid.Column="3" Text="×´Ì¬" Style="{StaticResource LblText}"
+                           ToolTip="ÖØ´ò´ÎÊý / ·¢´ôÃë / ¼ü×¼°Ù·Ö±È"/>
+                <TextBlock Grid.Row="0" Grid.Column="4" Text="ËÙ¶È"   Style="{StaticResource LblText}"/>
+                <TextBlock Grid.Row="0" Grid.Column="5" Text="»÷¼ü"   Style="{StaticResource LblText}"/>
+                <TextBlock Grid.Row="0" Grid.Column="6" Text="Âë³¤"   Style="{StaticResource LblText}"/>
+                <TextBlock Grid.Row="0" Grid.Column="7" Text="ÁªÏµÖÝÖÝ"   Style="{StaticResource LblText}"
+                           ToolTip="µã»÷¸´ÖÆ QQ ÈººÅ"/>
 
-                <!-- ä¸‹è¡Œï¼šå€¼ï¼ˆå±…ä¸­ï¼‰ -->
+                <!-- ÏÂÐÐ£ºÖµ£¨¾ÓÖÐ£© -->
                 <TextBlock Grid.Row="1" Grid.Column="0" x:Name="TxtCurSegInfo" Text="-"      Style="{StaticResource LblValue}"
-                           Cursor="Hand" ToolTip="ç‚¹å‡»ï¼šè·³è½¬åˆ°æŒ‡å®šæ®µï¼ˆä»…é¡ºåº/ä¸€å¥ç»“æŸæ¨¡å¼ï¼‰"
+                           Cursor="Hand" ToolTip="µã»÷£ºÌø×ªµ½Ö¸¶¨¶Î£¨½öË³Ðò/Ò»¾ä½áÊøÄ£Ê½£©"
                            MouseLeftButtonUp="TxtCurSegInfo_Click"/>
                 <TextBlock Grid.Row="1" Grid.Column="1" x:Name="TxtTitle"      Text="-"      Style="{StaticResource LblValue}"/>
-                <TextBlock Grid.Row="1" Grid.Column="2" x:Name="TxtWordCount"  Text="0/0å­—"  Style="{StaticResource LblValue}"/>
-                <TextBlock Grid.Row="1" Grid.Column="3" x:Name="TxtGroup"      Text="é‡0 å‘† 0s é”®å‡† 100%"      Style="{StaticResource LblValue}" FontSize="11"/>
+                <TextBlock Grid.Row="1" Grid.Column="2" x:Name="TxtWordCount"  Text="0/0×Ö"  Style="{StaticResource LblValue}"/>
+                <TextBlock Grid.Row="1" Grid.Column="3" x:Name="TxtGroup"      Text="ÖØ0 ´ô 0s ¼ü×¼ 100%"      Style="{StaticResource LblValue}" FontSize="11"/>
                 <TextBlock Grid.Row="1" Grid.Column="4" x:Name="TxtSpeed"      Text="0.00"   Style="{StaticResource LblValue}"/>
                 <TextBlock Grid.Row="1" Grid.Column="5" x:Name="TxtJj"         Text="0.00"   Style="{StaticResource LblValue}"/>
                 <TextBlock Grid.Row="1" Grid.Column="6" x:Name="TxtMc"         Text="0.00"   Style="{StaticResource LblValue}"/>
-                <TextBlock Grid.Row="1" Grid.Column="7" x:Name="TxtSign"       Text="å¾®ä¿¡ synhxb"    Style="{StaticResource LblValue}"
-                           Cursor="Hand" ToolTip="ç‚¹å‡»å¤åˆ¶å¾®ä¿¡å·"
+                <TextBlock Grid.Row="1" Grid.Column="7" x:Name="TxtSign"       Text="Î¢ÐÅ synhxb"    Style="{StaticResource LblValue}"
+                           Cursor="Hand" ToolTip="µã»÷¸´ÖÆÎ¢ÐÅºÅ"
                            MouseLeftButtonUp="TxtSign_LeftClick"/>
 
-                <!-- åˆ—é—´åˆ†éš”ï¼ˆç»†çº¿ï¼‰ -->
+                <!-- ÁÐ¼ä·Ö¸ô£¨Ï¸Ïß£© -->
                 <Border Grid.RowSpan="2" Grid.Column="0" BorderBrush="{StaticResource GridLine}" BorderThickness="0,0,1,0"/>
                 <Border Grid.RowSpan="2" Grid.Column="1" BorderBrush="{StaticResource GridLine}" BorderThickness="0,0,1,0"/>
                 <Border Grid.RowSpan="2" Grid.Column="2" BorderBrush="{StaticResource GridLine}" BorderThickness="0,0,1,0"/>
@@ -246,49 +246,49 @@
                 <Border Grid.RowSpan="2" Grid.Column="4" BorderBrush="{StaticResource GridLine}" BorderThickness="0,0,1,0"/>
                 <Border Grid.RowSpan="2" Grid.Column="5" BorderBrush="{StaticResource GridLine}" BorderThickness="0,0,1,0"/>
                 <Border Grid.RowSpan="2" Grid.Column="6" BorderBrush="{StaticResource GridLine}" BorderThickness="0,0,1,0"/>
-                <!-- ä¸Šä¸‹ä¸¤è¡Œä¹‹é—´æ¨ªçº¿ -->
+                <!-- ÉÏÏÂÁ½ÐÐÖ®¼äºáÏß -->
                 <Border Grid.Row="0" Grid.ColumnSpan="8" BorderBrush="{StaticResource GridLine}" BorderThickness="0,0,0,1" VerticalAlignment="Bottom"/>
             </Grid>
         </Border>
 
-        <!-- 5. åº•éƒ¨ï¼šæ ‡è®°æ ï¼ˆè´´åº•ï¼‰ -->
+        <!-- 5. µ×²¿£º±ê¼ÇÀ¸£¨Ìùµ×£© -->
         <Border DockPanel.Dock="Bottom" Background="{StaticResource PanelBG}" Padding="4,2">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <ToggleButton x:Name="TogImage" Style="{StaticResource MarkerText}" Content="å›¾ç‰‡"
-                              ToolTip="å®Œæˆæ®µæ—¶è‡ªåŠ¨å¤åˆ¶æˆç»©å›¾åˆ°å‰ªè´´æ¿"/>
-                <ToggleButton x:Name="TogBmTips" Style="{StaticResource MarkerText}" Content="ç¼–ç "
-                              ToolTip="ç¼–ç è‡ªåŠ¨æç¤º&#10;çŠ¶æ€æ¡ä¸­é—´æ ¼æ˜¾ç¤ºå½“å‰å­—çš„ç¼–ç  + é‡æ•°è‰²å—"
+                <ToggleButton x:Name="TogImage" Style="{StaticResource MarkerText}" Content="Í¼Æ¬"
+                              ToolTip="Íê³É¶ÎÊ±×Ô¶¯¸´ÖÆ³É¼¨Í¼µ½¼ôÌù°å"/>
+                <ToggleButton x:Name="TogBmTips" Style="{StaticResource MarkerText}" Content="±àÂë"
+                              ToolTip="±àÂë×Ô¶¯ÌáÊ¾&#10;×´Ì¬ÌõÖÐ¼ä¸ñÏÔÊ¾µ±Ç°×ÖµÄ±àÂë + ÖØÊýÉ«¿é"
                               Checked="TogBmTips_Toggled" Unchecked="TogBmTips_Toggled"/>
-                <ToggleButton x:Name="TogChart" Style="{StaticResource MarkerText}" Content="æ›²çº¿"
-                              ToolTip="å®žæ—¶é€Ÿåº¦é¢ç§¯æ›²çº¿ï¼ˆç‹¬ç«‹çª—å£ï¼‰"
+                <ToggleButton x:Name="TogChart" Style="{StaticResource MarkerText}" Content="ÇúÏß"
+                              ToolTip="ÊµÊ±ËÙ¶ÈÃæ»ýÇúÏß£¨¶ÀÁ¢´°¿Ú£©"
                               Checked="TogChart_Toggled" Unchecked="TogChart_Toggled"/>
-                <ToggleButton x:Name="TogMap" Style="{StaticResource MarkerText}" Content="åœ°å›¾"
-                              ToolTip="åµŒå…¥å¼è·Ÿæ‰“åœ°å›¾&#10;æ¨ªè½´=ç”¨æ—¶ï¼Œçºµè½´=å·²æ‰“å­—æ•°å æ¯”&#10;å®žæ—¶åæ˜ èŠ‚å¥æ³¢åŠ¨"
+                <ToggleButton x:Name="TogMap" Style="{StaticResource MarkerText}" Content="µØÍ¼"
+                              ToolTip="Ç¶ÈëÊ½¸ú´òµØÍ¼&#10;ºáÖá=ÓÃÊ±£¬×ÝÖá=ÒÑ´ò×ÖÊýÕ¼±È&#10;ÊµÊ±·´Ó³½Ú×à²¨¶¯"
                               Checked="TogMap_Toggled" Unchecked="TogMap_Toggled"/>
-                <ToggleButton x:Name="TogMark" Style="{StaticResource MarkerText}" Content="æ ‡è®°" IsChecked="True"
-                              ToolTip="è‡ªåŠ¨æ ‡è®°è¯ç»„&#10;è“=2å­— ç´«=3å­— çº¢=4å­—+&#10;å®žçº¿å…¨ç  / è™šçº¿éžå…¨ç "
+                <ToggleButton x:Name="TogMark" Style="{StaticResource MarkerText}" Content="±ê¼Ç" IsChecked="True"
+                              ToolTip="×Ô¶¯±ê¼Ç´Ê×é&#10;À¶=2×Ö ×Ï=3×Ö ºì=4×Ö+&#10;ÊµÏßÈ«Âë / ÐéÏß·ÇÈ«Âë"
                               Checked="TogMark_Toggled" Unchecked="TogMark_Toggled"/>
-                <ToggleButton x:Name="TogSimple" Style="{StaticResource MarkerText}" Content="æžç®€"
-                              ToolTip="æˆç»©å‘é€ä»¥æžç®€æ¨¡å¼ï¼ˆçŸ­æ–‡æœ¬æ ¼å¼ï¼ŒP4 å‘é€æ—¶ç”Ÿæ•ˆï¼‰"
+                <ToggleButton x:Name="TogSimple" Style="{StaticResource MarkerText}" Content="¼«¼ò"
+                              ToolTip="³É¼¨·¢ËÍÒÔ¼«¼òÄ£Ê½£¨¶ÌÎÄ±¾¸ñÊ½£¬P4 ·¢ËÍÊ±ÉúÐ§£©"
                               Checked="TogSimple_Toggled" Unchecked="TogSimple_Toggled"/>
-                <ToggleButton x:Name="TogLimit" Style="{StaticResource MarkerText}" Content="é™åˆ¶"
-                              ToolTip="é€Ÿåº¦é™åˆ¶ï¼šä½ŽäºŽè®¾ç½®çª—ä¸­é˜ˆå€¼æ—¶ä¸è®¡å…¥åŽ†å²&#10;é˜ˆå€¼åœ¨ èœå• â†’ å¤–è§‚ â†’ ä¸ªç­¾ Tab è®¾ç½®"/>
-                <ToggleButton x:Name="TogReplace" Style="{StaticResource MarkerText}" Content="æ›¿æ¢"
-                              ToolTip="è½½å…¥æ–‡æ®µåŽè‡ªåŠ¨æ›¿æ¢è‹±æ–‡æ ‡ç‚¹ä¸ºä¸­æ–‡æ ‡ç‚¹"/>
-                <ToggleButton x:Name="TogDetail" Style="{StaticResource MarkerText}" Content="è¯¦ç»†" IsChecked="True"
-                              ToolTip="æ˜¾ç¤º/éšè—åº•éƒ¨åŽ†å² Grid"
+                <ToggleButton x:Name="TogLimit" Style="{StaticResource MarkerText}" Content="ÏÞÖÆ"
+                              ToolTip="ËÙ¶ÈÏÞÖÆ£ºµÍÓÚÉèÖÃ´°ÖÐãÐÖµÊ±²»¼ÆÈëÀúÊ·&#10;ãÐÖµÔÚ ²Ëµ¥ ¡ú Íâ¹Û ¡ú ¸öÇ© Tab ÉèÖÃ"/>
+                <ToggleButton x:Name="TogReplace" Style="{StaticResource MarkerText}" Content="Ìæ»»"
+                              ToolTip="ÔØÈëÎÄ¶Îºó×Ô¶¯Ìæ»»Ó¢ÎÄ±êµãÎªÖÐÎÄ±êµã"/>
+                <ToggleButton x:Name="TogDetail" Style="{StaticResource MarkerText}" Content="ÏêÏ¸" IsChecked="True"
+                              ToolTip="ÏÔÊ¾/Òþ²Øµ×²¿ÀúÊ· Grid"
                               Checked="TogDetail_Toggled" Unchecked="TogDetail_Toggled"/>
             </StackPanel>
         </Border>
 
-        <!-- 6. è·Ÿæ‰“åœ°å›¾ï¼ˆåµŒå…¥å¼ï¼Œè´´åº•æ ‡è®°æ ä¸Šæ–¹ï¼‰-->
+        <!-- 6. ¸ú´òµØÍ¼£¨Ç¶ÈëÊ½£¬Ìùµ×±ê¼ÇÀ¸ÉÏ·½£©-->
         <Border DockPanel.Dock="Bottom" x:Name="MapPanel" Visibility="Collapsed"
                 Background="#16161A" BorderBrush="#333" BorderThickness="0,1,0,0"
                 Height="80">
             <Canvas x:Name="MapCanvas" ClipToBounds="True" SizeChanged="MapCanvas_SizeChanged"/>
         </Border>
 
-        <!-- 4. ä¸»ä½“ï¼šå¯¹ç…§åŒº + çŠ¶æ€æ¡ + è¾“å…¥åŒº + åŽ†å² Grid -->
+        <!-- 4. Ö÷Ìå£º¶ÔÕÕÇø + ×´Ì¬Ìõ + ÊäÈëÇø + ÀúÊ· Grid -->
         <Grid Background="{StaticResource PanelBG}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="3*" MinHeight="100"/>
@@ -299,15 +299,15 @@
                 <RowDefinition Height="2*" MinHeight="80"/>
             </Grid.RowDefinitions>
 
-            <!-- å¯¹ç…§åŒº -->
+            <!-- ¶ÔÕÕÇø -->
             <RichTextBox Grid.Row="0" x:Name="RtbCompare" IsReadOnly="True"
                          BorderThickness="0" Background="White" Foreground="#222"
-                         FontSize="22" FontFamily="å®‹ä½“"
+                         FontSize="22" FontFamily="ËÎÌå"
                          VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                          Padding="0">
                 <FlowDocument PagePadding="0">
                     <Paragraph Margin="0">
-                        <Run Text="å·žå·žè·Ÿæ‰“å™¨ Â· å¿«æ·é”® F3 é‡æ‰“ Â· èœå• â†’ åŠŸèƒ½ â†’ å†…éƒ¨æµ‹é€Ÿ é€‰ä¸€ç¯‡å¼€å§‹è·Ÿæ‰“ã€‚ç‚¹â€œèœå• â†’ æš‚åœâ€å¯æš‚åœè®¡æ—¶ï¼ˆè¾“å…¥æ¡†å¤±ç„¦ä¹Ÿä¼šè‡ªåŠ¨æš‚åœï¼‰ã€‚"/>
+                        <Run Text="ÖÝÖÝ¸ú´òÆ÷ ¡¤ ¿ì½Ý¼ü F3 ÖØ´ò ¡¤ ²Ëµ¥ ¡ú ¹¦ÄÜ ¡ú ÄÚ²¿²âËÙ Ñ¡Ò»Æª¿ªÊ¼¸ú´ò¡£µã¡°²Ëµ¥ ¡ú ÔÝÍ£¡±¿ÉÔÝÍ£¼ÆÊ±£¨ÊäÈë¿òÊ§½¹Ò²»á×Ô¶¯ÔÝÍ££©¡£"/>
                     </Paragraph>
                 </FlowDocument>
             </RichTextBox>
@@ -316,7 +316,7 @@
                           ResizeDirection="Rows" ResizeBehavior="PreviousAndNext" ShowsPreview="True"
                           Cursor="SizeNS" Background="#3A3A3D"/>
 
-            <!-- çŠ¶æ€æ¡ï¼ˆå¯¹ç…§åŒºä¸Žè¾“å…¥åŒºä¹‹é—´ï¼‰ -->
+            <!-- ×´Ì¬Ìõ£¨¶ÔÕÕÇøÓëÊäÈëÇøÖ®¼ä£© -->
             <Border Grid.Row="2" Background="{StaticResource CellBG}"
                     BorderBrush="#666" BorderThickness="0,1,0,1">
                 <Grid>
@@ -325,19 +325,19 @@
                         <RowDefinition Height="14"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="100"/>  <!-- æ—¶é—´ -->
-                        <ColumnDefinition Width="80"/>   <!-- å­—æ•° -->
-                        <ColumnDefinition Width="*"/>    <!-- ç¼–ç æç¤º / è¿›åº¦æ¡ -->
-                        <ColumnDefinition Width="60"/>   <!-- å‡»é”® -->
-                        <ColumnDefinition Width="60"/>   <!-- å›žæ”¹ -->
-                        <ColumnDefinition Width="60"/>   <!-- é”™å­— -->
-                        <ColumnDefinition Width="70"/>   <!-- å·¦:å³ -->
-                        <ColumnDefinition Width="80"/>   <!-- ç†è®ºç é•¿ -->
-                        <ColumnDefinition Width="200"/>  <!-- ç´¯è®¡ -->
+                        <ColumnDefinition Width="100"/>  <!-- Ê±¼ä -->
+                        <ColumnDefinition Width="80"/>   <!-- ×ÖÊý -->
+                        <ColumnDefinition Width="*"/>    <!-- ±àÂëÌáÊ¾ / ½ø¶ÈÌõ -->
+                        <ColumnDefinition Width="60"/>   <!-- »÷¼ü -->
+                        <ColumnDefinition Width="60"/>   <!-- »Ø¸Ä -->
+                        <ColumnDefinition Width="60"/>   <!-- ´í×Ö -->
+                        <ColumnDefinition Width="70"/>   <!-- ×ó:ÓÒ -->
+                        <ColumnDefinition Width="80"/>   <!-- ÀíÂÛÂë³¤ -->
+                        <ColumnDefinition Width="200"/>  <!-- ÀÛ¼Æ -->
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Row="0" Grid.Column="0" x:Name="TxtTime"      Text="00:00.00" Style="{StaticResource LblText}"/>
                     <TextBlock Grid.Row="0" Grid.Column="1" x:Name="TxtCount1"    Text="0/0"      Style="{StaticResource LblText}"/>
-                    <!-- ä¸­é—´ä¸Šè¡Œï¼šç¼–ç æç¤ºä¸‰å°æ ¼ (é‡æ•°è‰²å— + å­— + ç ) -->
+                    <!-- ÖÐ¼äÉÏÐÐ£º±àÂëÌáÊ¾ÈýÐ¡¸ñ (ÖØÊýÉ«¿é + ×Ö + Âë) -->
                     <Grid Grid.Row="0" Grid.Column="2" x:Name="BmTipBox" Visibility="Collapsed">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="18"/>
@@ -346,7 +346,7 @@
                         </Grid.ColumnDefinitions>
                         <Border Grid.Column="0" x:Name="BmRankBox" Background="#4A90E2"/>
                         <TextBlock Grid.Column="1" x:Name="BmChar" Text="-" Foreground="#EEE"
-                                   FontSize="12" FontFamily="å®‹ä½“"
+                                   FontSize="12" FontFamily="ËÎÌå"
                                    TextTrimming="CharacterEllipsis"
                                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         <TextBlock Grid.Column="2" x:Name="BmCode" Text="-" Foreground="#FFD24C"
@@ -356,7 +356,7 @@
                         <Border Grid.Column="0" BorderBrush="{StaticResource GridLine}" BorderThickness="0,0,1,0"/>
                         <Border Grid.Column="1" BorderBrush="{StaticResource GridLine}" BorderThickness="0,0,1,0"/>
                     </Grid>
-                    <!-- ä¸­é—´ä¸‹è¡Œï¼šå­—æ•°è¿›åº¦æ¡ -->
+                    <!-- ÖÐ¼äÏÂÐÐ£º×ÖÊý½ø¶ÈÌõ -->
                     <Grid Grid.Row="1" Grid.Column="2" Margin="3,1" SizeChanged="ProgHost_SizeChanged">
                         <Border Background="#1E1E1E" CornerRadius="2"/>
                         <Border x:Name="ProgFill" Background="#4FC3F7" CornerRadius="2"
@@ -369,16 +369,16 @@
                     <TextBlock Grid.Row="0" Grid.Column="5" x:Name="TxtCz"  Text="0" Style="{StaticResource LblText}"/>
                     <TextBlock Grid.Row="0" Grid.Column="6" x:Name="TxtRightLast" Text="0:0" Style="{StaticResource LblText}"/>
                     <TextBlock Grid.Row="0" Grid.Column="7" x:Name="TxtTheoryMc" Text="-" Style="{StaticResource LblText}"/>
-                    <TextBlock Grid.Row="0" Grid.Column="8" x:Name="TxtTotalInfo" Text="0/0/1å¤©/0"
+                    <TextBlock Grid.Row="0" Grid.Column="8" x:Name="TxtTotalInfo" Text="0/0/1Ìì/0"
                                Style="{StaticResource LblText}" HorizontalAlignment="Right" Margin="0,0,8,0"/>
-                    <TextBlock Grid.Row="1" Grid.Column="0" Text="æ—¶é—´" Style="{StaticResource LblText}" FontSize="10"/>
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Ê±¼ä" Style="{StaticResource LblText}" FontSize="10"/>
                     <TextBlock Grid.Row="1" Grid.Column="1" x:Name="TxtCount1Pct" Text="0%" Style="{StaticResource LblText}" FontSize="10"/>
-                    <TextBlock Grid.Row="1" Grid.Column="3" Text="å‡»é”®" Style="{StaticResource LblText}" FontSize="10"/>
-                    <TextBlock Grid.Row="1" Grid.Column="4" Text="å›žæ”¹" Style="{StaticResource LblText}" FontSize="10"/>
-                    <TextBlock Grid.Row="1" Grid.Column="5" Text="é”™å­—" Style="{StaticResource LblText}" FontSize="10"/>
-                    <TextBlock Grid.Row="1" Grid.Column="6" Text="å·¦:å³" Style="{StaticResource LblText}" FontSize="10"/>
-                    <TextBlock Grid.Row="1" Grid.Column="7" Text="ç†è®ºç é•¿" Style="{StaticResource LblText}" FontSize="10"/>
-                    <TextBlock Grid.Row="1" Grid.Column="8" Text="ä»Šæ—¥/ç´¯è®¡/å¤©/è®°å½•" Style="{StaticResource LblText}" FontSize="10" HorizontalAlignment="Right" Margin="0,0,8,0"/>
+                    <TextBlock Grid.Row="1" Grid.Column="3" Text="»÷¼ü" Style="{StaticResource LblText}" FontSize="10"/>
+                    <TextBlock Grid.Row="1" Grid.Column="4" Text="»Ø¸Ä" Style="{StaticResource LblText}" FontSize="10"/>
+                    <TextBlock Grid.Row="1" Grid.Column="5" Text="´í×Ö" Style="{StaticResource LblText}" FontSize="10"/>
+                    <TextBlock Grid.Row="1" Grid.Column="6" Text="×ó:ÓÒ" Style="{StaticResource LblText}" FontSize="10"/>
+                    <TextBlock Grid.Row="1" Grid.Column="7" Text="ÀíÂÛÂë³¤" Style="{StaticResource LblText}" FontSize="10"/>
+                    <TextBlock Grid.Row="1" Grid.Column="8" Text="½ñÈÕ/ÀÛ¼Æ/Ìì/¼ÇÂ¼" Style="{StaticResource LblText}" FontSize="10" HorizontalAlignment="Right" Margin="0,0,8,0"/>
                     <Border Grid.RowSpan="2" Grid.Column="0" BorderBrush="{StaticResource GridLine}" BorderThickness="0,0,1,0"/>
                     <Border Grid.RowSpan="2" Grid.Column="1" BorderBrush="{StaticResource GridLine}" BorderThickness="0,0,1,0"/>
                     <Border Grid.RowSpan="2" Grid.Column="2" BorderBrush="{StaticResource GridLine}" BorderThickness="0,0,1,0"/>
@@ -391,14 +391,14 @@
                 </Grid>
             </Border>
 
-            <!-- è¾“å…¥åŒºï¼ˆåŽ» HC æ ·å¼ä»¥æ¶ˆé™¤å†…ç½® paddingï¼‰ -->
+            <!-- ÊäÈëÇø£¨È¥ HC ÑùÊ½ÒÔÏû³ýÄÚÖÃ padding£© -->
             <Border Grid.Row="3" BorderBrush="#4FC3F7" BorderThickness="0,2,0,2">
                 <TextBox x:Name="TbxInput"
                          Style="{x:Null}"
                          IsReadOnly="True"
                          BorderThickness="0" Background="White" Foreground="#222"
                          CaretBrush="#222"
-                         FontSize="18" FontFamily="å®‹ä½“"
+                         FontSize="18" FontFamily="ËÎÌå"
                          AcceptsReturn="False" TextWrapping="Wrap"
                          VerticalScrollBarVisibility="Auto"
                          Padding="0"/>
@@ -408,8 +408,8 @@
                           ResizeDirection="Rows" ResizeBehavior="PreviousAndNext" ShowsPreview="True"
                           Cursor="SizeNS" Background="#3A3A3D"/>
 
-            <!-- åŽ†å² Gridï¼šåŽŸç‰ˆæ— è¡¨å¤´ï¼Œç¬¬ 0 è¡Œä½œä¸ºè¡¨å¤´åŠ ç²—æ˜¾ç¤º -->
-            <!-- åŽ†å²åŒº + å†…åµŒé€Ÿåº¦æ›²çº¿ï¼ˆå·¦ = æ›²çº¿ï¼Œå³ = åŽ†å²è¡¨ï¼‰ -->
+            <!-- ÀúÊ· Grid£ºÔ­°æÎÞ±íÍ·£¬µÚ 0 ÐÐ×÷Îª±íÍ·¼Ó´ÖÏÔÊ¾ -->
+            <!-- ÀúÊ·Çø + ÄÚÇ¶ËÙ¶ÈÇúÏß£¨×ó = ÇúÏß£¬ÓÒ = ÀúÊ·±í£© -->
             <Grid Grid.Row="5" x:Name="HistoryBox">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition x:Name="ChartCol" Width="0"/>
@@ -417,7 +417,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- å·¦ï¼šåµŒå…¥å¼é€Ÿåº¦æ›²çº¿ï¼ˆTogChart åˆ‡æ¢å¯è§æ€§ï¼‰ -->
+                <!-- ×ó£ºÇ¶ÈëÊ½ËÙ¶ÈÇúÏß£¨TogChart ÇÐ»»¿É¼ûÐÔ£© -->
                 <Border Grid.Column="0" Background="#1E1E1E" BorderBrush="#444" BorderThickness="0,0,0,0">
                     <oxy:PlotView x:Name="InlineChart" Background="Transparent"/>
                 </Border>
@@ -425,13 +425,13 @@
                               ResizeDirection="Columns" ResizeBehavior="PreviousAndNext"
                               Background="#3A3A3D" Cursor="SizeWE"/>
 
-                <!-- å³ï¼šåŽ†å²è¡¨å¤´ + DataGrid -->
+                <!-- ÓÒ£ºÀúÊ·±íÍ· + DataGrid -->
                 <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="20"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <!-- è¡¨å¤´å¸¦ -->
+                <!-- ±íÍ·´ø -->
                 <Grid Grid.Row="0" Background="{StaticResource CellBG}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="40"/>
@@ -450,21 +450,21 @@
                         <ColumnDefinition Width="70"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0"  Text="åº"   Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Column="1"  Text="æ—¶é—´" Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Column="2"  Text="æ®µ"   Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Column="3"  Text="é€Ÿåº¦" Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Column="4"  Text="å‡»é”®" Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Column="5"  Text="ç é•¿" Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Column="6"  Text="å›žæ”¹" Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Column="7"  Text="é”™å­—" Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Column="8"  Text="é”®æ•°" Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Column="9"  Text="å­—æ•°" Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Column="10" Text="æ‰“è¯" Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Column="11" Text="é€‰é‡" Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Column="12" Text="å›žè½¦" Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Column="13" Text="å·¦:å³" Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Column="14" Text="ç”¨æ—¶" Style="{StaticResource LblValue}"/>
+                    <TextBlock Grid.Column="0"  Text="Ðò"   Style="{StaticResource LblValue}"/>
+                    <TextBlock Grid.Column="1"  Text="Ê±¼ä" Style="{StaticResource LblValue}"/>
+                    <TextBlock Grid.Column="2"  Text="¶Î"   Style="{StaticResource LblValue}"/>
+                    <TextBlock Grid.Column="3"  Text="ËÙ¶È" Style="{StaticResource LblValue}"/>
+                    <TextBlock Grid.Column="4"  Text="»÷¼ü" Style="{StaticResource LblValue}"/>
+                    <TextBlock Grid.Column="5"  Text="Âë³¤" Style="{StaticResource LblValue}"/>
+                    <TextBlock Grid.Column="6"  Text="»Ø¸Ä" Style="{StaticResource LblValue}"/>
+                    <TextBlock Grid.Column="7"  Text="´í×Ö" Style="{StaticResource LblValue}"/>
+                    <TextBlock Grid.Column="8"  Text="¼üÊý" Style="{StaticResource LblValue}"/>
+                    <TextBlock Grid.Column="9"  Text="×ÖÊý" Style="{StaticResource LblValue}"/>
+                    <TextBlock Grid.Column="10" Text="´ò´Ê" Style="{StaticResource LblValue}"/>
+                    <TextBlock Grid.Column="11" Text="Ñ¡ÖØ" Style="{StaticResource LblValue}"/>
+                    <TextBlock Grid.Column="12" Text="»Ø³µ" Style="{StaticResource LblValue}"/>
+                    <TextBlock Grid.Column="13" Text="×ó:ÓÒ" Style="{StaticResource LblValue}"/>
+                    <TextBlock Grid.Column="14" Text="ÓÃÊ±" Style="{StaticResource LblValue}"/>
                 </Grid>
                 <DataGrid Grid.Row="1" x:Name="DgvHistory"
                           AutoGenerateColumns="False"
@@ -478,7 +478,7 @@
                           RowBackground="{StaticResource PanelBG}"
                           AlternatingRowBackground="#34343A"
                           Foreground="#EEE"
-                          RowHeight="24" FontSize="12" FontFamily="å¾®è½¯é›…é»‘">
+                          RowHeight="24" FontSize="12" FontFamily="Î¢ÈíÑÅºÚ">
                     <DataGrid.Columns>
                         <DataGridTextColumn Width="40" Binding="{Binding Index}"/>
                         <DataGridTextColumn Width="80" Binding="{Binding Time}"/>

@@ -965,6 +965,25 @@ namespace newgdq
         public void StopSending() { _sending.Stop(); _sendStatusWin?.Refresh(); }
         public void SendNextSegment() => SendNext();
 
+        /// <summary>Ctrl+← / Ctrl+→ 相对跳段：仅顺序 / 一句结束模式支持。</summary>
+        private void JumpSegRelative(int delta)
+        {
+            if (!_sending.State.Active) return;
+            int cur = _sending.State.CurSeg - 1;
+            int target = cur + delta;
+            if (target < 1) target = 1;
+            string seg = _sending.JumpToSeg(target);
+            if (seg == null)
+            {
+                HandyControl.Controls.Growl.Info("当前模式不支持跳段（乱序）");
+                return;
+            }
+            LoadArticle(seg, $"{_sending.State.Title} · 第 {target} 段");
+            SegRulerBox.Visibility = Visibility.Visible;
+            TxtCurSeg.Text = target.ToString();
+            _sendStatusWin?.Refresh();
+        }
+
         private Views.SendStatusWindow _sendStatusWin;
         private void ShowSendStatusWindow()
         {
@@ -1055,13 +1074,16 @@ namespace newgdq
                 "F6   发下一段\n" +
                 "F8   暂停 / 继续\n\n" +
                 "—— 主窗激活时的快捷键 ——\n" +
-                "F9       复制最新一段成绩\n" +
-                "Ctrl+T   发送图片成绩\n" +
-                "Ctrl+B   击键评定\n" +
-                "Ctrl+E   速度分析\n" +
-                "Ctrl+G   跟打报告\n" +
-                "Ctrl+Q   将目前文章乱序\n" +
-                "Ctrl+W   英文标点换中文\n\n" +
+                "F9         复制最新一段成绩\n" +
+                "Ctrl+R     发下一段（同 F6）\n" +
+                "Ctrl+F2    打开发文状态窗\n" +
+                "Ctrl+←/→   上一段 / 下一段（跳段）\n" +
+                "Ctrl+T     发送图片成绩\n" +
+                "Ctrl+B     击键评定\n" +
+                "Ctrl+E     速度分析\n" +
+                "Ctrl+G     跟打报告\n" +
+                "Ctrl+Q     将目前文章乱序\n" +
+                "Ctrl+W     英文标点换中文\n\n" +
                 "提示：输入框失焦会自动暂停；回到输入框敲任意键自动继续。",
                 "快捷键列表");
         }
@@ -1310,8 +1332,11 @@ namespace newgdq
             //   Ctrl+G 跟打报告 / Ctrl+Q 文章乱序 / Ctrl+W 英标转中标
             switch (vk)
             {
-                case 0x71: // F2 打开发文窗口
-                    Dispatcher.BeginInvoke(new Action(OpenSendTextWindow));
+                case 0x71: // F2 打开发文窗口（Ctrl+F2 改为打开发文状态窗）
+                    if (this.IsActive && IsCtrlDown())
+                        Dispatcher.BeginInvoke(new Action(ShowSendStatusWindow));
+                    else
+                        Dispatcher.BeginInvoke(new Action(OpenSendTextWindow));
                     return;
                 case 0x72: // F3 重打
                     Dispatcher.BeginInvoke(new Action(Repeat));
@@ -1353,6 +1378,15 @@ namespace newgdq
                         return;
                     case 0x57: // Ctrl+W 英文标点换中文
                         Dispatcher.BeginInvoke(new Action(() => MenuItem_En2CnPunct_Click(null, null)));
+                        return;
+                    case 0x52: // Ctrl+R 发下一段（对齐老版菜单快捷键）
+                        Dispatcher.BeginInvoke(new Action(SendNext));
+                        return;
+                    case 0x25: // Ctrl+← 上一段
+                        Dispatcher.BeginInvoke(new Action(() => JumpSegRelative(-1)));
+                        return;
+                    case 0x27: // Ctrl+→ 下一段（跳段，不是发送）
+                        Dispatcher.BeginInvoke(new Action(() => JumpSegRelative(+1)));
                         return;
                 }
             }
