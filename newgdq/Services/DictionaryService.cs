@@ -25,6 +25,10 @@ namespace newgdq.Services
 
         public bool Loaded { get; private set; }
         public int  TotalEntries { get; private set; }
+        /// <summary>载入后的单字条目数（去重后单字数量）。</summary>
+        public int  SingleCount => _single.Count;
+        /// <summary>载入后的词组条目数（含同义重复）。</summary>
+        public int  PhraseCount { get; private set; }
 
         /// <summary>从嵌入资源加载（Resources/bm.txt，UTF-8）。</summary>
         public void LoadFromResource()
@@ -92,6 +96,7 @@ namespace newgdq.Services
             foreach (var list in _phraseByHead.Values)
                 list.Sort((a, b) => b.Word.Length.CompareTo(a.Word.Length));
 
+            PhraseCount = _phraseByHead.Values.Sum(l => l.Count);
             Loaded = true;
         }
 

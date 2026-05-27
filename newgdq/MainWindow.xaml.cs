@@ -72,6 +72,10 @@ namespace newgdq
         // 长时间未跟打自动重打（对齐老版 timer5）
         private readonly DispatcherTimer _autoRepeatTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         private DateTime _lastInputAt;
+
+        // 本段重打次数（每次 Repeat() +1；换新文段时清零）
+        private int _repeatCount;
+        private bool _isRepeating;
         // 词组下划线颜色（按词长）
         private static readonly Brush[] WordUnderlineBrushes =
         {
@@ -464,9 +468,44 @@ namespace newgdq
 
         // ===== 编码提示（当前字 1 个）=====
 
-        private void MenuItem_OpenBmTips_Click(object sender, RoutedEventArgs e)
+        /// <summary>测试用户自定义的 bm.txt 是否合法（不替换当前词典）。
+        /// 老版 FormBMTips 的目的，新版以临时 DictionaryService 加载并显示统计。</summary>
+        private void MenuItem_TestBmFile_Click(object sender, RoutedEventArgs e)
         {
-            TogBmTips.IsChecked = true;
+            var dlg = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "选择 bm.txt 文件验证",
+                Filter = "文本词典|*.txt|所有文件|*.*",
+                CheckFileExists = true,
+            };
+            if (dlg.ShowDialog() != true) return;
+
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            try
+            {
+                var tmp = new Services.DictionaryService();
+                tmp.LoadFromFile(dlg.FileName);
+                sw.Stop();
+                var fi = new System.IO.FileInfo(dlg.FileName);
+                string msg =
+                    $"✓ 文件合法可加载\n\n" +
+                    $"路径：{dlg.FileName}\n" +
+                    $"大小：{fi.Length / 1024.0:0.0} KB\n" +
+                    $"用时：{sw.ElapsedMilliseconds} ms\n\n" +
+                    $"总条目：{tmp.TotalEntries}\n" +
+                    $"独立单字：{tmp.SingleCount}\n" +
+                    $"词组条目：{tmp.PhraseCount}\n\n" +
+                    $"格式要求：每行 \"编码 字1 字2 ...\"（空格/Tab 分隔，UTF-8 编码）。\n" +
+                    $"本次测试不会替换内置词典，仅为校验。";
+                HandyControl.Controls.MessageBox.Show(msg, "bm.txt 校验结果");
+            }
+            catch (Exception ex)
+            {
+                sw.Stop();
+                HandyControl.Controls.MessageBox.Show(
+                    $"✗ 加载失败\n\n{ex.Message}\n\n请检查文件是否为 UTF-8 编码、格式是否正确（每行 \"编码 字1 字2 ...\"）。",
+                    "bm.txt 校验失败");
+            }
         }
 
         private void TogBmTips_Toggled(object sender, RoutedEventArgs e)
@@ -593,6 +632,11 @@ namespace newgdq
             ComputeAndShowTheoryMc();
             _chartWin?.Reset();
             MapReset();
+
+            // 重打次数：Repeat() 触发的此次 LoadArticle → +1；换新文段 → 0
+            if (_isRepeating) _repeatCount++;
+            else _repeatCount = 0;
+            RefreshExtraStatus();
         }
 
         private void ResetUi()
@@ -610,6 +654,20 @@ namespace newgdq
             TxtHg.Text    = "0";
             TxtCz.Text    = "0";
             TxtRightLast.Text = "0:0";
+            TxtGroup.Text = $"重{_repeatCount} 呆0s 准100%";
+        }
+
+        /// <summary>刷新信息条"状态"格：重打次数 / 发呆秒数 / 键准百分比。
+        /// 由 TimerStats_Tick 每 200ms 调一次。</summary>
+        private void RefreshExtraStatus()
+        {
+            if (TxtGroup == null) return;
+            double idleSec = (_session.Started && !_session.Finished && !_isPaused && _lastInputAt != default)
+                ? (DateTime.Now - _lastInputAt).TotalSeconds : 0;
+            int keys = _session.Keys;
+            double acc = keys > 0 ? (keys - _session.Hg) * 100.0 / keys : 100;
+            if (acc < 0) acc = 0;
+            TxtGroup.Text = $"重{_repeatCount} 呆{idleSec:0}s 准{acc:0}%";
         }
 
         // ===== 词组下划线 =====
@@ -689,8 +747,9 @@ namespace newgdq
         private void Repeat()
         {
             if (_session.TypeText.Length == 0) return;
-            // 重载当前文章（重置 session 但保留原文）。LoadArticle 内部已处理"打满未finish强制结算"。
-            LoadArticle(_session.TypeText, _session.Title);
+            _isRepeating = true;
+            try { LoadArticle(_session.TypeText, _session.Title); }
+            finally { _isRepeating = false; }
         }
 
         /// <summary>强制结算末段（与老版 TryForceFinalizeLastSegment 对齐）：
@@ -1064,6 +1123,8 @@ namespace newgdq
             if (TxtTheoryMc != null) TxtTheoryMc.Text = "-";
             _chartWin?.Reset();
             MapReset();
+            _repeatCount = 0;
+            RefreshExtraStatus();
             HandyControl.Controls.Growl.Info("已复位");
         }
 
@@ -1345,6 +1406,7 @@ namespace newgdq
             TxtCz.Text = _session.Cz.ToString();
             TxtKeysCount.Text = _session.Keys.ToString();
             TxtRightLast.Text = _session.LeftHand + ":" + _session.RightHand;
+            RefreshExtraStatus();
 
             // 速度曲线采样（仅当窗口打开 + 已开始）
             if (_chartWin != null && _chartWin.IsVisible && _session.Started)

@@ -124,7 +124,8 @@
                 <MenuItem Header="速度分析..." Click="MenuItem_OpenSpeedAnalysis_Click"/>
                 <MenuItem Header="跟打报告..." Click="MenuItem_OpenReport_Click"/>
                 <Separator/>
-                <MenuItem Header="编码提示测试..." Click="MenuItem_OpenBmTips_Click"/>
+                <MenuItem Header="测试自定义 bm.txt..." Click="MenuItem_TestBmFile_Click"
+                          ToolTip="选一个 bm.txt 文件，验证格式是否合法 + 显示统计信息&#10;不会替换当前词典，仅用于自检"/>
                 <MenuItem Header="智能测词" x:Name="MnuSmartCi" IsCheckable="True"
                           ToolTip="计算当前文段的理论码长（五笔/形码用户有用，纯拼音可不开）"
                           Click="MnuSmartCi_Click"/>
@@ -142,7 +143,6 @@
                 <MenuItem Header="关于 州州跟打器..." Click="MenuItem_About_Click"/>
             </MenuItem>
             <MenuItem Header="复位" Click="MenuItem_Reset_Click"/>
-            <MenuItem Header="捐助" Click="MenuItem_JoinQQ_Click"/>
         </Menu>
 
         <!-- 2. 段号刻度尺：17 等分格 (4..11 每号占 2 格 + "12+") -->
@@ -204,7 +204,7 @@
                     <ColumnDefinition Width="60"/>   <!-- 段号 -->
                     <ColumnDefinition Width="*"/>    <!-- 标题 -->
                     <ColumnDefinition Width="80"/>   <!-- 字数 -->
-                    <ColumnDefinition Width="100"/>  <!-- 所在群 -->
+                    <ColumnDefinition Width="140"/>  <!-- 状态：重打/发呆/键准 -->
                     <ColumnDefinition Width="80"/>   <!-- 速度 -->
                     <ColumnDefinition Width="80"/>   <!-- 击键 -->
                     <ColumnDefinition Width="80"/>   <!-- 码长 -->
@@ -215,7 +215,8 @@
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="段号"   Style="{StaticResource LblText}"/>
                 <TextBlock Grid.Row="0" Grid.Column="1" Text="标题"   Style="{StaticResource LblText}"/>
                 <TextBlock Grid.Row="0" Grid.Column="2" Text="字数"   Style="{StaticResource LblText}"/>
-                <TextBlock Grid.Row="0" Grid.Column="3" Text="所在群" Style="{StaticResource LblText}"/>
+                <TextBlock Grid.Row="0" Grid.Column="3" Text="状态" Style="{StaticResource LblText}"
+                           ToolTip="重打次数 / 发呆秒 / 键准百分比"/>
                 <TextBlock Grid.Row="0" Grid.Column="4" Text="速度"   Style="{StaticResource LblText}"/>
                 <TextBlock Grid.Row="0" Grid.Column="5" Text="击键"   Style="{StaticResource LblText}"/>
                 <TextBlock Grid.Row="0" Grid.Column="6" Text="码长"   Style="{StaticResource LblText}"/>
@@ -227,7 +228,7 @@
                            MouseLeftButtonUp="TxtCurSegInfo_Click"/>
                 <TextBlock Grid.Row="1" Grid.Column="1" x:Name="TxtTitle"      Text="-"      Style="{StaticResource LblValue}"/>
                 <TextBlock Grid.Row="1" Grid.Column="2" x:Name="TxtWordCount"  Text="0/0字"  Style="{StaticResource LblValue}"/>
-                <TextBlock Grid.Row="1" Grid.Column="3" x:Name="TxtGroup"      Text="-"      Style="{StaticResource LblValue}"/>
+                <TextBlock Grid.Row="1" Grid.Column="3" x:Name="TxtGroup"      Text="重0 呆 0s 键准 100%"      Style="{StaticResource LblValue}" FontSize="11"/>
                 <TextBlock Grid.Row="1" Grid.Column="4" x:Name="TxtSpeed"      Text="0.00"   Style="{StaticResource LblValue}"/>
                 <TextBlock Grid.Row="1" Grid.Column="5" x:Name="TxtJj"         Text="0.00"   Style="{StaticResource LblValue}"/>
                 <TextBlock Grid.Row="1" Grid.Column="6" x:Name="TxtMc"         Text="0.00"   Style="{StaticResource LblValue}"/>
@@ -307,7 +308,9 @@
                 </FlowDocument>
             </RichTextBox>
 
-            <GridSplitter Grid.Row="1" Height="3" HorizontalAlignment="Stretch" Background="{StaticResource PanelBG}"/>
+            <GridSplitter Grid.Row="1" Height="4" HorizontalAlignment="Stretch"
+                          ResizeDirection="Rows" ResizeBehavior="PreviousAndNext" ShowsPreview="True"
+                          Cursor="SizeNS" Background="#3A3A3D"/>
 
             <!-- 状态条（对照区与输入区之间） -->
             <Border Grid.Row="2" Background="{StaticResource CellBG}"
@@ -393,7 +396,9 @@
                      VerticalScrollBarVisibility="Auto"
                      Padding="0"/>
 
-            <GridSplitter Grid.Row="4" Height="3" HorizontalAlignment="Stretch" Background="{StaticResource PanelBG}"/>
+            <GridSplitter Grid.Row="4" Height="4" HorizontalAlignment="Stretch"
+                          ResizeDirection="Rows" ResizeBehavior="PreviousAndNext" ShowsPreview="True"
+                          Cursor="SizeNS" Background="#3A3A3D"/>
 
             <!-- 历史 Grid：原版无表头，第 0 行作为表头加粗显示 -->
             <Grid Grid.Row="5" x:Name="HistoryBox">
