@@ -38,7 +38,10 @@ namespace newgdq
         private readonly SendingService _sending = new SendingService();
 
         // 速度曲线窗口
-        private SpeedChartWindow _chartWin;
+        // 嵌入式速度曲线（TogChart 切换可见性）
+        private OxyPlot.PlotModel _chartModel;
+        private OxyPlot.Series.AreaSeries _chartSpeed;
+        private OxyPlot.Series.ScatterSeries _chartFinishMark;
 
         // 重数色 (与原版 Glob.BmColors 一致)
         private static readonly Brush[] RankBrushes =
@@ -122,7 +125,6 @@ namespace newgdq
                 _timerTime.Stop();
                 _timerStats.Stop();
                 _keyHook.Dispose();
-                _chartWin?.Close();
                 try { TrayIcon?.Dispose(); } catch { }
             };
         }
@@ -367,19 +369,85 @@ namespace newgdq
 
         private void TogChart_Toggled(object sender, RoutedEventArgs e)
         {
-            if (TogChart.IsChecked == true)
+            bool on = TogChart.IsChecked == true;
+            if (on && _chartModel == null) BuildInlineChart();
+            ChartCol.Width          = on ? new GridLength(300) : new GridLength(0);
+            ChartSplitterCol.Width  = on ? new GridLength(4)   : new GridLength(0);
+        }
+
+        private void BuildInlineChart()
+        {
+            _chartModel = new OxyPlot.PlotModel
             {
-                if (_chartWin == null)
-                {
-                    _chartWin = new SpeedChartWindow(this);
-                    _chartWin.Closed += (s, _) => { _chartWin = null; TogChart.IsChecked = false; };
-                }
-                _chartWin.Show();
-            }
-            else
+                Background          = OxyPlot.OxyColor.FromRgb(0x1E, 0x1E, 0x1E),
+                PlotAreaBorderColor = OxyPlot.OxyColors.Transparent,
+                TextColor           = OxyPlot.OxyColor.FromRgb(0x88, 0x88, 0x88),
+                PlotMargins         = new OxyPlot.OxyThickness(36, 4, 8, 20),
+            };
+            _chartModel.Axes.Add(new OxyPlot.Axes.LinearAxis
             {
-                _chartWin?.Hide();
-            }
+                Position           = OxyPlot.Axes.AxisPosition.Bottom,
+                AxislineColor      = OxyPlot.OxyColors.Transparent,
+                MajorGridlineStyle = OxyPlot.LineStyle.Solid,
+                MajorGridlineColor = OxyPlot.OxyColor.FromArgb(0x22, 0xFF, 0xFF, 0xFF),
+                Minimum            = 0,
+                TickStyle          = OxyPlot.Axes.TickStyle.None,
+                FontSize           = 10,
+            });
+            _chartModel.Axes.Add(new OxyPlot.Axes.LinearAxis
+            {
+                Position           = OxyPlot.Axes.AxisPosition.Left,
+                AxislineColor      = OxyPlot.OxyColors.Transparent,
+                MajorGridlineStyle = OxyPlot.LineStyle.Solid,
+                MajorGridlineColor = OxyPlot.OxyColor.FromArgb(0x22, 0xFF, 0xFF, 0xFF),
+                Minimum            = 0,
+                TickStyle          = OxyPlot.Axes.TickStyle.None,
+                FontSize           = 10,
+            });
+            _chartSpeed = new OxyPlot.Series.AreaSeries
+            {
+                Color           = OxyPlot.OxyColor.FromRgb(0xFF, 0xB0, 0x2E),
+                StrokeThickness = 2,
+                MarkerType      = OxyPlot.MarkerType.None,
+                Fill            = OxyPlot.OxyColor.FromArgb(0x44, 0xFF, 0xB0, 0x2E),
+                InterpolationAlgorithm = OxyPlot.InterpolationAlgorithms.CanonicalSpline,
+            };
+            _chartModel.Series.Add(_chartSpeed);
+            InlineChart.Model = _chartModel;
+        }
+
+        private void InlineChartReset()
+        {
+            if (_chartSpeed == null) return;
+            _chartSpeed.Points.Clear();
+            if (_chartFinishMark != null) { _chartModel.Series.Remove(_chartFinishMark); _chartFinishMark = null; }
+            _chartModel.InvalidatePlot(true);
+        }
+
+        private int _chartAddCounter;
+        private void InlineChartAddPoint(double sec, double speed)
+        {
+            if (_chartSpeed == null) return;
+            _chartSpeed.Points.Add(new OxyPlot.DataPoint(sec, speed));
+            // 限点：最多 600 点 + 每 5 点才刷一次避免 GC 压力
+            if (_chartSpeed.Points.Count > 600) _chartSpeed.Points.RemoveAt(0);
+            if ((++_chartAddCounter % 5) == 0) _chartModel.InvalidatePlot(true);
+        }
+
+        private void InlineChartMarkFinish()
+        {
+            if (_chartSpeed == null || _chartSpeed.Points.Count == 0) return;
+            var last = _chartSpeed.Points[_chartSpeed.Points.Count - 1];
+            _chartFinishMark = new OxyPlot.Series.ScatterSeries
+            {
+                MarkerType   = OxyPlot.MarkerType.Circle,
+                MarkerSize   = 6,
+                MarkerFill   = OxyPlot.OxyColor.FromRgb(0xFF, 0xD2, 0x4C),
+                MarkerStroke = OxyPlot.OxyColors.White,
+            };
+            _chartFinishMark.Points.Add(new OxyPlot.Series.ScatterPoint(last.X, last.Y));
+            _chartModel.Series.Add(_chartFinishMark);
+            _chartModel.InvalidatePlot(true);
         }
 
         // ===== 跟打地图（嵌入式 Canvas + Polyline）=====
@@ -636,12 +704,14 @@ namespace newgdq
 
             ResetUi();
             TbxInput.IsReadOnly = false;  // 新段恢复可输入
+            // 限制输入长度 = 文段长度，防止用户超打（IME 提交时 WPF 会自动截断）
+            TbxInput.MaxLength = _session.TypeText.Length;
             TbxInput.Clear();
             TbxInput.Focus();
             UpdateProgress();
             RefreshBmTips();
             ComputeAndShowTheoryMc();
-            _chartWin?.Reset();
+            InlineChartReset();
             MapReset();
 
             // 重打次数：Repeat() 触发的此次 LoadArticle → +1；换新文段 → 0
@@ -747,9 +817,6 @@ namespace newgdq
             bool show = TogDetail.IsChecked == true;
             if (HistoryBox != null)
                 HistoryBox.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
-            // 详细关闭同时隐藏曲线窗
-            if (!show && _chartWin != null && _chartWin.IsVisible)
-                _chartWin.Hide();
         }
 
         // ===== 重打 (F3) =====
@@ -1132,7 +1199,8 @@ namespace newgdq
             UpdateProgress();
             RefreshBmTips();
             if (TxtTheoryMc != null) TxtTheoryMc.Text = "-";
-            _chartWin?.Reset();
+            // 曲线重置
+            InlineChartReset();
             MapReset();
             _repeatCount = 0;
             RefreshExtraStatus();
@@ -1457,11 +1525,12 @@ namespace newgdq
             RefreshExtraStatus();
 
             // 速度曲线采样（仅当窗口打开 + 已开始）
-            if (_chartWin != null && _chartWin.IsVisible && _session.Started)
+            // 内嵌曲线采样（切换开启且已开始）
+            if (TogChart.IsChecked == true && _chartSpeed != null && _session.Started)
             {
                 int len = TbxInput.Text?.Length ?? 0;
                 var (speed, _, _, _, sec) = _session.ComputeStats(len);
-                if (sec > 0) _chartWin.AddPoint(sec, speed);
+                if (sec > 0) InlineChartAddPoint(sec, speed);
             }
 
             // 跟打地图采样
@@ -1543,7 +1612,7 @@ namespace newgdq
                     AutoCopyResultImage();
             }
 
-            _chartWin?.MarkFinish();
+            InlineChartMarkFinish();
         }
 
         /// <summary>完成时若"图片"开启，弹一个隐藏的 ReportWindow 截图复制到剪贴板。</summary>

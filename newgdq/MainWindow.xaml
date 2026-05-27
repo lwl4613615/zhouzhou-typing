@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:hc="https://handyorg.github.io/handycontrol"
+        xmlns:oxy="http://oxyplot.org/wpf"
         xmlns:tb="http://www.hardcodet.net/taskbar"
         xmlns:local="clr-namespace:newgdq"
         mc:Ignorable="d"
@@ -406,7 +407,24 @@
                           Cursor="SizeNS" Background="#3A3A3D"/>
 
             <!-- 历史 Grid：原版无表头，第 0 行作为表头加粗显示 -->
+            <!-- 历史区 + 内嵌速度曲线（左 = 曲线，右 = 历史表） -->
             <Grid Grid.Row="5" x:Name="HistoryBox">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition x:Name="ChartCol" Width="0"/>
+                    <ColumnDefinition x:Name="ChartSplitterCol" Width="0"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- 左：嵌入式速度曲线（TogChart 切换可见性） -->
+                <Border Grid.Column="0" Background="#1E1E1E" BorderBrush="#444" BorderThickness="0,0,0,0">
+                    <oxy:PlotView x:Name="InlineChart" Background="Transparent"/>
+                </Border>
+                <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Stretch"
+                              ResizeDirection="Columns" ResizeBehavior="PreviousAndNext"
+                              Background="#3A3A3D" Cursor="SizeWE"/>
+
+                <!-- 右：历史表头 + DataGrid -->
+                <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="20"/>
                     <RowDefinition Height="*"/>
@@ -468,6 +486,7 @@
                         <DataGridTextColumn Width="*"  Binding="{Binding UseTime, StringFormat=0.00}"/>
                     </DataGrid.Columns>
                 </DataGrid>
+                </Grid>  <!-- end right grid -->
             </Grid>
         </Grid>
     </DockPanel>
