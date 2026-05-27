@@ -1041,17 +1041,7 @@ namespace newgdq
 
         private void MenuItem_About_Click(object sender, RoutedEventArgs e)
         {
-            var ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.1.0";
-            string msg =
-                "州州跟打器 v" + ver + "\n\n" +
-                "现代 WPF 跟打练习器，基于 taliove/tygdq 重写。\n" +
-                "已砍掉所有 QQ / 比赛 / 检查更新功能。\n\n" +
-                "项目主页：" + PROJECT_URL + "\n" +
-                "QQ 群：  " + QQ_GROUP_ID + "\n" +
-                "加群链接：" + QQ_GROUP_URL + "\n" +
-                "作者：    4613615@qq.com\n" +
-                "协议：    Apache-2.0";
-            HandyControl.Controls.MessageBox.Show(msg, "关于 州州跟打器");
+            new Views.AboutWindow(this).ShowDialog();
         }
 
         private void MenuItem_OpenSettings_Click(object sender, RoutedEventArgs e)
