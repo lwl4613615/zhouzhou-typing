@@ -6,13 +6,19 @@
         <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
     </ResourceDictionary.MergedDictionaries>
 
-    <!-- 暗色主题 -->
-    <SolidColorBrush x:Key="PanelBG"   Color="#2D2D30"/>
-    <SolidColorBrush x:Key="CellBG"    Color="#3F3F46"/>
-    <SolidColorBrush x:Key="DarkBG"    Color="#1E1E1E"/>
-    <SolidColorBrush x:Key="TickBG"    Color="#252526"/>
-    <SolidColorBrush x:Key="GridLine"  Color="#555555"/>
-    <SolidColorBrush x:Key="LabelFG"   Color="#A0A0A0"/>
-    <SolidColorBrush x:Key="ValueFG"   Color="#FFFFFF"/>
+    <!-- 暗色主题（深空蓝 + 青色辉光） -->
+    <SolidColorBrush x:Key="PanelBG"   Color="#1A1F2B"/>
+    <SolidColorBrush x:Key="CellBG"    Color="#232938"/>
+    <SolidColorBrush x:Key="DarkBG"    Color="#0E1116"/>
+    <SolidColorBrush x:Key="TickBG"    Color="#161B25"/>
+    <SolidColorBrush x:Key="GridLine"  Color="#2A3346"/>
+    <SolidColorBrush x:Key="LabelFG"   Color="#7E8896"/>
+    <SolidColorBrush x:Key="ValueFG"   Color="#E8EEF6"/>
     <SolidColorBrush x:Key="AccentFG"  Color="#FFD24C"/>
+
+    <!-- 覆盖 HandyControl 的 RegionBrush，让主体背景变深邃 -->
+    <LinearGradientBrush x:Key="RegionBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Offset="0" Color="#141926"/>
+        <GradientStop Offset="1" Color="#0E1116"/>
+    </LinearGradientBrush>
 </ResourceDictionary>
