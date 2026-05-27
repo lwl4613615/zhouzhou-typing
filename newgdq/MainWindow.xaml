@@ -245,12 +245,9 @@
         <!-- 4. 主体：对照区 + 状态条 + 输入区 + 历史 Grid -->
         <Grid Background="{StaticResource PanelBG}">
             <Grid.RowDefinitions>
-                <RowDefinition Height="3*" MinHeight="120"/>
+                <RowDefinition Height="2*" MinHeight="120"/>
                 <RowDefinition Height="4"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="100"/>
-                <RowDefinition Height="4"/>
-                <RowDefinition Height="2*" MinHeight="100"/>
+                <RowDefinition Height="3*" MinHeight="220"/>
             </Grid.RowDefinitions>
 
             <!-- 对照区 -->
@@ -272,8 +269,16 @@
                           DragIncrement="4"
                           Cursor="SizeNS" Background="#3A3A3D"/>
 
+            <!-- 下半整体：状态条(Auto) + 输入区(100固定) + 历史区(*) -->
+            <Grid Grid.Row="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="100"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
             <!-- 状态条（对照区与输入区之间） -->
-            <Border Grid.Row="2" Background="{StaticResource CellBG}"
+            <Border Grid.Row="0" Background="{StaticResource CellBG}"
                     BorderBrush="#666" BorderThickness="0,1,0,1">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -348,7 +353,7 @@
             </Border>
 
             <!-- 输入区（去 HC 样式以消除内置 padding） -->
-            <Border Grid.Row="3" BorderBrush="#4FC3F7" BorderThickness="0,2,0,2">
+            <Border Grid.Row="1" BorderBrush="#4FC3F7" BorderThickness="0,2,0,2">
                 <TextBox x:Name="TbxInput"
                          Style="{x:Null}"
                          IsReadOnly="True"
@@ -360,14 +365,9 @@
                          Padding="0"/>
             </Border>
 
-            <GridSplitter Grid.Row="4" Height="4" HorizontalAlignment="Stretch"
-                          ResizeDirection="Rows" ResizeBehavior="PreviousAndNext" ShowsPreview="True"
-                          DragIncrement="4"
-                          Cursor="SizeNS" Background="#3A3A3D"/>
-
             <!-- 历史 Grid：原版无表头，第 0 行作为表头加粗显示 -->
             <!-- 历史区 + 内嵌速度曲线（左 = 曲线，右 = 历史表） -->
-            <Grid Grid.Row="5" x:Name="HistoryBox">
+            <Grid Grid.Row="2" x:Name="HistoryBox">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition x:Name="ChartCol" Width="0"/>
                     <ColumnDefinition x:Name="ChartSplitterCol" Width="0"/>
@@ -489,6 +489,7 @@
                 </Border>
                 </Grid>  <!-- end right grid -->
             </Grid>
+            </Grid>  <!-- end 下半整体 -->
         </Grid>
     </DockPanel>
 </hc:Window>
