@@ -760,6 +760,7 @@ namespace newgdq
         private void ApplyPhraseUnderlines()
         {
             if (TogMark == null || TogMark.IsChecked != true) return;
+            if (MnuSmartCi == null || MnuSmartCi.IsChecked != true) return;
             if (!_dict.Loaded || _charRuns.Count == 0) return;
 
             var hits = _dict.SegmentPhrases(_session.TypeText);
@@ -994,9 +995,11 @@ namespace newgdq
             if (MnuSmartCi.IsChecked != true)
             {
                 TxtTheoryMc.Text = "-";
+                ClearPhraseUnderlines();
                 HandyControl.Controls.Growl.Info("智能测词已关闭");
                 return;
             }
+            ApplyPhraseUnderlines();
             ComputeAndShowTheoryMc();
         }
 
