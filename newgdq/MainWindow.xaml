@@ -477,8 +477,8 @@
                           HeadersVisibility="None"
                           Background="{StaticResource PanelBG}"
                           RowBackground="{StaticResource PanelBG}"
-                          AlternatingRowBackground="#34343A"
-                          Foreground="#EEE"
+                          AlternatingRowBackground="{DynamicResource AltRowBG}"
+                          Foreground="{DynamicResource ValueFG}"
                           RowHeight="24" FontSize="12" FontFamily="微软雅黑">
                     <DataGrid.Columns>
                         <DataGridTextColumn Width="40" Binding="{Binding Index}"/>
@@ -519,15 +519,15 @@
                             <ColumnDefinition Width="70"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" x:Name="TxtFootLabel" Text="今日"  Foreground="#FFD24C" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
-                        <TextBlock Grid.Column="1" x:Name="TxtFootTime"   Text="00:00:00" Foreground="#FFD24C" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
-                        <TextBlock Grid.Column="2" x:Name="TxtFootSegs"   Text="0#"     Foreground="#FFD24C" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
-                        <TextBlock Grid.Column="3" x:Name="TxtFootSpeed"  Text="0.00"   Foreground="#EEE" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
-                        <TextBlock Grid.Column="4" x:Name="TxtFootJj"     Text="0.00"   Foreground="#EEE" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
-                        <TextBlock Grid.Column="5" x:Name="TxtFootMc"     Text="0.00"   Foreground="#EEE" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
-                        <TextBlock Grid.Column="9" x:Name="TxtFootWords"  Text="0"      Foreground="#EEE" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
-                        <TextBlock Grid.Column="13" x:Name="TxtFootAllAvg" Text="累计 0.00" Foreground="#9CB7E3" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" ToolTip="历史所有段的平均速度"/>
-                        <TextBlock Grid.Column="14" x:Name="TxtFootAllJj"  Text="0.00"  Foreground="#9CB7E3" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" ToolTip="历史所有段的平均击键"/>
+                        <TextBlock Grid.Column="0" x:Name="TxtFootLabel" Text="今日"  Foreground="{DynamicResource AccentFG}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
+                        <TextBlock Grid.Column="1" x:Name="TxtFootTime"   Text="00:00:00" Foreground="{DynamicResource AccentFG}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
+                        <TextBlock Grid.Column="2" x:Name="TxtFootSegs"   Text="0#"     Foreground="{DynamicResource AccentFG}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
+                        <TextBlock Grid.Column="3" x:Name="TxtFootSpeed"  Text="0.00"   Foreground="{DynamicResource ValueFG}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
+                        <TextBlock Grid.Column="4" x:Name="TxtFootJj"     Text="0.00"   Foreground="{DynamicResource ValueFG}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
+                        <TextBlock Grid.Column="5" x:Name="TxtFootMc"     Text="0.00"   Foreground="{DynamicResource ValueFG}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
+                        <TextBlock Grid.Column="9" x:Name="TxtFootWords"  Text="0"      Foreground="{DynamicResource ValueFG}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
+                        <TextBlock Grid.Column="13" x:Name="TxtFootAllAvg" Text="累计 0.00" Foreground="{DynamicResource FootSubFG}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" ToolTip="历史所有段的平均速度"/>
+                        <TextBlock Grid.Column="14" x:Name="TxtFootAllJj"  Text="0.00"  Foreground="{DynamicResource FootSubFG}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" ToolTip="历史所有段的平均击键"/>
                     </Grid>
                 </Border>
                 </Grid>  <!-- end right grid -->

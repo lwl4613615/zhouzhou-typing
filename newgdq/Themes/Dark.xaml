@@ -15,6 +15,8 @@
     <SolidColorBrush x:Key="LabelFG"   Color="#7E8896"/>
     <SolidColorBrush x:Key="ValueFG"   Color="#E8EEF6"/>
     <SolidColorBrush x:Key="AccentFG"  Color="#FFD24C"/>
+    <SolidColorBrush x:Key="AltRowBG"  Color="#1F2535"/>
+    <SolidColorBrush x:Key="FootSubFG" Color="#9CB7E3"/>
 
     <!-- 覆盖 HandyControl 的 RegionBrush，让主体背景变深邃 -->
     <LinearGradientBrush x:Key="RegionBrush" StartPoint="0,0" EndPoint="0,1">

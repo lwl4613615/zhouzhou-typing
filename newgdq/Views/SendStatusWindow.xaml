@@ -6,24 +6,17 @@
         Icon="pack://application:,,,/Resources/myicon.ico"
         FontFamily="微软雅黑" FontSize="12"
         WindowStartupLocation="Manual"
-        ResizeMode="CanMinimize">
-    <hc:Window.Background>
-        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-            <GradientStop Offset="0" Color="#0E1116"/>
-            <GradientStop Offset="1" Color="#1A1F2B"/>
-        </LinearGradientBrush>
-    </hc:Window.Background>
-
+        ResizeMode="CanMinimize"
+        Background="{DynamicResource RegionBrush}"
+        Foreground="{DynamicResource ValueFG}">
     <hc:Window.Resources>
         <SolidColorBrush x:Key="Cyan"  Color="#4FC3F7"/>
         <SolidColorBrush x:Key="Amber" Color="#FFD24C"/>
-        <SolidColorBrush x:Key="Mute"  Color="#7E8896"/>
-        <SolidColorBrush x:Key="Text"  Color="#E8EEF6"/>
 
-        <LinearGradientBrush x:Key="CardBg" StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Offset="0" Color="#1A2030"/>
-            <GradientStop Offset="1" Color="#141826"/>
-        </LinearGradientBrush>
+        <!-- 卡片底色 + 字色都跟主题走，浅色模式下子窗也清晰 -->
+        <StaticResource x:Key="CardBg" ResourceKey="CellBG"/>
+        <StaticResource x:Key="Mute"   ResourceKey="LabelFG"/>
+        <StaticResource x:Key="Text"   ResourceKey="ValueFG"/>
 
         <Style x:Key="Lbl" TargetType="TextBlock">
             <Setter Property="Foreground" Value="{StaticResource Mute}"/>

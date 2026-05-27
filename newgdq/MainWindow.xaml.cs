@@ -1571,8 +1571,8 @@ namespace newgdq
             TxtCz.Text = cz.ToString();
             TxtWordCount.Text = $"{len}/{_session.TypeText.Length}字";
 
-            // 回改地点高亮（主染色已把回改区清回默认色，这里再涂一层黄色，0.8s 后还原）
-            if (hgFrom >= 0) TriggerHgFlash(hgFrom, hgTo);
+            // 回改地点高亮（用户反馈干扰，已禁用；保留 TriggerHgFlash/HgFlashTimer 代码以备将来切回）
+            // if (hgFrom >= 0) TriggerHgFlash(hgFrom, hgTo);
 
             // 段内事件
             if (_session.Started && len != _session.LastInputLen)
