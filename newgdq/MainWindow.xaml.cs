@@ -67,6 +67,22 @@ namespace newgdq
         private int _hgFlashFrom, _hgFlashTo;
         private bool _hgFlashActive;
 
+        // 上屏偏慢标记（对齐老版 SelectionBackColor = YellowGreen）：单字耗时超阈值的字段永久标记浅绿
+        private static readonly Brush SlowBrush = new SolidColorBrush(Color.FromRgb(0xC0, 0xE8, 0x9A));
+        private const double SlowCharThresholdSec = 1.2;  // 单字平均 ≥ 1.2 秒即视为慢
+        private readonly HashSet<int> _slowMarks = new HashSet<int>();
+        private void MarkSlowChars(int from, int to)
+        {
+            int end = Math.Min(to, _charRuns.Count);
+            for (int i = from; i < end; i++)
+            {
+                if (i < 0) continue;
+                _slowMarks.Add(i);
+                // 主染色完成后再涂，避免被覆盖。当前帧 input[i] 必然对，所以仅改背景
+                _charRuns[i].Background = SlowBrush;
+            }
+        }
+
         // 跟打地图：嵌入式 Canvas + Polyline，横轴=用时，纵轴=已打字数占比
         private readonly System.Collections.Generic.List<System.Windows.Point> _mapPoints = new System.Collections.Generic.List<System.Windows.Point>();
         private System.Windows.Shapes.Polyline _mapLine;
@@ -716,6 +732,7 @@ namespace newgdq
             RtbCompare.Document.PagePadding = new Thickness(0);
             _charRuns.Clear();
             _runStatus = new byte[_session.TypeText.Length];
+            _slowMarks.Clear();
 
             var para = new Paragraph { Margin = new Thickness(0), Padding = new Thickness(0) };
             foreach (var ch in _session.TypeText)
@@ -1259,6 +1276,7 @@ namespace newgdq
             RtbCompare.Document.Blocks.Clear();
             _charRuns.Clear();
             _runStatus = new byte[0];
+            _slowMarks.Clear();
             this.Title = "州州跟打器";
             TxtTitle.Text = "-";
             TxtWordCount.Text = "0/0字";
@@ -1532,7 +1550,12 @@ namespace newgdq
                 if (newSt == 2) cz++;
                 if (i >= _runStatus.Length || _runStatus[i] == newSt) continue;
                 var run = _charRuns[i];
-                if (newSt == 1) { run.Foreground = _brushRight; run.Background = _brushRightBg; }
+                if (newSt == 1)
+                {
+                    run.Foreground = _brushRight;
+                    // 保留慢字浅绿背景，否则用正确底色
+                    run.Background = _slowMarks.Contains(i) ? SlowBrush : _brushRightBg;
+                }
                 else            { run.Foreground = _brushWrong; run.Background = _brushWrongBg; }
                 _runStatus[i] = newSt;
             }
@@ -1542,6 +1565,7 @@ namespace newgdq
                 _charRuns[i].Foreground = _brushDefault;
                 _charRuns[i].Background = null;
                 if (i < _runStatus.Length) _runStatus[i] = 0;
+                _slowMarks.Remove(i);   // 回改到这之前，慢字记录也要清
             }
             _session.Cz = cz;
             TxtCz.Text = cz.ToString();
@@ -1552,7 +1576,21 @@ namespace newgdq
 
             // 段内事件
             if (_session.Started && len != _session.LastInputLen)
+            {
+                int prevLen = _session.LastInputLen;
                 _session.AppendEvent(len);
+                // 上屏偏慢：刚追加的事件如果是正向输入且单字耗时 > 阈值 → 把那段字背景染浅绿
+                if (_session.Report.Count > 0)
+                {
+                    var ev = _session.Report[_session.Report.Count - 1];
+                    if (ev.Length > 0 && ev.TotalTime > 0)
+                    {
+                        double perChar = ev.TotalTime / ev.Length;
+                        if (perChar >= SlowCharThresholdSec)
+                            MarkSlowChars(prevLen, len);
+                    }
+                }
+            }
 
             // 编码提示 + 进度条刷新
             UpdateProgress();
