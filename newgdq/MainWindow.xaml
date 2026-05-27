@@ -234,8 +234,8 @@
                 <TextBlock Grid.Row="1" Grid.Column="5" x:Name="TxtJj"         Text="0.00"   Style="{StaticResource LblValue}"/>
                 <TextBlock Grid.Row="1" Grid.Column="6" x:Name="TxtMc"         Text="0.00"   Style="{StaticResource LblValue}"/>
                 <TextBlock Grid.Row="1" Grid.Column="7" x:Name="TxtSign"       Text="微信 synhxb"    Style="{StaticResource LblValue}"
-                           Cursor="Hand" ToolTip="左键：复制微信号　右键：打开 QQ 加群链接"
-                           MouseLeftButtonUp="TxtSign_LeftClick" MouseRightButtonUp="TxtSign_RightClick"/>
+                           Cursor="Hand" ToolTip="点击复制微信号"
+                           MouseLeftButtonUp="TxtSign_LeftClick"/>
 
                 <!-- 列间分隔（细线） -->
                 <Border Grid.RowSpan="2" Grid.Column="0" BorderBrush="{StaticResource GridLine}" BorderThickness="0,0,1,0"/>

@@ -205,12 +205,6 @@ namespace newgdq
             catch (Exception ex) { HandyControl.Controls.Growl.Error(ex.Message); }
         }
 
-        private void TxtSign_RightClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            try { System.Diagnostics.Process.Start(QQ_GROUP_URL); }
-            catch (Exception ex) { HandyControl.Controls.Growl.Error(ex.Message); }
-        }
-
         private static bool TryParseColor(string hex, out Color c)
         {
             c = default(Color);
