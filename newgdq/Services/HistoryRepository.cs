@@ -225,6 +225,38 @@ FROM type_record ORDER BY id DESC LIMIT @lim;";
             catch { return (0, 0, 0, 0, 0, 0); }
         }
 
+        /// <summary>历史均值：(今日 avg speed/jj/mc, 累计 avg speed/jj)。</summary>
+        public static (double todaySpeed, double todayJj, double todayMc, double totalSpeed, double totalJj) LoadAverages()
+        {
+            if (!_initialized) return (0, 0, 0, 0, 0);
+            try
+            {
+                using (var conn = new SQLiteConnection(ConnStr))
+                {
+                    conn.Open();
+                    double tSp = 0, tJj = 0, tMc = 0, allSp = 0, allJj = 0;
+                    using (var cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = "SELECT COALESCE(AVG(speed),0), COALESCE(AVG(jj),0), COALESCE(AVG(mc),0) FROM type_record WHERE date(when_utc,'localtime')=date('now','localtime');";
+                        using (var rd = cmd.ExecuteReader())
+                        {
+                            if (rd.Read()) { tSp = rd.GetDouble(0); tJj = rd.GetDouble(1); tMc = rd.GetDouble(2); }
+                        }
+                    }
+                    using (var cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = "SELECT COALESCE(AVG(speed),0), COALESCE(AVG(jj),0) FROM type_record;";
+                        using (var rd = cmd.ExecuteReader())
+                        {
+                            if (rd.Read()) { allSp = rd.GetDouble(0); allJj = rd.GetDouble(1); }
+                        }
+                    }
+                    return (tSp, tJj, tMc, allSp, allJj);
+                }
+            }
+            catch { return (0, 0, 0, 0, 0); }
+        }
+
         /// <summary>取所有历史段的击键速度（键/秒）—— 击键评定窗用。</summary>
         public static List<double> LoadAllJj()
         {

@@ -660,7 +660,24 @@ namespace newgdq
         private (int todayWords, double todaySec, int todaySegs, int totalWords, int totalSegs, int days) _summaryCache;
         private void RefreshSummaryCache()
         {
-            try { _summaryCache = HistoryRepository.LoadSummary(); } catch { }
+            try
+            {
+                _summaryCache = HistoryRepository.LoadSummary();
+                var avg = HistoryRepository.LoadAverages();
+                if (TxtFootTime != null)
+                {
+                    var ts = TimeSpan.FromSeconds(_summaryCache.todaySec);
+                    TxtFootTime.Text  = $"{(int)ts.TotalHours:D2}:{ts.Minutes:D2}:{ts.Seconds:D2}";
+                    TxtFootSegs.Text  = _summaryCache.todaySegs + "#";
+                    TxtFootSpeed.Text = avg.todaySpeed.ToString("0.00");
+                    TxtFootJj.Text    = avg.todayJj.ToString("0.00");
+                    TxtFootMc.Text    = avg.todayMc.ToString("0.00");
+                    TxtFootWords.Text = _summaryCache.todayWords.ToString();
+                    TxtFootAllAvg.Text = "累计 " + avg.totalSpeed.ToString("0.00");
+                    TxtFootAllJj.Text  = avg.totalJj.ToString("0.00");
+                }
+            }
+            catch { }
         }
 
         // ===== 加载文章 =====

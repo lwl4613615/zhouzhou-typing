@@ -425,11 +425,12 @@
                               ResizeDirection="Columns" ResizeBehavior="PreviousAndNext"
                               Background="#3A3A3D" Cursor="SizeWE"/>
 
-                <!-- 右：历史表头 + DataGrid -->
+                <!-- 右：历史表头 + DataGrid + 汇总行 -->
                 <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="20"/>
                     <RowDefinition Height="*"/>
+                    <RowDefinition Height="22"/>
                 </Grid.RowDefinitions>
                 <!-- 表头带 -->
                 <Grid Grid.Row="0" Background="{StaticResource CellBG}">
@@ -497,6 +498,38 @@
                         <DataGridTextColumn Width="*"  Binding="{Binding UseTime, StringFormat=0.00}"/>
                     </DataGrid.Columns>
                 </DataGrid>
+
+                <!-- 汇总行：今日训练时长 / 段数 / 平均速度 / 平均击键 / 平均码长 ... 末尾累计均速 -->
+                <Border Grid.Row="2" Background="{StaticResource CellBG}" BorderBrush="{StaticResource GridLine}" BorderThickness="0,1,0,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="40"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="40"/>
+                            <ColumnDefinition Width="70"/>
+                            <ColumnDefinition Width="70"/>
+                            <ColumnDefinition Width="70"/>
+                            <ColumnDefinition Width="60"/>
+                            <ColumnDefinition Width="60"/>
+                            <ColumnDefinition Width="60"/>
+                            <ColumnDefinition Width="60"/>
+                            <ColumnDefinition Width="60"/>
+                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition Width="70"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" x:Name="TxtFootLabel" Text="今日"  Foreground="#FFD24C" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
+                        <TextBlock Grid.Column="1" x:Name="TxtFootTime"   Text="00:00:00" Foreground="#FFD24C" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
+                        <TextBlock Grid.Column="2" x:Name="TxtFootSegs"   Text="0#"     Foreground="#FFD24C" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
+                        <TextBlock Grid.Column="3" x:Name="TxtFootSpeed"  Text="0.00"   Foreground="#EEE" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
+                        <TextBlock Grid.Column="4" x:Name="TxtFootJj"     Text="0.00"   Foreground="#EEE" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
+                        <TextBlock Grid.Column="5" x:Name="TxtFootMc"     Text="0.00"   Foreground="#EEE" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
+                        <TextBlock Grid.Column="9" x:Name="TxtFootWords"  Text="0"      Foreground="#EEE" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
+                        <TextBlock Grid.Column="13" x:Name="TxtFootAllAvg" Text="累计 0.00" Foreground="#9CB7E3" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" ToolTip="历史所有段的平均速度"/>
+                        <TextBlock Grid.Column="14" x:Name="TxtFootAllJj"  Text="0.00"  Foreground="#9CB7E3" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" ToolTip="历史所有段的平均击键"/>
+                    </Grid>
+                </Border>
                 </Grid>  <!-- end right grid -->
             </Grid>
         </Grid>
