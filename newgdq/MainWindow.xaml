@@ -97,14 +97,14 @@
                 <MenuItem Header="外观..." Click="MenuItem_OpenSettings_Click"/>
                 <MenuItem Header="暂停"   InputGestureText="F8" x:Name="MnuPause" Click="MenuItem_Pause_Click"/>
                 <Separator/>
-                <MenuItem Header="复制成绩" Click="MenuItem_CopyResult_Click"/>
+                <MenuItem Header="复制成绩" InputGestureText="F9"     Click="MenuItem_CopyResult_Click"/>
                 <MenuItem Header="退出"     Click="MenuItem_Exit_Click"/>
             </MenuItem>
             <MenuItem Header="功能">
                 <MenuItem Header="文章处理">
-                    <MenuItem Header="将目前文章乱序"           Click="MenuItem_ShuffleArticle_Click"/>
-                    <MenuItem Header="英文标点换中文标点"       Click="MenuItem_En2CnPunct_Click"/>
-                    <MenuItem Header="删除空格（包含全角）"     Click="MenuItem_StripSpace_Click"/>
+                    <MenuItem Header="将目前文章乱序"     InputGestureText="Ctrl+Q" Click="MenuItem_ShuffleArticle_Click"/>
+                    <MenuItem Header="英文标点换中文标点" InputGestureText="Ctrl+W" Click="MenuItem_En2CnPunct_Click"/>
+                    <MenuItem Header="删除空格（包含全角）"   Click="MenuItem_StripSpace_Click"/>
                 </MenuItem>
                 <MenuItem Header="内部测速">
                     <MenuItem Header="10字测试"     Tag="10字测试.txt"     Click="MenuItem_LoadInternal_Click"/>
@@ -118,11 +118,11 @@
                     <MenuItem Header="前1500单字"     Tag="前1500单字.txt"     Click="MenuItem_LoadInternal_Click"/>
                 </MenuItem>
                 <Separator/>
-                <MenuItem Header="发送图片成绩" Click="MenuItem_SendImageScore_Click"/>
+                <MenuItem Header="发送图片成绩" InputGestureText="Ctrl+T" Click="MenuItem_SendImageScore_Click"/>
                 <MenuItem Header="平均成绩..." Click="MenuItem_OpenAverage_Click"/>
-                <MenuItem Header="击键评定..." Click="MenuItem_OpenJjCheck_Click"/>
-                <MenuItem Header="速度分析..." Click="MenuItem_OpenSpeedAnalysis_Click"/>
-                <MenuItem Header="跟打报告..." Click="MenuItem_OpenReport_Click"/>
+                <MenuItem Header="击键评定..." InputGestureText="Ctrl+B" Click="MenuItem_OpenJjCheck_Click"/>
+                <MenuItem Header="速度分析..." InputGestureText="Ctrl+E" Click="MenuItem_OpenSpeedAnalysis_Click"/>
+                <MenuItem Header="跟打报告..." InputGestureText="Ctrl+G" Click="MenuItem_OpenReport_Click"/>
                 <Separator/>
                 <MenuItem Header="测试自定义 bm.txt..." Click="MenuItem_TestBmFile_Click"
                           ToolTip="选一个 bm.txt 文件，验证格式是否合法 + 显示统计信息&#10;不会替换当前词典，仅用于自检"/>

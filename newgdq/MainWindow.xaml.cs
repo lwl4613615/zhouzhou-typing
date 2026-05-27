@@ -939,12 +939,21 @@ namespace newgdq
         private void MenuItem_Hotkeys_Click(object sender, RoutedEventArgs e)
         {
             HandyControl.Controls.MessageBox.Show(
-                "F2  打开发文窗口\n" +
-                "F3  重打当前段\n" +
-                "F4  载文（剪贴板内容直接进对照区）\n" +
-                "F6  发下一段\n" +
-                "F8  暂停 / 继续\n\n" +
-                "输入框失焦也会自动暂停；回到输入框敲任意键自动继续",
+                "—— 全局热键（任何窗口都生效）——\n" +
+                "F2   打开发文窗口\n" +
+                "F3   重打当前段\n" +
+                "F4   载文（剪贴板 → 对照区）\n" +
+                "F6   发下一段\n" +
+                "F8   暂停 / 继续\n\n" +
+                "—— 主窗激活时的快捷键 ——\n" +
+                "F9       复制最新一段成绩\n" +
+                "Ctrl+T   发送图片成绩\n" +
+                "Ctrl+B   击键评定\n" +
+                "Ctrl+E   速度分析\n" +
+                "Ctrl+G   跟打报告\n" +
+                "Ctrl+Q   将目前文章乱序\n" +
+                "Ctrl+W   英文标点换中文\n\n" +
+                "提示：输入框失焦会自动暂停；回到输入框敲任意键自动继续。",
                 "快捷键列表");
         }
 
@@ -1200,10 +1209,17 @@ namespace newgdq
 
         // ===== 键盘钩子 =====
 
+        // GetAsyncKeyState 用于检测 Ctrl 是否按下（KeyHook 只回报单键 vk，不含修饰）
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern short GetAsyncKeyState(int vKey);
+        private static bool IsCtrlDown() => (GetAsyncKeyState(0x11) & 0x8000) != 0;
+
         private void KeyHook_KeyDown(object sender, int vk)
         {
-            // 全局热键：与老版 tygdq 一致（仅保留功能已实现的）
-            //   F2 发文、F3 重打、F4 载文（剪贴板）、F6 发下一段、F8 暂停/继续
+            // 全局热键：与老版 tygdq 对齐
+            //   F2 发文、F3 重打、F4 载文、F6 发下一段、F8 暂停/继续、F9 复制成绩
+            //   Ctrl+T 发送图片成绩 / Ctrl+B 击键评定 / Ctrl+E 速度分析 /
+            //   Ctrl+G 跟打报告 / Ctrl+Q 文章乱序 / Ctrl+W 英标转中标
             switch (vk)
             {
                 case 0x71: // F2 打开发文窗口
@@ -1221,6 +1237,36 @@ namespace newgdq
                 case 0x77: // F8 暂停 / 继续
                     Dispatcher.BeginInvoke(new Action(TogglePause));
                     return;
+                case 0x78: // F9 复制最新成绩
+                    if (this.IsActive)
+                        Dispatcher.BeginInvoke(new Action(() => MenuItem_CopyResult_Click(null, null)));
+                    return;
+            }
+
+            // Ctrl+字母 组合键：只在主窗激活时响应（避免影响其它程序）
+            if (this.IsActive && IsCtrlDown())
+            {
+                switch (vk)
+                {
+                    case 0x54: // Ctrl+T 发送图片成绩
+                        Dispatcher.BeginInvoke(new Action(() => MenuItem_SendImageScore_Click(null, null)));
+                        return;
+                    case 0x42: // Ctrl+B 击键评定
+                        Dispatcher.BeginInvoke(new Action(() => MenuItem_OpenJjCheck_Click(null, null)));
+                        return;
+                    case 0x45: // Ctrl+E 速度分析
+                        Dispatcher.BeginInvoke(new Action(() => MenuItem_OpenSpeedAnalysis_Click(null, null)));
+                        return;
+                    case 0x47: // Ctrl+G 跟打报告
+                        Dispatcher.BeginInvoke(new Action(() => MenuItem_OpenReport_Click(null, null)));
+                        return;
+                    case 0x51: // Ctrl+Q 文章乱序
+                        Dispatcher.BeginInvoke(new Action(() => MenuItem_ShuffleArticle_Click(null, null)));
+                        return;
+                    case 0x57: // Ctrl+W 英文标点换中文
+                        Dispatcher.BeginInvoke(new Action(() => MenuItem_En2CnPunct_Click(null, null)));
+                        return;
+                }
             }
 
             if (!_session.Started) return;
