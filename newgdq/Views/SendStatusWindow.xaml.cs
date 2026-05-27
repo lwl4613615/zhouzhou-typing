@@ -41,6 +41,8 @@ namespace newgdq.Views
                 TxtMark.Text = TxtSentSeg.Text = TxtTotal.Text = TxtRemain.Text = "-";
                 TxtCountPerSeg.Text = TxtMode.Text = TxtStartSeg.Text = TxtCurSeg.Text = "-";
                 TxtOneEnd.Text = TxtNoRepeat.Text = "-";
+                PrgSent.Value = 0;
+                TxtPct.Text = "0%";
                 BtnStop.IsEnabled = false;
                 BtnSendNext.IsEnabled = false;
                 return;
@@ -62,6 +64,10 @@ namespace newgdq.Views
             TxtCurSeg.Text      = (st.CurSeg - 1).ToString();
             TxtOneEnd.Text      = st.OneSentenceEnd ? "✓" : "✗";
             TxtNoRepeat.Text    = st.RandomNoRepeat ? "✓" : "✗";
+            double pct = totalLen > 0 ? (double)st.Mark * 100.0 / totalLen : 0;
+            if (pct < 0) pct = 0; if (pct > 100) pct = 100;
+            PrgSent.Value = pct;
+            TxtPct.Text = pct.ToString("0.0") + "%";
             BtnStop.IsEnabled = true;
             BtnSendNext.IsEnabled = true;
         }
