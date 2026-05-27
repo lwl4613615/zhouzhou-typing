@@ -248,7 +248,7 @@
                 <RowDefinition Height="3*" MinHeight="120"/>
                 <RowDefinition Height="4"/>
                 <RowDefinition Height="34"/>
-                <RowDefinition Height="1.2*" MinHeight="100"/>
+                <RowDefinition Height="100"/>
                 <RowDefinition Height="4"/>
                 <RowDefinition Height="2*" MinHeight="100"/>
             </Grid.RowDefinitions>
