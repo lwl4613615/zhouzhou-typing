@@ -71,6 +71,15 @@ namespace newgdq
         private static readonly Brush SlowBrush = new SolidColorBrush(Color.FromRgb(0xC0, 0xE8, 0x9A));
         private const double SlowCharThresholdSec = 1.2;  // 单字平均 ≥ 1.2 秒即视为慢
         private readonly HashSet<int> _slowMarks = new HashSet<int>();
+
+        /// <summary>把对照区滚到当前光标位置，保证最后一行不被卡在视窗下方。</summary>
+        private void ScrollCompareToCursor(int len)
+        {
+            if (_charRuns.Count == 0) return;
+            int idx = Math.Min(Math.Max(len, 0), _charRuns.Count - 1);
+            try { _charRuns[idx].BringIntoView(); } catch { }
+        }
+
         private void MarkSlowChars(int from, int to)
         {
             int end = Math.Min(to, _charRuns.Count);
@@ -1589,6 +1598,9 @@ namespace newgdq
             // 编码提示 + 进度条刷新
             UpdateProgress();
             RefreshBmTips();
+
+            // 自动滚屏：让当前光标位置的字保持在对照区可见区域内
+            ScrollCompareToCursor(len);
 
             // 字数打满才考虑结束
             if (len >= _session.TypeText.Length)
