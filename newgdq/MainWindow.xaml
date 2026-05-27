@@ -443,6 +443,9 @@
                         <ColumnDefinition Width="60"/>
                         <ColumnDefinition Width="60"/>
                         <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="70"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0"  Text="序"   Style="{StaticResource LblValue}"/>
@@ -456,7 +459,10 @@
                     <TextBlock Grid.Column="8"  Text="键数" Style="{StaticResource LblValue}"/>
                     <TextBlock Grid.Column="9"  Text="字数" Style="{StaticResource LblValue}"/>
                     <TextBlock Grid.Column="10" Text="打词" Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Column="11" Text="用时" Style="{StaticResource LblValue}"/>
+                    <TextBlock Grid.Column="11" Text="选重" Style="{StaticResource LblValue}"/>
+                    <TextBlock Grid.Column="12" Text="回车" Style="{StaticResource LblValue}"/>
+                    <TextBlock Grid.Column="13" Text="左:右" Style="{StaticResource LblValue}"/>
+                    <TextBlock Grid.Column="14" Text="用时" Style="{StaticResource LblValue}"/>
                 </Grid>
                 <DataGrid Grid.Row="1" x:Name="DgvHistory"
                           AutoGenerateColumns="False"
@@ -483,6 +489,9 @@
                         <DataGridTextColumn Width="60" Binding="{Binding Js}"/>
                         <DataGridTextColumn Width="60" Binding="{Binding Words}"/>
                         <DataGridTextColumn Width="60" Binding="{Binding DaCi}"/>
+                        <DataGridTextColumn Width="50" Binding="{Binding Reselect}"/>
+                        <DataGridTextColumn Width="50" Binding="{Binding Enter}"/>
+                        <DataGridTextColumn Width="70" Binding="{Binding LeftRight}"/>
                         <DataGridTextColumn Width="*"  Binding="{Binding UseTime, StringFormat=0.00}"/>
                     </DataGrid.Columns>
                 </DataGrid>

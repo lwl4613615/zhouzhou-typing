@@ -55,6 +55,17 @@ CREATE TABLE IF NOT EXISTS type_record (
 CREATE INDEX IF NOT EXISTS idx_type_record_when ON type_record(when_utc);";
                         cmd.ExecuteNonQuery();
                     }
+                    // 兼容旧库：ALTER 加扩展列，已存在则吞异常
+                    foreach (var sql in new[] {
+                        "ALTER TABLE type_record ADD COLUMN reselect INTEGER DEFAULT 0;",
+                        "ALTER TABLE type_record ADD COLUMN enter    INTEGER DEFAULT 0;",
+                        "ALTER TABLE type_record ADD COLUMN lhand    INTEGER DEFAULT 0;",
+                        "ALTER TABLE type_record ADD COLUMN rhand    INTEGER DEFAULT 0;",
+                    })
+                    {
+                        try { using (var c2 = conn.CreateCommand()) { c2.CommandText = sql; c2.ExecuteNonQuery(); } }
+                        catch { /* 已存在 */ }
+                    }
                 }
                 _initialized = true;
             }
@@ -75,8 +86,8 @@ CREATE INDEX IF NOT EXISTS idx_type_record_when ON type_record(when_utc);";
                     using (var cmd = conn.CreateCommand())
                     {
                         cmd.CommandText = @"
-INSERT INTO type_record (when_utc, title, seg, speed, speed2, jj, mc, hg, cz, js, words, daci, use_time)
-VALUES (@w, @t, @s, @sp, @sp2, @jj, @mc, @hg, @cz, @js, @wd, @dc, @ut);";
+INSERT INTO type_record (when_utc, title, seg, speed, speed2, jj, mc, hg, cz, js, words, daci, use_time, reselect, enter, lhand, rhand)
+VALUES (@w, @t, @s, @sp, @sp2, @jj, @mc, @hg, @cz, @js, @wd, @dc, @ut, @re, @en, @lh, @rh);";
                         cmd.Parameters.AddWithValue("@w",   (r.When == default ? DateTime.Now : r.When).ToString("o"));
                         cmd.Parameters.AddWithValue("@t",   (object)r.Title ?? DBNull.Value);
                         cmd.Parameters.AddWithValue("@s",   (object)r.Seg   ?? DBNull.Value);
@@ -90,6 +101,10 @@ VALUES (@w, @t, @s, @sp, @sp2, @jj, @mc, @hg, @cz, @js, @wd, @dc, @ut);";
                         cmd.Parameters.AddWithValue("@wd",  r.Words);
                         cmd.Parameters.AddWithValue("@dc",  r.DaCi);
                         cmd.Parameters.AddWithValue("@ut",  r.UseTime);
+                        cmd.Parameters.AddWithValue("@re",  r.Reselect);
+                        cmd.Parameters.AddWithValue("@en",  r.Enter);
+                        cmd.Parameters.AddWithValue("@lh",  r.LeftHand);
+                        cmd.Parameters.AddWithValue("@rh",  r.RightHand);
                         cmd.ExecuteNonQuery();
                     }
                 }
@@ -113,7 +128,7 @@ VALUES (@w, @t, @s, @sp, @sp2, @jj, @mc, @hg, @cz, @js, @wd, @dc, @ut);";
                     using (var cmd = conn.CreateCommand())
                     {
                         cmd.CommandText = @"
-SELECT id, when_utc, title, seg, speed, speed2, jj, mc, hg, cz, js, words, daci, use_time
+SELECT id, when_utc, title, seg, speed, speed2, jj, mc, hg, cz, js, words, daci, use_time, reselect, enter, lhand, rhand
 FROM type_record ORDER BY id DESC LIMIT @lim;";
                         cmd.Parameters.AddWithValue("@lim", limit);
                         using (var rd = cmd.ExecuteReader())
@@ -139,6 +154,10 @@ FROM type_record ORDER BY id DESC LIMIT @lim;";
                                     Words   = (int)rd.GetInt64(11),
                                     DaCi    = (int)rd.GetInt64(12),
                                     UseTime = rd.GetDouble(13),
+                                    Reselect = rd.IsDBNull(14) ? 0 : (int)rd.GetInt64(14),
+                                    Enter    = rd.IsDBNull(15) ? 0 : (int)rd.GetInt64(15),
+                                    LeftHand = rd.IsDBNull(16) ? 0 : (int)rd.GetInt64(16),
+                                    RightHand= rd.IsDBNull(17) ? 0 : (int)rd.GetInt64(17),
                                 });
                             }
                         }

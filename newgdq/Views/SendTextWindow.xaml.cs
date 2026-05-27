@@ -278,11 +278,19 @@ namespace newgdq.Views
                 CountPerSeg    = countPerSeg,
                 Mark           = mark,
                 StartSeg       = startSeg,
+                SourceName     = GetCurrentSourceName(),
             };
 
             ResultState = state;
             OnStartSending?.Invoke(state);
             this.Close();
+        }
+
+        private string GetCurrentSourceName()
+        {
+            if (MainTab?.SelectedItem is System.Windows.Controls.TabItem t)
+                return t.Header?.ToString() ?? "-";
+            return "-";
         }
 
         // ===== 发全文（不分段）：忽略每段字数，整篇作为一段发出 =====
@@ -309,6 +317,7 @@ namespace newgdq.Views
                 CountPerSeg    = text.Length,   // 关键：每段 = 全文长度 → 一次发完
                 Mark           = 0,
                 StartSeg       = 1,
+                SourceName     = GetCurrentSourceName(),
             };
             ResultState = state;
             OnStartSending?.Invoke(state);

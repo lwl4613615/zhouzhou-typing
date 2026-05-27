@@ -19,6 +19,15 @@ namespace newgdq.Models
         public int    DaCi     { get; set; }
         public double UseTime  { get; set; }
 
+        // 扩展字段（v2 后新增）
+        public int    Reselect { get; set; }   // 选重次数
+        public int    Enter    { get; set; }   // 回车次数
+        public int    LeftHand { get; set; }   // 左手击键
+        public int    RightHand{ get; set; }   // 右手击键
+
+        // 派生：DataGrid 绑定的"左:右"字符串
+        public string LeftRight => LeftHand + ":" + RightHand;
+
         // 持久化用（不展示）
         public System.DateTime When  { get; set; }   // 完整时间戳（含日期）
         public string          Title { get; set; }   // 文段标题

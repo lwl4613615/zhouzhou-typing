@@ -605,8 +605,12 @@ namespace newgdq
                 BmRankBox.Background = Brushes.Transparent;
                 return;
             }
-            // 词组优先：在当前位置最长匹配，匹中词组则显示整词编码
-            var entry = _dict.MatchAt(_session.TypeText, len);
+            // 智能测词开启 → 词组优先（MatchAt 最长匹配）；关闭 → 只查单字
+            BmEntry entry;
+            if (MnuSmartCi != null && MnuSmartCi.IsChecked == true)
+                entry = _dict.MatchAt(_session.TypeText, len);
+            else
+                entry = _dict.LookupChar(_session.TypeText[len]);
             if (entry == null)
             {
                 BmChar.Text = _session.TypeText[len].ToString();
@@ -916,7 +920,10 @@ namespace newgdq
                 _sending.State.Mark           = state.Mark;
                 _sending.State.StartSeg       = state.StartSeg;
                 _sending.State.SentSeg        = 0;
+                // 来源（SendTextWindow 当前 Tab 名）
+                _sending.State.SourceName     = state.SourceName ?? "-";
                 SendNext();   // 立即发第一段
+                ShowSendStatusWindow();  // 自动弹发文状态窗
             };
             win.ShowDialog();
         }
@@ -941,6 +948,24 @@ namespace newgdq
             _sending.State.Type = origType;
         }
 
+        // 供 SendStatusWindow 调用的公共入口
+        public Models.SendingState GetSendingState() => _sending.State;
+        public void StopSending() { _sending.Stop(); _sendStatusWin?.Refresh(); }
+        public void SendNextSegment() => SendNext();
+
+        private Views.SendStatusWindow _sendStatusWin;
+        private void ShowSendStatusWindow()
+        {
+            if (_sendStatusWin == null)
+            {
+                _sendStatusWin = new Views.SendStatusWindow(this);
+                _sendStatusWin.Closed += (s, e) => _sendStatusWin = null;
+            }
+            _sendStatusWin.Show();
+            _sendStatusWin.Activate();
+            _sendStatusWin.Refresh();
+        }
+
         /// <summary>发下一段：从 SendingService.NextSegment() 取文本，加载到对照区。</summary>
         private void SendNext()
         {
@@ -962,6 +987,7 @@ namespace newgdq
             // 段尺动态游标（发文后才显示）
             SegRulerBox.Visibility = Visibility.Visible;
             TxtCurSeg.Text = curSeg.ToString();
+            _sendStatusWin?.Refresh();
         }
         private void MnuSmartCi_Click(object sender, RoutedEventArgs e)
         {
@@ -1091,19 +1117,7 @@ namespace newgdq
 
         private void MenuItem_SendStatus_Click(object sender, RoutedEventArgs e)
         {
-            var s = _sending.State;
-            if (!s.Active)
-            { HandyControl.Controls.MessageBox.Show("当前没有发文会话。\n菜单 → 发文... 开始", "发文状态"); return; }
-            string mode = s.Type.ToString() + (s.IsRandom ? "（乱序" + (s.RandomNoRepeat ? "/不重复" : "") + "）" : "（顺序）");
-            string msg =
-                $"标题：{s.Title}\n" +
-                $"模式：{mode}\n" +
-                $"已发段数：{s.SentSeg}\n" +
-                $"当前段号：{s.CurSeg - 1}\n" +
-                $"起始段号：{s.StartSeg}\n" +
-                $"每段字数：{s.CountPerSeg}\n" +
-                $"剩余位置：{(s.FullText?.Length ?? 0) - s.Mark} / {s.FullText?.Length ?? 0}";
-            HandyControl.Controls.MessageBox.Show(msg, "发文状态");
+            ShowSendStatusWindow();
         }
 
         private void MenuItem_About_Click(object sender, RoutedEventArgs e)
@@ -1592,6 +1606,10 @@ namespace newgdq
                 Words   = total,
                 DaCi    = _session.Words,
                 UseTime = Math.Round(sec, 2),
+                Reselect= _session.Reselect,
+                Enter   = _session.Enter,
+                LeftHand = _session.LeftHand,
+                RightHand= _session.RightHand,
             };
             History.Insert(0, row);
             HistoryRepository.Insert(row);

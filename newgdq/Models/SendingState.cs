@@ -29,6 +29,7 @@ namespace newgdq.Models
     public class SendingState
     {
         public bool   Active;        // 是否正在发文流程中
+        public string SourceName = "-";  // 文章来源（自带文章 / 自定义文章 / 来自剪切板）
         public string Title = "-";
         public string FullText = ""; // 文章全文
         public string PoolText = ""; // 当前剩余池（乱序全段不重复时会消减）
