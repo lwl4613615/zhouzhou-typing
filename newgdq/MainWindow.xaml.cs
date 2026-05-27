@@ -116,6 +116,7 @@ namespace newgdq
             foreach (var row in HistoryRepository.LoadRecent(200))
                 History.Add(row);
             _historyIndex = HistoryRepository.TotalCount();
+            RefreshSummaryCache();
             this.Loaded += MainWindow_Loaded;
             this.Closing += MainWindow_Closing;
             this.StateChanged += MainWindow_StateChanged;
@@ -648,8 +649,18 @@ namespace newgdq
             TxtCount1.Text = $"{len}/{total}";
             TxtCount1Pct.Text = (pct * 100).ToString("0.0") + "%";
 
-            // 末尾汇总：今日/总字数/天数/记录字数 (P5 接持久化后上真数据)
-            TxtTotalInfo.Text = $"{len}/{len}/1天/{len}";
+            // 末尾汇总：今日字数 / 累计字数 / 训练天数 / 累计段数
+            var sm = _summaryCache;
+            // 当前正在跟打的字数也叠加到今日（结算后会刷新缓存）
+            int todayW = sm.todayWords + len;
+            TxtTotalInfo.Text = $"{todayW}/{sm.totalWords + len}/{Math.Max(1, sm.days)}天/{sm.totalSegs}";
+        }
+
+        // 历史汇总缓存（开机+每次结算后刷新，避免每帧查 SQLite）
+        private (int todayWords, double todaySec, int todaySegs, int totalWords, int totalSegs, int days) _summaryCache;
+        private void RefreshSummaryCache()
+        {
+            try { _summaryCache = HistoryRepository.LoadSummary(); } catch { }
         }
 
         // ===== 加载文章 =====
@@ -1618,6 +1629,7 @@ namespace newgdq
             };
             History.Insert(0, row);
             HistoryRepository.Insert(row);
+            RefreshSummaryCache();
             }   // end if (!blockedByLimit)
 
             if (blockedByLimit)

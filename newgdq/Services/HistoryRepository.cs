@@ -191,6 +191,40 @@ FROM type_record ORDER BY id DESC LIMIT @lim;";
             catch { return 0; }
         }
 
+        /// <summary>汇总统计：(今日字数, 今日用时秒, 今日段数, 累计字数, 累计段数, 训练天数)。</summary>
+        public static (int todayWords, double todaySec, int todaySegs, int totalWords, int totalSegs, int days) LoadSummary()
+        {
+            if (!_initialized) return (0, 0, 0, 0, 0, 0);
+            try
+            {
+                using (var conn = new SQLiteConnection(ConnStr))
+                {
+                    conn.Open();
+                    // 今日：按本地日期分组 (when_utc 是 ISO UTC)
+                    int tw = 0, ts = 0; double tsec = 0;
+                    using (var cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = "SELECT COALESCE(SUM(words),0), COALESCE(SUM(use_time),0), COUNT(*) FROM type_record WHERE date(when_utc,'localtime')=date('now','localtime');";
+                        using (var rd = cmd.ExecuteReader())
+                        {
+                            if (rd.Read()) { tw = rd.GetInt32(0); tsec = rd.GetDouble(1); ts = rd.GetInt32(2); }
+                        }
+                    }
+                    int totalW = 0, totalS = 0, days = 0;
+                    using (var cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = "SELECT COALESCE(SUM(words),0), COUNT(*), COUNT(DISTINCT date(when_utc,'localtime')) FROM type_record;";
+                        using (var rd = cmd.ExecuteReader())
+                        {
+                            if (rd.Read()) { totalW = rd.GetInt32(0); totalS = rd.GetInt32(1); days = rd.GetInt32(2); }
+                        }
+                    }
+                    return (tw, tsec, ts, totalW, totalS, days);
+                }
+            }
+            catch { return (0, 0, 0, 0, 0, 0); }
+        }
+
         /// <summary>取所有历史段的击键速度（键/秒）—— 击键评定窗用。</summary>
         public static List<double> LoadAllJj()
         {
