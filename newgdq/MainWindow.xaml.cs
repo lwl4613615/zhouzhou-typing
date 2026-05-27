@@ -996,7 +996,7 @@ namespace newgdq
             {
                 TxtTheoryMc.Text = "-";
                 ClearPhraseUnderlines();
-                HandyControl.Controls.Growl.Info("智能测词已关闭");
+                HandyControl.Controls.Growl.Info("单字模式");
                 return;
             }
             ApplyPhraseUnderlines();

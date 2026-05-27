@@ -127,8 +127,8 @@
                 <Separator/>
                 <MenuItem Header="测试自定义 bm.txt..." Click="MenuItem_TestBmFile_Click"
                           ToolTip="选一个 bm.txt 文件，验证格式是否合法 + 显示统计信息&#10;不会替换当前词典，仅用于自检"/>
-                <MenuItem Header="智能测词" x:Name="MnuSmartCi" IsCheckable="True"
-                          ToolTip="计算当前文段的理论码长（五笔/形码用户有用，纯拼音可不开）"
+                <MenuItem Header="词组模式" x:Name="MnuSmartCi" IsCheckable="True"
+                          ToolTip="开：按最长词组划下划线 + 理论码长按词算；关：无下划线，只查单字"
                           Click="MnuSmartCi_Click"/>
             </MenuItem>
             <MenuItem Header="发文">
