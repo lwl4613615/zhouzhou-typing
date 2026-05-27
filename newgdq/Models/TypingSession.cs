@@ -66,7 +66,7 @@ namespace newgdq.Models
         /// 与老版 tygdq 对齐：分母用"已打字数 − 当前错字数"（实际正确字数）。
         ///   speed  = (inputLen − Cz) × 60 / sec
         ///   speed2 = max(0, (inputLen − Cz × 5)) × 60 / sec   ← 错一罚五
-        ///   mc     = Keys / (inputLen − Cz)
+        ///   mc     = (Keys − Hg − Enter) / (inputLen − Cz)   ← 退格/回车不算编码键
         ///   jj     = Keys / sec
         /// </summary>
         public (double speed, double speed2, double jj, double mc, double sec) ComputeStats(int inputLen)
@@ -85,7 +85,10 @@ namespace newgdq.Models
             if (speed2 > 999) speed2 = 999;
 
             double jj = Keys / sec;
-            double mc = validLen > 0 ? (double)Keys / validLen : 0;
+            // 码长分子要剥掉非编码键：退格(Hg) + 回车(Enter)
+            int codeKeys = Keys - Hg - Enter;
+            if (codeKeys < 0) codeKeys = 0;
+            double mc = validLen > 0 ? (double)codeKeys / validLen : 0;
             return (speed, speed2, jj, mc, sec);
         }
 
