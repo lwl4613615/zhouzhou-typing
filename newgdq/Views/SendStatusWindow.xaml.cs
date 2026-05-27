@@ -24,10 +24,32 @@ namespace newgdq.Views
                 if (left < 0) left = owner.Left + owner.Width + 4;
                 Left = left;
                 Top  = owner.Top;
+
+                // 磁吸跟随：记录初始相对偏移，主窗移动时按差量同步
+                _ownerLastLeft = owner.Left;
+                _ownerLastTop  = owner.Top;
+                owner.LocationChanged += Owner_LocationChanged;
             }
             _timer.Tick += (s, e) => Refresh();
             this.Loaded += (s, e) => { Refresh(); _timer.Start(); };
-            this.Closed += (s, e) => _timer.Stop();
+            this.Closed += (s, e) =>
+            {
+                _timer.Stop();
+                if (_owner != null) _owner.LocationChanged -= Owner_LocationChanged;
+            };
+        }
+
+        private double _ownerLastLeft, _ownerLastTop;
+        private void Owner_LocationChanged(object sender, EventArgs e)
+        {
+            if (_owner == null) return;
+            double dx = _owner.Left - _ownerLastLeft;
+            double dy = _owner.Top  - _ownerLastTop;
+            _ownerLastLeft = _owner.Left;
+            _ownerLastTop  = _owner.Top;
+            // 用户拖过子窗后保持相对位置：直接把同样的位移加到子窗上
+            Left += dx;
+            Top  += dy;
         }
 
         public void Refresh()
