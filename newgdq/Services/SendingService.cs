@@ -172,5 +172,62 @@ namespace newgdq.Services
         {
             State.Active = false;
         }
+
+        /// <summary>枚举当前发文设置下所有可点击跳转的段（仅顺序 + 文章一句结束模式可枚举）。
+        /// 返回项形如 (段号, 预览前 N 字)。乱序/词组模式返回空（每次随机抽，跳转无意义）。</summary>
+        public System.Collections.Generic.List<(int SegNo, string Preview)> EnumerateSegments(int previewLen = 12, int maxCount = 500)
+        {
+            var list = new System.Collections.Generic.List<(int, string)>();
+            var s = State;
+            if (!s.Active || string.IsNullOrEmpty(s.FullText)) return list;
+
+            // 乱序/词组模式不支持枚举
+            if (s.Type == SendingTextType.Word) return list;
+            if (s.Type == SendingTextType.Single && s.IsRandom) return list;
+
+            // 一次性模拟分段：保存 Mark/SentSeg，跑一遍 NextSegment 收集，跑完恢复
+            int savedMark = s.Mark, savedSent = s.SentSeg;
+            s.Mark = 0;
+            s.SentSeg = 0;
+            try
+            {
+                while (list.Count < maxCount)
+                {
+                    string seg = NextSegment();
+                    if (seg == null) break;
+                    int segNo = s.StartSeg + s.SentSeg - 1;
+                    string preview = seg.Length <= previewLen ? seg : seg.Substring(0, previewLen) + "…";
+                    list.Add((segNo, preview));
+                }
+            }
+            finally
+            {
+                s.Mark = savedMark;
+                s.SentSeg = savedSent;
+            }
+            return list;
+        }
+
+        /// <summary>跳转到指定段号。返回该段文本（与 NextSegment 一致）；不可跳转时返回 null。</summary>
+        public string JumpToSeg(int targetSegNo)
+        {
+            var s = State;
+            if (!s.Active || string.IsNullOrEmpty(s.FullText)) return null;
+            if (s.Type == SendingTextType.Word) return null;
+            if (s.Type == SendingTextType.Single && s.IsRandom) return null;
+
+            int targetIdx = targetSegNo - s.StartSeg; // 目标 = 0-based 已发数
+            if (targetIdx < 0) return null;
+
+            s.Mark = 0;
+            s.SentSeg = 0;
+            string last = null;
+            for (int i = 0; i <= targetIdx; i++)
+            {
+                last = NextSegment();
+                if (last == null) break;
+            }
+            return last;
+        }
     }
 }

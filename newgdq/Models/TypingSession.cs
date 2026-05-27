@@ -24,6 +24,9 @@ namespace newgdq.Models
         public int LeftHand;    // 左手键击键次数
         public int RightHand;   // 右手键击键次数
         public int PauseTimes;  // 暂停次数
+        public int Enter;       // 回车次数（对齐老版 Glob.回车）
+        public int Words;       // 打词数：一次输入 ≥ 2 个字符记 1 词（对齐老版 Glob.aTypeWords）
+        public int Reselect;    // 选重次数（对齐老版 Glob.选重）
 
         public int LastInputLen;
         public int EventIndex;
@@ -51,22 +54,39 @@ namespace newgdq.Models
             LeftHand = 0;
             RightHand = 0;
             PauseTimes = 0;
+            Enter = 0;
+            Words = 0;
+            Reselect = 0;
             LastInputLen = 0;
             EventIndex = 0;
             Report.Clear();
         }
 
-        /// <summary>统计：(速度字/分, 击键键/秒, 码长键/字, 用时秒)</summary>
-        public (double speed, double jj, double mc, double sec) ComputeStats(int inputLen)
+        /// <summary>统计：(速度字/分, 错一罚五速度, 击键键/秒, 码长键/字, 用时秒)
+        /// 与老版 tygdq 对齐：分母用"已打字数 − 当前错字数"（实际正确字数）。
+        ///   speed  = (inputLen − Cz) × 60 / sec
+        ///   speed2 = max(0, (inputLen − Cz × 5)) × 60 / sec   ← 错一罚五
+        ///   mc     = Keys / (inputLen − Cz)
+        ///   jj     = Keys / sec
+        /// </summary>
+        public (double speed, double speed2, double jj, double mc, double sec) ComputeStats(int inputLen)
         {
             double sec = (DateTime.Now - StartTime).TotalSeconds;
-            if (sec <= 0.001 || inputLen <= 0) return (0, 0, 0, 0);
+            if (sec <= 0.001 || inputLen <= 0) return (0, 0, 0, 0, 0);
 
-            double speed = inputLen * 60.0 / sec;
+            int validLen = inputLen - Cz;  // 已打 - 错字 = 有效字数
+            if (validLen < 0) validLen = 0;
+
+            double speed = validLen * 60.0 / sec;
             if (speed > 999) speed = 999;
+
+            int penalized = inputLen - Cz * 5;
+            double speed2 = penalized > 0 ? penalized * 60.0 / sec : 0;
+            if (speed2 > 999) speed2 = 999;
+
             double jj = Keys / sec;
-            double mc = (double)Keys / inputLen;
-            return (speed, jj, mc, sec);
+            double mc = validLen > 0 ? (double)Keys / validLen : 0;
+            return (speed, speed2, jj, mc, sec);
         }
 
         /// <summary>追加一条段内事件（输入长度变化时调用）。</summary>
@@ -75,13 +95,16 @@ namespace newgdq.Models
             EventIndex++;
             double now = (DateTime.Now - StartTime).TotalSeconds;
             int prevLen = LastInputLen;
+            int delta = newLen - prevLen;
+            // 打词：一次正向输入 ≥ 2 个字符视为打了一个词（与老版 aTypeWords 一致）
+            if (delta >= 2) Words++;
             var prev = Report.Count > 0 ? Report[Report.Count - 1] : null;
             Report.Add(new TypeDate
             {
                 Index     = EventIndex,
                 Start     = prevLen,
                 End       = newLen,
-                Length    = newLen - prevLen,
+                Length    = delta,
                 NowTime   = now,
                 TotalTime = prev == null ? now : now - prev.NowTime,
                 Tick      = Keys,

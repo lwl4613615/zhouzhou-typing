@@ -20,6 +20,9 @@ namespace newgdq
     {
         private readonly TypingSession _session = new TypingSession();
         private readonly List<Run>     _charRuns = new List<Run>();
+        /// <summary>每个 Run 的当前染色状态缓存：0=默认 1=正确 2=错误。
+        /// TextChanged 中只对状态变化的 Run 真正赋 Foreground/Background，省 95%+ 重绘。</summary>
+        private byte[] _runStatus = new byte[0];
         private int _historyIndex;
 
         // 服务 / 计时器
@@ -48,12 +51,27 @@ namespace newgdq
 
         public ObservableCollection<HistoryRow> History { get; } = new ObservableCollection<HistoryRow>();
 
-        // 颜色
-        private static readonly Brush BrushDefault = new SolidColorBrush(Color.FromRgb(0x22, 0x22, 0x22));
-        private static readonly Brush BrushRight   = new SolidColorBrush(Color.FromRgb(0x16, 0x6F, 0x16));
-        private static readonly Brush BrushRightBg = new SolidColorBrush(Color.FromRgb(0xCC, 0xF2, 0xCC));
-        private static readonly Brush BrushWrong   = new SolidColorBrush(Color.FromRgb(0xCC, 0x33, 0x33));
-        private static readonly Brush BrushWrongBg = new SolidColorBrush(Color.FromRgb(0xFF, 0xD8, 0xD8));
+        // 颜色（可通过设置窗实时更新）
+        private Brush _brushDefault = new SolidColorBrush(Color.FromRgb(0x22, 0x22, 0x22));
+        private Brush _brushRight   = new SolidColorBrush(Color.FromRgb(0x16, 0x6F, 0x16));
+        private Brush _brushRightBg = new SolidColorBrush(Color.FromRgb(0xCC, 0xF2, 0xCC));
+        private Brush _brushWrong   = new SolidColorBrush(Color.FromRgb(0xCC, 0x33, 0x33));
+        private Brush _brushWrongBg = new SolidColorBrush(Color.FromRgb(0xFF, 0xD8, 0xD8));
+
+        // 回改地点高亮（对齐老版 Show_Hg_Place）：触发回改后，被删除的那段字给 0.8s 短暂淡黄背景
+        private static readonly Brush HgFlashBrush = new SolidColorBrush(Color.FromRgb(0xFF, 0xEB, 0x3B));
+        private readonly DispatcherTimer _hgFlashTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(800) };
+        private int _hgFlashFrom, _hgFlashTo;
+        private bool _hgFlashActive;
+
+        // 跟打地图：嵌入式 Canvas + Polyline，横轴=用时，纵轴=已打字数占比
+        private readonly System.Collections.Generic.List<System.Windows.Point> _mapPoints = new System.Collections.Generic.List<System.Windows.Point>();
+        private System.Windows.Shapes.Polyline _mapLine;
+        private double _mapW, _mapH;
+
+        // 长时间未跟打自动重打（对齐老版 timer5）
+        private readonly DispatcherTimer _autoRepeatTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        private DateTime _lastInputAt;
         // 词组下划线颜色（按词长）
         private static readonly Brush[] WordUnderlineBrushes =
         {
@@ -69,6 +87,9 @@ namespace newgdq
             _ime.Attach(TbxInput);
             TbxInput.LostFocus += (s, e) => PauseType();
             _flashTimer.Tick += FlashTimer_Tick;
+            _hgFlashTimer.Tick += HgFlashTimer_Tick;
+            _autoRepeatTimer.Tick += AutoRepeatTimer_Tick;
+            _autoRepeatTimer.Start();
 
             DgvHistory.ItemsSource = History;
 
@@ -81,13 +102,250 @@ namespace newgdq
             // 异步加载词典（76145 行，主线程加载会卡 ~200ms，可以接受但提示一下）
             try { _dict.LoadFromResource(); } catch { /* 词典加载失败不致命 */ }
 
+            // 从 %AppData%\newgdq\settings.json 恢复设置（窗口几何 + 标记栏开关）
+            SettingsService.Load();
+            // SQLite 历史持久化初始化 + 装载最近 200 条
+            HistoryRepository.Init();
+            foreach (var row in HistoryRepository.LoadRecent(200))
+                History.Add(row);
+            _historyIndex = HistoryRepository.TotalCount();
+            this.Loaded += MainWindow_Loaded;
+            this.Closing += MainWindow_Closing;
+            this.StateChanged += MainWindow_StateChanged;
+
             this.Closed += (s, e) =>
             {
                 _timerTime.Stop();
                 _timerStats.Stop();
                 _keyHook.Dispose();
                 _chartWin?.Close();
+                try { TrayIcon?.Dispose(); } catch { }
             };
+        }
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            var s = SettingsService.Instance;
+
+            // 窗口几何
+            if (s.WindowWidth  is double w && w > 100) this.Width  = w;
+            if (s.WindowHeight is double h && h > 100) this.Height = h;
+            if (s.WindowLeft is double l && s.WindowTop is double t)
+            {
+                // 简单防越界（屏幕变小 / 多屏切换后位置可能落在屏外）
+                var work = SystemParameters.WorkArea;
+                if (l < work.Right - 50 && t < work.Bottom - 50 && l > work.Left - 100 && t > work.Top - 50)
+                {
+                    this.Left = l;
+                    this.Top  = t;
+                }
+            }
+            if (s.WindowMaximized == true) this.WindowState = WindowState.Maximized;
+
+            // 标记栏开关
+            if (s.TogBmTips  is bool b1) TogBmTips.IsChecked = b1;
+            if (s.TogChart   is bool b2) TogChart.IsChecked  = b2;
+            if (s.TogMark    is bool b3) TogMark.IsChecked   = b3;
+            if (s.TogSimple  is bool b4) TogSimple.IsChecked = b4;
+            if (s.TogDetail  is bool b5) TogDetail.IsChecked = b5;
+            if (s.TogSegRuler is bool b6 && b6) SegRulerBox.Visibility = Visibility.Visible;
+            if (s.TogMap     is bool b8) TogMap.IsChecked    = b8;
+            if (s.SmartCi    is bool b7) MnuSmartCi.IsChecked = b7;
+
+            // 字体/颜色/个签
+            ApplyAppearance();
+        }
+
+        /// <summary>把 SettingsService.Instance 的字体/颜色/个签应用到 UI。
+        /// 设置窗每次"应用"后由设置窗调用一次。</summary>
+        public void ApplyAppearance()
+        {
+            var s = SettingsService.Instance;
+
+            // 字体
+            if (!string.IsNullOrEmpty(s.CompareFontFamily))
+                RtbCompare.FontFamily = new FontFamily(s.CompareFontFamily);
+            if (s.CompareFontSize is double cfs && cfs >= 8 && cfs <= 96)
+                RtbCompare.FontSize = cfs;
+            if (!string.IsNullOrEmpty(s.InputFontFamily))
+                TbxInput.FontFamily = new FontFamily(s.InputFontFamily);
+            if (s.InputFontSize is double ifs && ifs >= 8 && ifs <= 96)
+                TbxInput.FontSize = ifs;
+
+            // 颜色：更新 brushes 并对已渲染字符重新染色
+            if (TryParseColor(s.ColorRight,    out var c1)) _brushRight   = new SolidColorBrush(c1);
+            if (TryParseColor(s.ColorRightBg,  out var c2)) _brushRightBg = new SolidColorBrush(c2);
+            if (TryParseColor(s.ColorWrong,    out var c3)) _brushWrong   = new SolidColorBrush(c3);
+            if (TryParseColor(s.ColorWrongBg,  out var c4)) _brushWrongBg = new SolidColorBrush(c4);
+            if (TryParseColor(s.ColorCompareBg,out var c5)) RtbCompare.Background = new SolidColorBrush(c5);
+            if (TryParseColor(s.ColorInputBg,  out var c6)) TbxInput.Background   = new SolidColorBrush(c6);
+
+            // 重刷已染色字符
+            RecolorRenderedChars();
+
+            // 个签
+            if (s.SignEnabled == true && !string.IsNullOrEmpty(s.SignText))
+                TxtSign.Text = s.SignText;
+            else if (s.SignEnabled == false)
+                TxtSign.Text = string.Empty;
+        }
+
+        private static bool TryParseColor(string hex, out Color c)
+        {
+            c = default(Color);
+            if (string.IsNullOrEmpty(hex)) return false;
+            try
+            {
+                var obj = ColorConverter.ConvertFromString(hex);
+                if (obj is Color cc) { c = cc; return true; }
+            }
+            catch { }
+            return false;
+        }
+
+        /// <summary>颜色变化后，对已渲染的对照区每个字按当前输入比对状态重新染色。</summary>
+        private void RecolorRenderedChars()
+        {
+            if (_charRuns.Count == 0) return;
+            // 颜色变了，作废所有缓存状态，让下次 TextChanged 重新涂。
+            // 这里同步把可见区也立即重涂一次（不靠下次 TextChanged 等待用户按键）。
+            string input = TbxInput.Text ?? string.Empty;
+            int len = Math.Min(input.Length, _charRuns.Count);
+            for (int i = 0; i < len; i++)
+            {
+                if (input[i] == _session.TypeText[i])
+                {
+                    _charRuns[i].Foreground = _brushRight;
+                    _charRuns[i].Background = _brushRightBg;
+                    if (i < _runStatus.Length) _runStatus[i] = 1;
+                }
+                else
+                {
+                    _charRuns[i].Foreground = _brushWrong;
+                    _charRuns[i].Background = _brushWrongBg;
+                    if (i < _runStatus.Length) _runStatus[i] = 2;
+                }
+            }
+            for (int i = len; i < _charRuns.Count; i++)
+            {
+                _charRuns[i].Foreground = _brushDefault;
+                _charRuns[i].Background = null;
+                if (i < _runStatus.Length) _runStatus[i] = 0;
+            }
+        }
+
+        /// <summary>回改地点高亮（对齐老版 Show_Hg_Place）：把 [from, to) 那段字短暂置为淡黄背景。
+        /// 0.8s 后由 <see cref="HgFlashTimer_Tick"/> 还原。</summary>
+        private void TriggerHgFlash(int from, int to)
+        {
+            // 若已有高亮在闪，先恢复上次的，避免叠加颜色错乱
+            if (_hgFlashActive) HgFlashTimer_Tick(null, null);
+
+            from = Math.Max(0, from);
+            to   = Math.Min(_charRuns.Count, to);
+            if (from >= to) return;
+
+            for (int i = from; i < to; i++)
+                _charRuns[i].Background = HgFlashBrush;
+
+            _hgFlashFrom = from;
+            _hgFlashTo   = to;
+            _hgFlashActive = true;
+            _hgFlashTimer.Stop();
+            _hgFlashTimer.Start();
+        }
+
+        private void HgFlashTimer_Tick(object sender, EventArgs e)
+        {
+            _hgFlashTimer.Stop();
+            if (!_hgFlashActive) return;
+            _hgFlashActive = false;
+            // 还原：被高亮的那段字按当前输入对比状态重新染色
+            string input = TbxInput.Text ?? string.Empty;
+            int end = Math.Min(_hgFlashTo, _charRuns.Count);
+            for (int i = _hgFlashFrom; i < end; i++)
+            {
+                if (i < input.Length && i < _session.TypeText.Length)
+                {
+                    if (input[i] == _session.TypeText[i])
+                    {
+                        _charRuns[i].Foreground = _brushRight;
+                        _charRuns[i].Background = _brushRightBg;
+                        if (i < _runStatus.Length) _runStatus[i] = 1;
+                    }
+                    else
+                    {
+                        _charRuns[i].Foreground = _brushWrong;
+                        _charRuns[i].Background = _brushWrongBg;
+                        if (i < _runStatus.Length) _runStatus[i] = 2;
+                    }
+                }
+                else
+                {
+                    _charRuns[i].Foreground = _brushDefault;
+                    _charRuns[i].Background = null;
+                    if (i < _runStatus.Length) _runStatus[i] = 0;
+                }
+            }
+        }
+
+        private bool _exitingFromTray;
+
+        private void MainWindow_StateChanged(object sender, EventArgs e)
+        {
+            // 最小化到托盘：仅当 settings 启用 + 当前处于 Minimized + 不是从托盘"退出"触发
+            if (_exitingFromTray) return;
+            if (this.WindowState == WindowState.Minimized
+                && SettingsService.Instance.MinimizeToTray == true)
+            {
+                this.Hide();
+                try
+                {
+                    TrayIcon?.ShowBalloonTip("州州跟打器", "已最小化到托盘，单击图标恢复",
+                        Hardcodet.Wpf.TaskbarNotification.BalloonIcon.Info);
+                }
+                catch { /* 某些系统通知被禁用，忽略 */ }
+            }
+        }
+
+        private void TrayIcon_LeftClick(object sender, RoutedEventArgs e) => RestoreFromTray();
+        private void TrayMenu_Show_Click(object sender, RoutedEventArgs e) => RestoreFromTray();
+
+        private void TrayMenu_Exit_Click(object sender, RoutedEventArgs e)
+        {
+            _exitingFromTray = true;
+            this.Close();
+        }
+
+        private void RestoreFromTray()
+        {
+            if (!this.IsVisible) this.Show();
+            if (this.WindowState == WindowState.Minimized) this.WindowState = WindowState.Normal;
+            this.Activate();
+        }
+
+        private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            var s = SettingsService.Instance;
+            // 最大化时记 RestoreBounds，以便下次打开还原成"还原态"位置
+            bool isMax = this.WindowState == WindowState.Maximized;
+            var rect = isMax ? this.RestoreBounds : new Rect(this.Left, this.Top, this.Width, this.Height);
+            s.WindowLeft       = rect.Left;
+            s.WindowTop        = rect.Top;
+            s.WindowWidth      = rect.Width;
+            s.WindowHeight     = rect.Height;
+            s.WindowMaximized  = isMax;
+
+            s.TogBmTips  = TogBmTips.IsChecked  == true;
+            s.TogChart   = TogChart.IsChecked   == true;
+            s.TogMark    = TogMark.IsChecked    == true;
+            s.TogSimple  = TogSimple.IsChecked  == true;
+            s.TogDetail  = TogDetail.IsChecked  == true;
+            s.TogSegRuler= SegRulerBox.Visibility == Visibility.Visible;
+            s.TogMap     = TogMap.IsChecked    == true;
+            s.SmartCi    = MnuSmartCi.IsChecked == true;
+
+            SettingsService.Save();
         }
 
         // ===== 速度曲线 =====
@@ -107,6 +365,101 @@ namespace newgdq
             {
                 _chartWin?.Hide();
             }
+        }
+
+        // ===== 跟打地图（嵌入式 Canvas + Polyline）=====
+
+        private void TogMap_Toggled(object sender, RoutedEventArgs e)
+        {
+            MapPanel.Visibility = TogMap.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+            if (TogMap.IsChecked == true) RedrawMap();
+        }
+
+        private void MapCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            _mapW = e.NewSize.Width;
+            _mapH = e.NewSize.Height;
+            RedrawMap();
+        }
+
+        private void MapAddSample()
+        {
+            if (!_session.Started || _session.Finished) return;
+            if (MapPanel.Visibility != Visibility.Visible) return;
+            int total = _session.TypeText.Length;
+            if (total <= 0) return;
+
+            double sec = (DateTime.Now - _session.StartTime).TotalSeconds;
+            double pct = Math.Min(1.0, (double)_session.LastInputLen / total);
+            // 同一秒内不重复点；新点必须时间严格大于上次
+            if (_mapPoints.Count > 0 && sec - _mapPoints[_mapPoints.Count - 1].X < 0.05) return;
+            _mapPoints.Add(new System.Windows.Point(sec, pct));
+            // 限点：最多保留近 1200 点（足够覆盖 ~20 分钟以 200ms 采样）
+            const int MaxMapPoints = 1200;
+            if (_mapPoints.Count > MaxMapPoints) _mapPoints.RemoveRange(0, _mapPoints.Count - MaxMapPoints);
+            // 降频：每 5 次采样才重画 1 次（约 1s）
+            if ((++_mapDrawCounter % 5) == 0) RedrawMap();
+        }
+        private int _mapDrawCounter;
+
+        private void MapReset()
+        {
+            _mapPoints.Clear();
+            RedrawMap();
+        }
+
+        // 长时间未跟打自动重打：每秒检查一次，若跟打中且距上次输入超过阈值分钟 → 触发 F3
+        private void AutoRepeatTimer_Tick(object sender, EventArgs e)
+        {
+            int? th = SettingsService.Instance.AutoRepeatMinutes;
+            if (!th.HasValue || th.Value <= 0) return;
+            if (!_session.Started || _session.Finished) return;
+            if (_isPaused) return;
+            if (_lastInputAt == default) return;
+
+            if ((DateTime.Now - _lastInputAt).TotalMinutes >= th.Value)
+            {
+                Repeat();
+                HandyControl.Controls.Growl.Info($"已超过 {th.Value} 分钟无输入，自动重打");
+            }
+        }
+
+        private void RedrawMap()
+        {
+            if (MapCanvas == null) return;
+            MapCanvas.Children.Clear();
+            if (_mapW <= 1 || _mapH <= 1) return;
+
+            // 背景网格：4 等分横线
+            for (int i = 1; i < 4; i++)
+            {
+                double y = _mapH * i / 4.0;
+                MapCanvas.Children.Add(new System.Windows.Shapes.Line
+                {
+                    X1 = 0, Y1 = y, X2 = _mapW, Y2 = y,
+                    Stroke = new SolidColorBrush(Color.FromRgb(0x2A, 0x2A, 0x30)),
+                    StrokeThickness = 1,
+                });
+            }
+
+            if (_mapPoints.Count < 2) return;
+
+            double maxSec = _mapPoints[_mapPoints.Count - 1].X;
+            if (maxSec < 1) maxSec = 1;
+
+            _mapLine = new System.Windows.Shapes.Polyline
+            {
+                Stroke = new SolidColorBrush(Color.FromRgb(0x4F, 0xC3, 0xF7)),
+                StrokeThickness = 1.5,
+                StrokeLineJoin = PenLineJoin.Round,
+            };
+            foreach (var p in _mapPoints)
+            {
+                double x = (p.X / maxSec) * _mapW;
+                double y = _mapH - p.Y * _mapH;   // 纵轴翻转：0 在底
+                _mapLine.Points.Add(new System.Windows.Point(x, y));
+            }
+            MapCanvas.Children.Add(_mapLine);
         }
 
         // ===== 编码提示（当前字 1 个）=====
@@ -145,7 +498,7 @@ namespace newgdq
             }
             BmChar.Text = entry.Word;
             BmCode.Text = entry.Code;
-            BmRankBox.Background = RankBrushes[Math.Min(entry.Rank - 1, RankBrushes.Length - 1)];
+            BmRankBox.Background = RankBrushes[Math.Max(0, Math.Min(entry.Rank - 1, RankBrushes.Length - 1))];
         }
 
         // ===== 字数进度条 =====
@@ -200,13 +553,11 @@ namespace newgdq
         private void LoadArticle(string text, string title)
         {
             // 如果上一段已字数打满但因末字错未 finish，载新文时强制以当前成绩入历史
-            if (_session.Started && !_session.Finished
-                && (TbxInput.Text?.Length ?? 0) >= _session.TypeText.Length
-                && _session.TypeText.Length > 0)
-            {
-                _session.Finished = true;
-                FinishTyping();
-            }
+            TryForceFinalizeLastSegment();
+
+            // 替换：底部标记栏"替换"开启时，载入时自动英文标点转中文标点
+            if (TogReplace != null && TogReplace.IsChecked == true && !string.IsNullOrEmpty(text))
+                text = Services.TextProcessor.En2Cn(text);
 
             _session.Load(text, title);
 
@@ -214,11 +565,12 @@ namespace newgdq
             RtbCompare.Document.Blocks.Clear();
             RtbCompare.Document.PagePadding = new Thickness(0);
             _charRuns.Clear();
+            _runStatus = new byte[_session.TypeText.Length];
 
             var para = new Paragraph { Margin = new Thickness(0), Padding = new Thickness(0) };
             foreach (var ch in _session.TypeText)
             {
-                var run = new Run(ch.ToString()) { Foreground = BrushDefault };
+                var run = new Run(ch.ToString()) { Foreground = _brushDefault };
                 _charRuns.Add(run);
                 para.Inlines.Add(run);
             }
@@ -240,6 +592,7 @@ namespace newgdq
             RefreshBmTips();
             ComputeAndShowTheoryMc();
             _chartWin?.Reset();
+            MapReset();
         }
 
         private void ResetUi()
@@ -336,8 +689,21 @@ namespace newgdq
         private void Repeat()
         {
             if (_session.TypeText.Length == 0) return;
-            // 重载当前文章（重置 session 但保留原文）
+            // 重载当前文章（重置 session 但保留原文）。LoadArticle 内部已处理"打满未finish强制结算"。
             LoadArticle(_session.TypeText, _session.Title);
+        }
+
+        /// <summary>强制结算末段（与老版 TryForceFinalizeLastSegment 对齐）：
+        /// 若已开始但未完成，且字数已经达到全文长度 → 立刻按当前成绩入历史。
+        /// 避免末字错时按 F3/F5/换文导致整段成绩丢失。</summary>
+        private void TryForceFinalizeLastSegment()
+        {
+            if (!_session.Started || _session.Finished) return;
+            if (_session.TypeText.Length == 0) return;
+            int inputLen = TbxInput.Text?.Length ?? 0;
+            if (inputLen < _session.TypeText.Length) return;
+            _session.Finished = true;
+            FinishTyping();
         }
 
         // ===== 复位 =====清空当前文章、输入区、历史不动
@@ -503,12 +869,11 @@ namespace newgdq
         {
             HandyControl.Controls.MessageBox.Show(
                 "F2  打开发文窗口\n" +
-                "F3  重打当前段（全局）\n" +
+                "F3  重打当前段\n" +
                 "F4  载文（剪贴板内容直接进对照区）\n" +
-                "F5  复位\n" +
-                "F6  乱序重抽\n\n" +
-                "暂停：菜单 → 暂停（输入框失焦也会自动暂停）\n" +
-                "继续：回到输入框敲任意键自动继续",
+                "F6  发下一段\n" +
+                "F8  暂停 / 继续\n\n" +
+                "输入框失焦也会自动暂停；回到输入框敲任意键自动继续",
                 "快捷键列表");
         }
 
@@ -522,6 +887,76 @@ namespace newgdq
         {
             try { System.Diagnostics.Process.Start(QQ_GROUP_URL); }
             catch (Exception ex) { HandyControl.Controls.Growl.Error(ex.Message); }
+        }
+
+        // ===== 文章处理（菜单 → 功能 → 文章处理）=====
+
+        private void MenuItem_ShuffleArticle_Click(object sender, RoutedEventArgs e)
+        {
+            if (_session.TypeText.Length == 0)
+            { HandyControl.Controls.Growl.Info("当前无文段"); return; }
+            string shuffled = Services.TextProcessor.Shuffle(_session.TypeText);
+            LoadArticle(shuffled, _session.Title + "（已乱序）");
+        }
+
+        private void MenuItem_En2CnPunct_Click(object sender, RoutedEventArgs e)
+        {
+            if (_session.TypeText.Length == 0)
+            { HandyControl.Controls.Growl.Info("当前无文段"); return; }
+            string converted = Services.TextProcessor.En2Cn(_session.TypeText);
+            LoadArticle(converted, _session.Title);
+        }
+
+        private void MenuItem_StripSpace_Click(object sender, RoutedEventArgs e)
+        {
+            if (_session.TypeText.Length == 0)
+            { HandyControl.Controls.Growl.Info("当前无文段"); return; }
+            string stripped = Services.TextProcessor.TickBlock(_session.TypeText);
+            LoadArticle(stripped, _session.Title);
+        }
+
+        // ===== 复制成绩 / 退出 / 发文状态 =====
+
+        private void MenuItem_CopyResult_Click(object sender, RoutedEventArgs e)
+        {
+            if (History.Count == 0)
+            { HandyControl.Controls.Growl.Info("没有可复制的成绩，先打一段"); return; }
+            var r = History[0];
+            string s = $"第{r.Seg}段 速度{r.Speed:0.00} 罚五{r.Speed2:0.00} 击键{r.Jj:0.00} 码长{r.Mc:0.00} " +
+                       $"回改{r.Hg} 错字{r.Cz} 键数{r.Js} 打词{r.DaCi} 用时{r.UseTime:0.00}s · {r.Title}";
+            try { System.Windows.Clipboard.SetText(s); HandyControl.Controls.Growl.Success("最新成绩已复制"); }
+            catch (Exception ex) { HandyControl.Controls.Growl.Error(ex.Message); }
+        }
+
+        private void MenuItem_Exit_Click(object sender, RoutedEventArgs e) => this.Close();
+
+        private void MenuItem_OpenAverage_Click(object sender, RoutedEventArgs e)
+        {
+            new Views.AverageWindow(this).Show();
+        }
+
+        private void MenuItem_SendImageScore_Click(object sender, RoutedEventArgs e)
+        {
+            if (History.Count == 0)
+            { HandyControl.Controls.Growl.Info("没有可发送的成绩，先打一段"); return; }
+            AutoCopyResultImage();
+        }
+
+        private void MenuItem_SendStatus_Click(object sender, RoutedEventArgs e)
+        {
+            var s = _sending.State;
+            if (!s.Active)
+            { HandyControl.Controls.MessageBox.Show("当前没有发文会话。\n菜单 → 发文... 开始", "发文状态"); return; }
+            string mode = s.Type.ToString() + (s.IsRandom ? "（乱序" + (s.RandomNoRepeat ? "/不重复" : "") + "）" : "（顺序）");
+            string msg =
+                $"标题：{s.Title}\n" +
+                $"模式：{mode}\n" +
+                $"已发段数：{s.SentSeg}\n" +
+                $"当前段号：{s.CurSeg - 1}\n" +
+                $"起始段号：{s.StartSeg}\n" +
+                $"每段字数：{s.CountPerSeg}\n" +
+                $"剩余位置：{(s.FullText?.Length ?? 0) - s.Mark} / {s.FullText?.Length ?? 0}";
+            HandyControl.Controls.MessageBox.Show(msg, "发文状态");
         }
 
         private void MenuItem_About_Click(object sender, RoutedEventArgs e)
@@ -539,11 +974,85 @@ namespace newgdq
             HandyControl.Controls.MessageBox.Show(msg, "关于 州州跟打器");
         }
 
+        private void MenuItem_OpenSettings_Click(object sender, RoutedEventArgs e)
+        {
+            var win = new Views.SettingsWindow(this);
+            win.ShowDialog();
+        }
+
+        private void MenuItem_OpenReport_Click(object sender, RoutedEventArgs e)
+        {
+            if (_session.TypeText.Length == 0 && _session.Report.Count == 0)
+            {
+                HandyControl.Controls.Growl.Info("当前没有可分析的跟打数据，先打一段试试");
+                return;
+            }
+            var win = new Views.ReportWindow(_session, this);
+            win.Show();
+        }
+
+        private void MenuItem_OpenJjCheck_Click(object sender, RoutedEventArgs e)
+        {
+            new Views.JjCheckWindow(this).Show();
+        }
+
+        private void MenuItem_OpenSpeedAnalysis_Click(object sender, RoutedEventArgs e)
+        {
+            if (_session.TypeText.Length == 0 && _session.Report.Count == 0)
+            {
+                HandyControl.Controls.Growl.Info("当前没有可分析的跟打数据，先打一段试试");
+                return;
+            }
+            new Views.SpeedAnalysisWindow(_session, this).Show();
+        }
+
+        // ===== 信息条段号点击 → 弹列表跳段 =====
+        private void TxtCurSegInfo_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (!_sending.State.Active)
+            {
+                HandyControl.Controls.Growl.Info("尚未开启发文，请先菜单 → 发文 → 发文...");
+                return;
+            }
+            var segs = _sending.EnumerateSegments(previewLen: 14, maxCount: 300);
+            if (segs.Count == 0)
+            {
+                HandyControl.Controls.Growl.Info("当前模式不支持段号跳转（乱序/词组模式按性质无法预先确定段号）");
+                return;
+            }
+
+            var menu = new System.Windows.Controls.ContextMenu { MaxHeight = 480 };
+            int curSeg = _sending.State.CurSeg - 1; // 当前已发段
+            foreach (var (segNo, preview) in segs)
+            {
+                var mi = new System.Windows.Controls.MenuItem
+                {
+                    Header = $"第 {segNo} 段  ·  {preview}",
+                    IsChecked = (segNo == curSeg),
+                };
+                int captured = segNo;
+                mi.Click += (s2, e2) =>
+                {
+                    string seg = _sending.JumpToSeg(captured);
+                    if (seg == null) { HandyControl.Controls.Growl.Warning("跳转失败"); return; }
+                    LoadArticle(seg, $"{_sending.State.Title} · 第 {captured} 段");
+                    SegRulerBox.Visibility = Visibility.Visible;
+                    TxtCurSeg.Text = captured.ToString();
+                };
+                menu.Items.Add(mi);
+            }
+            menu.PlacementTarget = TxtCurSegInfo;
+            menu.IsOpen = true;
+        }
+
         private void MenuItem_Reset_Click(object sender, RoutedEventArgs e)
         {
+            // 与老版一致：复位前若末段已打满但因末字错未结算，强制入历史，避免数据丢失
+            TryForceFinalizeLastSegment();
             _session.Load(string.Empty, string.Empty);
             RtbCompare.Document.Blocks.Clear();
             _charRuns.Clear();
+            _runStatus = new byte[0];
             this.Title = "州州跟打器";
             TxtTitle.Text = "-";
             TxtWordCount.Text = "0/0字";
@@ -554,6 +1063,7 @@ namespace newgdq
             RefreshBmTips();
             if (TxtTheoryMc != null) TxtTheoryMc.Text = "-";
             _chartWin?.Reset();
+            MapReset();
             HandyControl.Controls.Growl.Info("已复位");
         }
 
@@ -565,7 +1075,14 @@ namespace newgdq
         private static readonly Brush PauseFlashBrush = new SolidColorBrush(Color.FromRgb(0xCD, 0x5C, 0x5C));
         private static readonly Brush NormalTimeBrush = new SolidColorBrush(Color.FromRgb(0xA0, 0xA0, 0xA0));
 
-        private void MenuItem_Pause_Click(object sender, RoutedEventArgs e) => PauseType();
+        private void MenuItem_Pause_Click(object sender, RoutedEventArgs e) => TogglePause();
+
+        /// <summary>F8 行为：跟打中按一下暂停；暂停时按一下继续。</summary>
+        private void TogglePause()
+        {
+            if (_isPaused) { EndPause(); TbxInput.Focus(); return; }
+            PauseType();
+        }
 
         /// <summary>暂停（幂等）。返回是否真的暂停了。</summary>
         private bool PauseType()
@@ -612,24 +1129,24 @@ namespace newgdq
 
         private void KeyHook_KeyDown(object sender, int vk)
         {
-            // 全局热键（不依赖输入框焦点）
-            // F2 发文 / F3 重打 / F5 复位 / F6 发文及换文
+            // 全局热键：与老版 tygdq 一致（仅保留功能已实现的）
+            //   F2 发文、F3 重打、F4 载文（剪贴板）、F6 发下一段、F8 暂停/继续
             switch (vk)
             {
                 case 0x71: // F2 打开发文窗口
                     Dispatcher.BeginInvoke(new Action(OpenSendTextWindow));
                     return;
-                case 0x73: // F4 载文（拉剪贴板直接进对照区）
-                    Dispatcher.BeginInvoke(new Action(LoadFromClipboard));
-                    return;
                 case 0x72: // F3 重打
                     Dispatcher.BeginInvoke(new Action(Repeat));
                     return;
-                case 0x74: // F5 复位
-                    Dispatcher.BeginInvoke(new Action(() => MenuItem_Reset_Click(null, null)));
+                case 0x73: // F4 载文（拉剪贴板直接进对照区）
+                    Dispatcher.BeginInvoke(new Action(LoadFromClipboard));
                     return;
-                case 0x75: // F6 乱序重抽
-                    Dispatcher.BeginInvoke(new Action(SendShuffle));
+                case 0x75: // F6 发下一段
+                    Dispatcher.BeginInvoke(new Action(SendNext));
+                    return;
+                case 0x77: // F8 暂停 / 继续
+                    Dispatcher.BeginInvoke(new Action(TogglePause));
                     return;
             }
 
@@ -649,6 +1166,22 @@ namespace newgdq
 
             _session.Keys++;
 
+            // 回车计数（对齐老版 Glob.回车）
+            if (isEnter) _session.Enter++;
+
+            // 选重计数（对齐老版）：按 ; (0xBA) / ' (0xDE) / 0-9 数字主键 时，
+            // 若原文当前位置的字符不是这些"选重键字符"，认为用户在挑候选 → +1
+            if (vk == 0xBA || vk == 0xDE || (vk >= 0x30 && vk <= 0x39))
+            {
+                int pos = _session.LastInputLen;
+                if (pos < _session.TypeText.Length)
+                {
+                    char src = _session.TypeText[pos];
+                    bool srcIsSelectKey = src == ';' || src == '\'' || (src >= '0' && src <= '9');
+                    if (!srcIsSelectKey) _session.Reselect++;
+                }
+            }
+
             // 左右手字母区（与原版一致）。
             if ((vk >= 65 && vk <= 71) || (vk >= 81 && vk <= 84) || vk == 88 || vk == 90)
                 _session.LeftHand++;
@@ -658,12 +1191,6 @@ namespace newgdq
 
         private void TbxInput_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
-            if (e.Key == System.Windows.Input.Key.F3)
-            {
-                Repeat();
-                e.Handled = true;
-                return;
-            }
             if (!_session.Started) return;
             if (e.Key == System.Windows.Input.Key.Back)
             {
@@ -690,6 +1217,14 @@ namespace newgdq
             // 双保险：如果输入长度等于上次染色长度且未回退，说明只是 IME 切换/光标移动，跳过
             if (input.Length == _session.LastInputLen && _session.Started) return;
 
+            // 记录回改范围（输入变短）→ 主染色后再触发黄色闪烁，避免被主循环清回默认色
+            int hgFrom = -1, hgTo = -1;
+            if (_session.Started && input.Length < _session.LastInputLen)
+            {
+                hgFrom = input.Length;
+                hgTo   = _session.LastInputLen;
+            }
+
             // 第一次有字符 -> 启动计时
             if (!_session.Started && input.Length > 0)
             {
@@ -698,6 +1233,9 @@ namespace newgdq
                 _timerTime.Start();
                 _timerStats.Start();
             }
+
+            // 刷新"最后一次输入时间"（长时间未跟打自动重打用）
+            _lastInputAt = DateTime.Now;
 
             int len = Math.Min(input.Length, _charRuns.Count);
 
@@ -728,29 +1266,31 @@ namespace newgdq
             len = realLen;
 
             int cz = 0;
+            // 差异染色：只对状态变化的 Run 实际改 Foreground/Background；稳定区域整段跳过。
+            // 大文段下 CPU 节省 ~95%（O(N) 整数比较仍要做以统计 cz，但属性写极少）。
             for (int i = 0; i < len; i++)
             {
+                byte newSt = input[i] == _session.TypeText[i] ? (byte)1 : (byte)2;
+                if (newSt == 2) cz++;
+                if (i >= _runStatus.Length || _runStatus[i] == newSt) continue;
                 var run = _charRuns[i];
-                if (input[i] == _session.TypeText[i])
-                {
-                    run.Foreground = BrushRight;
-                    run.Background = BrushRightBg;
-                }
-                else
-                {
-                    run.Foreground = BrushWrong;
-                    run.Background = BrushWrongBg;
-                    cz++;
-                }
+                if (newSt == 1) { run.Foreground = _brushRight; run.Background = _brushRightBg; }
+                else            { run.Foreground = _brushWrong; run.Background = _brushWrongBg; }
+                _runStatus[i] = newSt;
             }
             for (int i = len; i < _charRuns.Count; i++)
             {
-                _charRuns[i].Foreground = BrushDefault;
+                if (i < _runStatus.Length && _runStatus[i] == 0) continue;
+                _charRuns[i].Foreground = _brushDefault;
                 _charRuns[i].Background = null;
+                if (i < _runStatus.Length) _runStatus[i] = 0;
             }
             _session.Cz = cz;
             TxtCz.Text = cz.ToString();
             TxtWordCount.Text = $"{len}/{_session.TypeText.Length}字";
+
+            // 回改地点高亮（主染色已把回改区清回默认色，这里再涂一层黄色，0.8s 后还原）
+            if (hgFrom >= 0) TriggerHgFlash(hgFrom, hgTo);
 
             // 段内事件
             if (_session.Started && len != _session.LastInputLen)
@@ -810,15 +1350,18 @@ namespace newgdq
             if (_chartWin != null && _chartWin.IsVisible && _session.Started)
             {
                 int len = TbxInput.Text?.Length ?? 0;
-                var (speed, _, _, sec) = _session.ComputeStats(len);
+                var (speed, _, _, _, sec) = _session.ComputeStats(len);
                 if (sec > 0) _chartWin.AddPoint(sec, speed);
             }
+
+            // 跟打地图采样
+            MapAddSample();
         }
 
         private void UpdateStatsDisplay()
         {
             int len = TbxInput.Text?.Length ?? 0;
-            var (speed, jj, mc, _) = _session.ComputeStats(len);
+            var (speed, _, jj, mc, _) = _session.ComputeStats(len);
             TxtSpeed.Text = speed.ToString("0.00");
             TxtJj.Text    = jj.ToString("0.00");
             TxtMc.Text    = mc.ToString("0.00");
@@ -840,29 +1383,94 @@ namespace newgdq
             UpdateProgress();
             RefreshBmTips();
 
-            var (speed, jj, mc, sec) = _session.ComputeStats(total);
-            _historyIndex++;
-            History.Insert(0, new HistoryRow
+            var (speed, speed2, jj, mc, sec) = _session.ComputeStats(total);
+
+            // 速度门槛：底部"限制"按钮启用 + 设置中阈值 > 0 + 当前速度低于阈值 → 不入历史
+            bool blockedByLimit = false;
+            if (TogLimit != null && TogLimit.IsChecked == true)
+            {
+                double limit = SettingsService.Instance.SpeedLimit ?? 0;
+                if (limit > 0 && speed < limit) blockedByLimit = true;
+            }
+
+            if (!blockedByLimit)
+            {
+                _historyIndex++;
+                var row = new HistoryRow
             {
                 Index   = _historyIndex,
+                When    = DateTime.Now,
                 Time    = DateTime.Now.ToString("HH:mm:ss"),
+                Title   = _session.Title,
                 Seg     = "1",
                 Speed   = Math.Round(speed, 2),
+                Speed2  = Math.Round(speed2, 2),
                 Jj      = Math.Round(jj, 2),
                 Mc      = Math.Round(mc, 2),
                 Hg      = _session.Hg,
                 Cz      = _session.Cz,
                 Js      = _session.Keys,
                 Words   = total,
-                DaCi    = 0,
+                DaCi    = _session.Words,
                 UseTime = Math.Round(sec, 2),
-            });
+            };
+            History.Insert(0, row);
+            HistoryRepository.Insert(row);
+            }   // end if (!blockedByLimit)
 
-            HandyControl.Controls.Growl.Success(
-                $"完成！速度 {speed:0.00} | 击键 {jj:0.00} | 码长 {mc:0.00} | 用时 {sec:0.00}s\n" +
-                $"错字 {_session.Cz} | 回改 {_session.Hg} | 键数 {_session.Keys} | 左:右 {_session.LeftHand}:{_session.RightHand}");
+            if (blockedByLimit)
+            {
+                HandyControl.Controls.Growl.Warning($"速度 {speed:0.00} 低于阈值，未入历史（菜单 → 外观 → 个签 Tab 改阈值）");
+            }
+            else
+            {
+                HandyControl.Controls.Growl.Success(
+                    $"完成！速度 {speed:0.00}（错一罚五 {speed2:0.00}）| 击键 {jj:0.00} | 码长 {mc:0.00} | 用时 {sec:0.00}s\n" +
+                    $"错字 {_session.Cz} | 回改 {_session.Hg} | 键数 {_session.Keys} | 打词 {_session.Words} | 选重 {_session.Reselect} | 回车 {_session.Enter} | 左:右 {_session.LeftHand}:{_session.RightHand}");
+
+                // 图片成绩：完成自动截 ReportWindow 复制到剪贴板
+                if (TogImage != null && TogImage.IsChecked == true)
+                    AutoCopyResultImage();
+            }
 
             _chartWin?.MarkFinish();
+        }
+
+        /// <summary>完成时若"图片"开启，弹一个隐藏的 ReportWindow 截图复制到剪贴板。</summary>
+        private void AutoCopyResultImage()
+        {
+            try
+            {
+                var rw = new Views.ReportWindow(_session, this)
+                {
+                    WindowStartupLocation = WindowStartupLocation.Manual,
+                    Left = -10000, Top = -10000,   // 屏外预渲染避免闪烁
+                    ShowInTaskbar = false,
+                };
+                rw.Show();
+                // 等 WPF 完成布局再截图
+                rw.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    try
+                    {
+                        var visual = (System.Windows.Media.Visual)rw.Content;
+                        var bounds = System.Windows.Media.VisualTreeHelper.GetDescendantBounds(visual);
+                        int w = (int)Math.Ceiling(bounds.Width);
+                        int h = (int)Math.Ceiling(bounds.Height);
+                        if (w > 0 && h > 0)
+                        {
+                            var rtb = new System.Windows.Media.Imaging.RenderTargetBitmap(w, h, 96, 96,
+                                System.Windows.Media.PixelFormats.Pbgra32);
+                            rtb.Render(visual);
+                            System.Windows.Clipboard.SetImage(rtb);
+                            HandyControl.Controls.Growl.Success("成绩图已自动复制到剪贴板");
+                        }
+                    }
+                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine("AutoCopyResultImage: " + ex); }
+                    finally { rw.Close(); }
+                }), System.Windows.Threading.DispatcherPriority.Loaded);
+            }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine("AutoCopyResultImage outer: " + ex); }
         }
     }
 }

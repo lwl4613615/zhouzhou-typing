@@ -14,7 +14,7 @@ namespace newgdq.Services
         {
             var uri = new Uri($"pack://application:,,,/Resources/TXT/{fileName}", UriKind.Absolute);
             var info = Application.GetResourceStream(uri);
-            if (info == null) throw new FileNotFoundException(fileName);
+            if (info?.Stream == null) throw new FileNotFoundException(fileName);
             using (var sr = new StreamReader(info.Stream, Encoding.UTF8))
             {
                 return sr.ReadToEnd();

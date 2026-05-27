@@ -7,19 +7,9 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDark.xaml"/>
-                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
+                <!-- 默认 Dark；启动时 App.OnStartup 会按 settings.json 中 ThemeName 替换 -->
+                <ResourceDictionary Source="pack://application:,,,/newgdq;component/Themes/Dark.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-
-            <!-- 全局调色板（窗口属性 StaticResource 求值需早于 Window.Resources，故放此处） -->
-            <SolidColorBrush x:Key="PanelBG"   Color="#2D2D30"/>
-            <SolidColorBrush x:Key="CellBG"    Color="#3F3F46"/>
-            <SolidColorBrush x:Key="DarkBG"    Color="#1E1E1E"/>
-            <SolidColorBrush x:Key="TickBG"    Color="#252526"/>
-            <SolidColorBrush x:Key="GridLine"  Color="#555555"/>
-            <SolidColorBrush x:Key="LabelFG"   Color="#A0A0A0"/>
-            <SolidColorBrush x:Key="ValueFG"   Color="#FFFFFF"/>
-            <SolidColorBrush x:Key="AccentFG"  Color="#FFD24C"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

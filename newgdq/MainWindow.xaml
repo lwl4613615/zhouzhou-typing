@@ -4,10 +4,12 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:hc="https://handyorg.github.io/handycontrol"
+        xmlns:tb="http://www.hardcodet.net/taskbar"
         xmlns:local="clr-namespace:newgdq"
         mc:Ignorable="d"
         Title="州州跟打器" Height="620" Width="940"
         FontFamily="微软雅黑" FontSize="12"
+        Icon="pack://application:,,,/Resources/app.ico"
         Background="{DynamicResource RegionBrush}"
         Foreground="{DynamicResource PrimaryTextBrush}"
         NonClientAreaBackground="{StaticResource PanelBG}"
@@ -70,22 +72,39 @@
 
     <DockPanel LastChildFill="True">
 
+        <!-- 托盘图标：左键点击还原；右键弹菜单 -->
+        <tb:TaskbarIcon x:Name="TrayIcon"
+                        IconSource="pack://application:,,,/Resources/app.ico"
+                        ToolTipText="州州跟打器"
+                        TrayLeftMouseDown="TrayIcon_LeftClick">
+            <tb:TaskbarIcon.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="显示主窗口" Click="TrayMenu_Show_Click"/>
+                    <MenuItem Header="重打"      InputGestureText="F3" Click="MenuItem_Repeat_Click"/>
+                    <MenuItem Header="发下一段" InputGestureText="F6" Click="MenuItem_SendNext_Click"/>
+                    <MenuItem Header="暂停 / 继续" InputGestureText="F8" Click="MenuItem_Pause_Click"/>
+                    <Separator/>
+                    <MenuItem Header="退出" Click="TrayMenu_Exit_Click"/>
+                </ContextMenu>
+            </tb:TaskbarIcon.ContextMenu>
+        </tb:TaskbarIcon>
+
         <!-- 1. 顶部菜单栏 -->
         <Menu DockPanel.Dock="Top" Background="{StaticResource PanelBG}" x:Name="MainMenu">
             <MenuItem Header="菜单">
-                <MenuItem Header="发文... (F2)" Click="MenuItem_OpenSendText_Click"/>
-                <MenuItem Header="载文 (F4)" Click="MenuItem_LoadClipboard_Click"/>
-                <MenuItem Header="外观..." />
-                <MenuItem Header="暂停" x:Name="MnuPause" Click="MenuItem_Pause_Click"/>
+                <MenuItem Header="发文..."    InputGestureText="F2" Click="MenuItem_OpenSendText_Click"/>
+                <MenuItem Header="载文"       InputGestureText="F4" Click="MenuItem_LoadClipboard_Click"/>
+                <MenuItem Header="外观..." Click="MenuItem_OpenSettings_Click"/>
+                <MenuItem Header="暂停"   InputGestureText="F8" x:Name="MnuPause" Click="MenuItem_Pause_Click"/>
                 <Separator/>
-                <MenuItem Header="复制成绩" />
-                <MenuItem Header="退出" />
+                <MenuItem Header="复制成绩" Click="MenuItem_CopyResult_Click"/>
+                <MenuItem Header="退出"     Click="MenuItem_Exit_Click"/>
             </MenuItem>
             <MenuItem Header="功能">
                 <MenuItem Header="文章处理">
-                    <MenuItem Header="将目前文章乱序" />
-                    <MenuItem Header="英文标点换中文标点" />
-                    <MenuItem Header="删除空格（包含全角）" />
+                    <MenuItem Header="将目前文章乱序"           Click="MenuItem_ShuffleArticle_Click"/>
+                    <MenuItem Header="英文标点换中文标点"       Click="MenuItem_En2CnPunct_Click"/>
+                    <MenuItem Header="删除空格（包含全角）"     Click="MenuItem_StripSpace_Click"/>
                 </MenuItem>
                 <MenuItem Header="内部测速">
                     <MenuItem Header="10字测试"     Tag="10字测试.txt"     Click="MenuItem_LoadInternal_Click"/>
@@ -99,11 +118,11 @@
                     <MenuItem Header="前1500单字"     Tag="前1500单字.txt"     Click="MenuItem_LoadInternal_Click"/>
                 </MenuItem>
                 <Separator/>
-                <MenuItem Header="发送图片成绩" />
-                <MenuItem Header="平均成绩..." />
-                <MenuItem Header="击键评定..." />
-                <MenuItem Header="速度分析..." />
-                <MenuItem Header="跟打报告..." />
+                <MenuItem Header="发送图片成绩" Click="MenuItem_SendImageScore_Click"/>
+                <MenuItem Header="平均成绩..." Click="MenuItem_OpenAverage_Click"/>
+                <MenuItem Header="击键评定..." Click="MenuItem_OpenJjCheck_Click"/>
+                <MenuItem Header="速度分析..." Click="MenuItem_OpenSpeedAnalysis_Click"/>
+                <MenuItem Header="跟打报告..." Click="MenuItem_OpenReport_Click"/>
                 <Separator/>
                 <MenuItem Header="编码提示测试..." Click="MenuItem_OpenBmTips_Click"/>
                 <MenuItem Header="智能测词" x:Name="MnuSmartCi" IsCheckable="True"
@@ -111,9 +130,9 @@
                           Click="MnuSmartCi_Click"/>
             </MenuItem>
             <MenuItem Header="发文">
-                <MenuItem Header="发文状态" IsEnabled="False"/>
-                <MenuItem Header="发下一段" Click="MenuItem_SendNext_Click"/>
-                <MenuItem Header="乱序重抽 (F6)" Click="MenuItem_SendShuffle_Click"/>
+                <MenuItem Header="发文状态" Click="MenuItem_SendStatus_Click"/>
+                <MenuItem Header="发下一段" InputGestureText="F6" Click="MenuItem_SendNext_Click"/>
+                <MenuItem Header="乱序重抽" Click="MenuItem_SendShuffle_Click"/>
             </MenuItem>
             <MenuItem Header="帮助">
                 <MenuItem Header="快捷键列表" Click="MenuItem_Hotkeys_Click"/>
@@ -203,7 +222,9 @@
                 <TextBlock Grid.Row="0" Grid.Column="7" Text="签名"   Style="{StaticResource LblText}"/>
 
                 <!-- 下行：值（居中） -->
-                <TextBlock Grid.Row="1" Grid.Column="0" x:Name="TxtCurSegInfo" Text="-"      Style="{StaticResource LblValue}"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" x:Name="TxtCurSegInfo" Text="-"      Style="{StaticResource LblValue}"
+                           Cursor="Hand" ToolTip="点击：跳转到指定段（仅顺序/一句结束模式）"
+                           MouseLeftButtonUp="TxtCurSegInfo_Click"/>
                 <TextBlock Grid.Row="1" Grid.Column="1" x:Name="TxtTitle"      Text="-"      Style="{StaticResource LblValue}"/>
                 <TextBlock Grid.Row="1" Grid.Column="2" x:Name="TxtWordCount"  Text="0/0字"  Style="{StaticResource LblValue}"/>
                 <TextBlock Grid.Row="1" Grid.Column="3" x:Name="TxtGroup"      Text="-"      Style="{StaticResource LblValue}"/>
@@ -228,28 +249,38 @@
         <!-- 5. 底部：标记栏（贴底） -->
         <Border DockPanel.Dock="Bottom" Background="{StaticResource PanelBG}" Padding="4,2">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <ToggleButton Style="{StaticResource MarkerText}" Content="图片"
-                              ToolTip="以图片发送成绩 (P5 实现)"/>
+                <ToggleButton x:Name="TogImage" Style="{StaticResource MarkerText}" Content="图片"
+                              ToolTip="完成段时自动复制成绩图到剪贴板"/>
                 <ToggleButton x:Name="TogBmTips" Style="{StaticResource MarkerText}" Content="编码"
                               ToolTip="编码自动提示&#10;状态条中间格显示当前字的编码 + 重数色块"
                               Checked="TogBmTips_Toggled" Unchecked="TogBmTips_Toggled"/>
                 <ToggleButton x:Name="TogChart" Style="{StaticResource MarkerText}" Content="曲线"
-                              ToolTip="实时速度面积曲线"
+                              ToolTip="实时速度面积曲线（独立窗口）"
                               Checked="TogChart_Toggled" Unchecked="TogChart_Toggled"/>
+                <ToggleButton x:Name="TogMap" Style="{StaticResource MarkerText}" Content="地图"
+                              ToolTip="嵌入式跟打地图&#10;横轴=用时，纵轴=已打字数占比&#10;实时反映节奏波动"
+                              Checked="TogMap_Toggled" Unchecked="TogMap_Toggled"/>
                 <ToggleButton x:Name="TogMark" Style="{StaticResource MarkerText}" Content="标记" IsChecked="True"
                               ToolTip="自动标记词组&#10;蓝=2字 紫=3字 红=4字+&#10;实线全码 / 虚线非全码"
                               Checked="TogMark_Toggled" Unchecked="TogMark_Toggled"/>
                 <ToggleButton x:Name="TogSimple" Style="{StaticResource MarkerText}" Content="极简"
                               ToolTip="成绩发送以极简模式（短文本格式，P4 发送时生效）"
                               Checked="TogSimple_Toggled" Unchecked="TogSimple_Toggled"/>
-                <ToggleButton Style="{StaticResource MarkerText}" Content="限制"
-                              ToolTip="限速发送：超过设定速度才发送成绩 (P4 设置)"/>
-                <ToggleButton Style="{StaticResource MarkerText}" Content="替换"
-                              ToolTip="载入文段后自动替换英文标点为中文标点 (P4 实现)"/>
+                <ToggleButton x:Name="TogLimit" Style="{StaticResource MarkerText}" Content="限制"
+                              ToolTip="速度限制：低于设置窗中阈值时不计入历史&#10;阈值在 菜单 → 外观 → 个签 Tab 设置"/>
+                <ToggleButton x:Name="TogReplace" Style="{StaticResource MarkerText}" Content="替换"
+                              ToolTip="载入文段后自动替换英文标点为中文标点"/>
                 <ToggleButton x:Name="TogDetail" Style="{StaticResource MarkerText}" Content="详细" IsChecked="True"
                               ToolTip="显示/隐藏底部历史 Grid"
                               Checked="TogDetail_Toggled" Unchecked="TogDetail_Toggled"/>
             </StackPanel>
+        </Border>
+
+        <!-- 6. 跟打地图（嵌入式，贴底标记栏上方）-->
+        <Border DockPanel.Dock="Bottom" x:Name="MapPanel" Visibility="Collapsed"
+                Background="#16161A" BorderBrush="#333" BorderThickness="0,1,0,0"
+                Height="80">
+            <Canvas x:Name="MapCanvas" ClipToBounds="True" SizeChanged="MapCanvas_SizeChanged"/>
         </Border>
 
         <!-- 4. 主体：对照区 + 状态条 + 输入区 + 历史 Grid -->

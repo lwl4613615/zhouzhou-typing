@@ -31,7 +31,7 @@ namespace newgdq.Services
         {
             var uri = new Uri("pack://application:,,,/Resources/bm.txt", UriKind.Absolute);
             var info = Application.GetResourceStream(uri);
-            if (info == null) throw new FileNotFoundException("bm.txt");
+            if (info?.Stream == null) throw new FileNotFoundException("bm.txt");
             using (var sr = new StreamReader(info.Stream, Encoding.UTF8))
             {
                 LoadFromReader(sr);

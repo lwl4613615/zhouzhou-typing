@@ -25,7 +25,13 @@
                         <TextBlock Text="字数:" Width="40" VerticalAlignment="Center" Foreground="#AAA"/>
                         <TextBlock x:Name="LblTextCount" Text="0" Width="60" Foreground="#FFF" VerticalAlignment="Center"/>
                         <TextBlock Text="类型:" Width="40" VerticalAlignment="Center" Foreground="#AAA"/>
-                        <TextBlock x:Name="LblStyle" Text="-" Width="60" Foreground="#4FC3F7" VerticalAlignment="Center"/>
+                        <ComboBox x:Name="CmbStyle" Width="80" SelectionChanged="CmbStyle_Changed"
+                                  ToolTip="自动按是否含中文标点判断；可手动覆盖">
+                            <ComboBoxItem>自动</ComboBoxItem>
+                            <ComboBoxItem>文章</ComboBoxItem>
+                            <ComboBoxItem>单字</ComboBoxItem>
+                        </ComboBox>
+                        <TextBlock x:Name="LblStyle" Text="-" Width="60" Foreground="#4FC3F7" VerticalAlignment="Center" Margin="4,0,0,0"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                         <RadioButton x:Name="RbnInOrder"  Content="顺序" GroupName="Order" IsChecked="True" Margin="0,0,12,0" Foreground="#EEE"/>
@@ -46,10 +52,13 @@
 
                 <!-- 右：动作按钮 -->
                 <StackPanel Grid.Column="1" Orientation="Vertical" VerticalAlignment="Bottom">
-                    <Button x:Name="BtnGoSend" Content="开启发文" Width="120" Height="38"
+                    <Button x:Name="BtnGoSend"  Content="开启发文"   Width="120" Height="38"
                             Background="#0E7C42" Foreground="#FFF" FontSize="14" FontWeight="Bold"
                             BorderThickness="0" Click="BtnGoSend_Click"/>
-                    <Button Content="关闭" Width="120" Height="28" Margin="0,4,0,0" Click="BtnClose_Click"/>
+                    <Button x:Name="BtnSendAll" Content="发全文（不分段）" Width="120" Height="26" Margin="0,4,0,0"
+                            ToolTip="忽略每段字数，把整篇文章作为一段一次性发出"
+                            Click="BtnSendAll_Click"/>
+                    <Button Content="关闭" Width="120" Height="26" Margin="0,4,0,0" Click="BtnClose_Click"/>
                 </StackPanel>
             </Grid>
         </Border>
@@ -107,12 +116,72 @@
                 </Grid>
             </TabItem>
 
-            <!-- Tab 4 配置（占位，未实现） -->
+            <!-- Tab 4 配置：发文参数预设 -->
             <TabItem Header="配置与设置">
-                <Border Margin="6" Padding="20" Background="#1E1E1E" BorderBrush="#555" BorderThickness="1">
-                    <TextBlock Text="配置保存与加载功能将在 P5 上线。&#10;&#10;当前仅支持单次发文。&#10;选择前 3 个 Tab 之一获取文章 → 设置参数 → 点【开启发文】"
-                               TextWrapping="Wrap" Foreground="#888" FontSize="13"/>
-                </Border>
+                <Grid Margin="6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="220"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- 左：预设列表 -->
+                    <DockPanel Grid.Column="0" Margin="0,0,6,0">
+                        <TextBlock DockPanel.Dock="Top" Text="已保存的预设" FontWeight="Bold" Margin="0,0,0,4"/>
+                        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,4,0,0">
+                            <Button Content="删除"     Width="60" Margin="0,0,4,0" Click="BtnPresetDelete_Click"/>
+                            <Button Content="应用到当前" Width="100" Click="BtnPresetApply_Click"/>
+                        </StackPanel>
+                        <ListBox x:Name="LbxPresets" SelectionChanged="LbxPresets_SelectionChanged"
+                                 DisplayMemberPath="Name"/>
+                    </DockPanel>
+
+                    <!-- 右：编辑 -->
+                    <DockPanel Grid.Column="1">
+                        <TextBlock DockPanel.Dock="Top" Text="编辑预设" FontWeight="Bold" Margin="0,0,0,4"/>
+
+                        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+                            <Button Content="保存为新预设"  Width="120" Margin="0,0,6,0" Click="BtnPresetCreate_Click"/>
+                            <Button Content="更新选中预设"  Width="120" Click="BtnPresetUpdate_Click"/>
+                        </StackPanel>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="32"/>
+                                <RowDefinition Height="32"/>
+                                <RowDefinition Height="32"/>
+                                <RowDefinition Height="32"/>
+                                <RowDefinition Height="28"/>
+                                <RowDefinition Height="28"/>
+                                <RowDefinition Height="28"/>
+                                <RowDefinition Height="28"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="名称"        VerticalAlignment="Center"/>
+                            <TextBox   Grid.Row="0" Grid.Column="1" x:Name="TbxPresetName"      Margin="0,4"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="每段字数"    VerticalAlignment="Center"/>
+                            <TextBox   Grid.Row="1" Grid.Column="1" x:Name="TbxPresetCount"     Margin="0,4" PreviewTextInput="DigitOnly_PreviewTextInput"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="起始段号"    VerticalAlignment="Center"/>
+                            <TextBox   Grid.Row="2" Grid.Column="1" x:Name="TbxPresetStartSeg"  Margin="0,4" PreviewTextInput="DigitOnly_PreviewTextInput"/>
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="起始位置"    VerticalAlignment="Center"/>
+                            <TextBox   Grid.Row="3" Grid.Column="1" x:Name="TbxPresetMark"      Margin="0,4" PreviewTextInput="DigitOnly_PreviewTextInput"/>
+
+                            <CheckBox  Grid.Row="4" Grid.Column="1" x:Name="ChkPresetRandom"     Content="乱序"      VerticalAlignment="Center"/>
+                            <CheckBox  Grid.Row="5" Grid.Column="1" x:Name="ChkPresetNoRepeat"   Content="不重复（全段抽完前不重复）" VerticalAlignment="Center"/>
+                            <CheckBox  Grid.Row="6" Grid.Column="1" x:Name="ChkPresetOneEnd"     Content="一句结束（文章模式遇标点提前断段）" VerticalAlignment="Center"/>
+                            <CheckBox  Grid.Row="7" Grid.Column="1" x:Name="ChkPresetTickOut"    Content="自动去空格"  VerticalAlignment="Center"/>
+
+                            <TextBlock Grid.Row="8" Grid.ColumnSpan="2" Foreground="#888" TextWrapping="Wrap" Margin="0,12,0,0"
+                                       Text="预设保存在 settings.json 内，整个程序文件夹拷哪都跟着走。&#10;选中左侧列表后可点 应用到当前 → 当前面板（前 3 个 Tab）的参数会被本预设覆盖，然后开启发文即可。"/>
+                        </Grid>
+                    </DockPanel>
+                </Grid>
             </TabItem>
         </TabControl>
     </DockPanel>

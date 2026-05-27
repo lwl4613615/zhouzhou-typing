@@ -69,5 +69,19 @@ namespace newgdq.Services
             }
             return result;
         }
+
+        /// <summary>把字符串字符随机打乱（Fisher-Yates）。</summary>
+        public static string Shuffle(string text, Random rnd = null)
+        {
+            if (string.IsNullOrEmpty(text)) return text;
+            rnd = rnd ?? new Random((int)DateTime.Now.Ticks);
+            var arr = text.ToCharArray();
+            for (int i = arr.Length - 1; i > 0; i--)
+            {
+                int j = rnd.Next(i + 1);
+                (arr[i], arr[j]) = (arr[j], arr[i]);
+            }
+            return new string(arr);
+        }
     }
 }
