@@ -255,6 +255,7 @@
 
             <!-- 对照区 -->
             <RichTextBox Grid.Row="0" x:Name="RtbCompare" IsReadOnly="True"
+                         Style="{x:Null}"
                          BorderThickness="0" Background="White" Foreground="#222"
                          FontSize="22" FontFamily="宋体"
                          VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled"
