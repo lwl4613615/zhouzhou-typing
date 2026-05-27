@@ -208,7 +208,7 @@
                     <ColumnDefinition Width="80"/>   <!-- 速度 -->
                     <ColumnDefinition Width="80"/>   <!-- 击键 -->
                     <ColumnDefinition Width="80"/>   <!-- 码长 -->
-                    <ColumnDefinition Width="80"/>   <!-- 签名 -->
+                    <ColumnDefinition Width="110"/>   <!-- 联系州州 -->
                 </Grid.ColumnDefinitions>
 
                 <!-- 上行：标签 -->
@@ -220,7 +220,8 @@
                 <TextBlock Grid.Row="0" Grid.Column="4" Text="速度"   Style="{StaticResource LblText}"/>
                 <TextBlock Grid.Row="0" Grid.Column="5" Text="击键"   Style="{StaticResource LblText}"/>
                 <TextBlock Grid.Row="0" Grid.Column="6" Text="码长"   Style="{StaticResource LblText}"/>
-                <TextBlock Grid.Row="0" Grid.Column="7" Text="签名"   Style="{StaticResource LblText}"/>
+                <TextBlock Grid.Row="0" Grid.Column="7" Text="联系州州"   Style="{StaticResource LblText}"
+                           ToolTip="点击复制 QQ 群号"/>
 
                 <!-- 下行：值（居中） -->
                 <TextBlock Grid.Row="1" Grid.Column="0" x:Name="TxtCurSegInfo" Text="-"      Style="{StaticResource LblValue}"
@@ -232,7 +233,9 @@
                 <TextBlock Grid.Row="1" Grid.Column="4" x:Name="TxtSpeed"      Text="0.00"   Style="{StaticResource LblValue}"/>
                 <TextBlock Grid.Row="1" Grid.Column="5" x:Name="TxtJj"         Text="0.00"   Style="{StaticResource LblValue}"/>
                 <TextBlock Grid.Row="1" Grid.Column="6" x:Name="TxtMc"         Text="0.00"   Style="{StaticResource LblValue}"/>
-                <TextBlock Grid.Row="1" Grid.Column="7" x:Name="TxtSign"       Text="t46"    Style="{StaticResource LblValue}"/>
+                <TextBlock Grid.Row="1" Grid.Column="7" x:Name="TxtSign"       Text="QQ群 17079867"    Style="{StaticResource LblValue}"
+                           Cursor="Hand" ToolTip="左键：复制群号　右键：打开加群链接"
+                           MouseLeftButtonUp="TxtSign_LeftClick" MouseRightButtonUp="TxtSign_RightClick"/>
 
                 <!-- 列间分隔（细线） -->
                 <Border Grid.RowSpan="2" Grid.Column="0" BorderBrush="{StaticResource GridLine}" BorderThickness="0,0,1,0"/>

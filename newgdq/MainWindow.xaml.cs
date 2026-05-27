@@ -187,11 +187,28 @@ namespace newgdq
             // 重刷已染色字符
             RecolorRenderedChars();
 
-            // 个签
+            // 个签 / 联系州州：启用个签则显示个签文本，否则显示默认 QQ 群号
             if (s.SignEnabled == true && !string.IsNullOrEmpty(s.SignText))
                 TxtSign.Text = s.SignText;
-            else if (s.SignEnabled == false)
-                TxtSign.Text = string.Empty;
+            else
+                TxtSign.Text = "QQ群 " + QQ_GROUP_ID;
+        }
+
+        // ===== 联系州州（信息条最右格点击）=====
+        private void TxtSign_LeftClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            try
+            {
+                System.Windows.Clipboard.SetText(QQ_GROUP_ID);
+                HandyControl.Controls.Growl.Success("已复制 QQ 群号：" + QQ_GROUP_ID);
+            }
+            catch (Exception ex) { HandyControl.Controls.Growl.Error(ex.Message); }
+        }
+
+        private void TxtSign_RightClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            try { System.Diagnostics.Process.Start(QQ_GROUP_URL); }
+            catch (Exception ex) { HandyControl.Controls.Growl.Error(ex.Message); }
         }
 
         private static bool TryParseColor(string hex, out Color c)
