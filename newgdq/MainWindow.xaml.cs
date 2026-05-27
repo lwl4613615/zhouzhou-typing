@@ -171,7 +171,7 @@ namespace newgdq
             if (s.TogMark    is bool b3) TogMark.IsChecked   = b3;
             if (s.TogSimple  is bool b4) TogSimple.IsChecked = b4;
             if (s.TogDetail  is bool b5) TogDetail.IsChecked = b5;
-            if (s.TogSegRuler is bool b6 && b6) SegRulerBox.Visibility = Visibility.Visible;
+            // SegRulerBox 已废弃 - 用户反馈无用，永远 Collapsed
             if (s.TogMap     is bool b8) TogMap.IsChecked    = b8;
             if (s.SmartCi    is bool b7) MnuSmartCi.IsChecked = b7;
 
@@ -375,7 +375,8 @@ namespace newgdq
             s.TogMark    = TogMark.IsChecked    == true;
             s.TogSimple  = TogSimple.IsChecked  == true;
             s.TogDetail  = TogDetail.IsChecked  == true;
-            s.TogSegRuler= SegRulerBox.Visibility == Visibility.Visible;
+            // SegRulerBox 已废弃
+            // s.TogSegRuler= SegRulerBox.Visibility == Visibility.Visible;
             s.TogMap     = TogMap.IsChecked    == true;
             s.SmartCi    = MnuSmartCi.IsChecked == true;
 
@@ -1013,8 +1014,6 @@ namespace newgdq
                 return;
             }
             LoadArticle(seg, $"{_sending.State.Title} · 第 {target} 段");
-            SegRulerBox.Visibility = Visibility.Visible;
-            TxtCurSeg.Text = target.ToString();
             _sendStatusWin?.Refresh();
         }
 
@@ -1049,9 +1048,6 @@ namespace newgdq
             int curSeg = _sending.State.CurSeg - 1; // SentSeg 已 ++，当前段号 = StartSeg + (SentSeg - 1)
             string title = $"{_sending.State.Title} · 第 {curSeg} 段";
             LoadArticle(seg, title);
-            // 段尺动态游标（发文后才显示）
-            SegRulerBox.Visibility = Visibility.Visible;
-            TxtCurSeg.Text = curSeg.ToString();
             _sendStatusWin?.Refresh();
         }
         private void MnuSmartCi_Click(object sender, RoutedEventArgs e)
@@ -1259,8 +1255,6 @@ namespace newgdq
                     string seg = _sending.JumpToSeg(captured);
                     if (seg == null) { HandyControl.Controls.Growl.Warning("跳转失败"); return; }
                     LoadArticle(seg, $"{_sending.State.Title} · 第 {captured} 段");
-                    SegRulerBox.Visibility = Visibility.Visible;
-                    TxtCurSeg.Text = captured.ToString();
                 };
                 menu.Items.Add(mi);
             }
