@@ -104,6 +104,49 @@ namespace newgdq.Views
             catch { preview.Background = Brushes.Transparent; }
         }
 
+        /// <summary>颜色预览块点击 → 弹 HandyControl 拾色器，把选中的颜色写回对应 TextBox。
+        /// XAML 里给 Border 设 Tag="TxtColorRight" 等，按名字反查 TextBox。</summary>
+        private void Pvw_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            var bd = sender as Border;
+            if (bd == null) return;
+            var tbxName = bd.Tag as string;
+            if (string.IsNullOrEmpty(tbxName)) return;
+            var tbx = this.FindName(tbxName) as TextBox;
+            if (tbx == null) return;
+            try
+            {
+                Color initial;
+                try { initial = (Color)ColorConverter.ConvertFromString(tbx.Text); } catch { initial = Colors.White; }
+                var picker = new HandyControl.Controls.ColorPicker
+                {
+                    SelectedBrush = new SolidColorBrush(initial),
+                };
+                var win = new Window
+                {
+                    Title = "选择颜色",
+                    Owner = this,
+                    SizeToContent = SizeToContent.WidthAndHeight,
+                    ResizeMode = ResizeMode.NoResize,
+                    WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                    Content = picker,
+                    ShowInTaskbar = false,
+                };
+                picker.Canceled += (s2, e2) => win.Close();
+                picker.Confirmed += (s2, e2) =>
+                {
+                    var c = picker.SelectedBrush.Color;
+                    tbx.Text = "#" + c.R.ToString("X2") + c.G.ToString("X2") + c.B.ToString("X2");
+                    win.Close();
+                };
+                win.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                HandyControl.Controls.Growl.Error("拾色器打开失败：" + ex.Message);
+            }
+        }
+
         private void BtnOk_Click(object sender, RoutedEventArgs e)
         {
             var s = SettingsService.Instance;
