@@ -187,11 +187,11 @@ namespace newgdq
             // 重刷已染色字符
             RecolorRenderedChars();
 
-            // 个签 / 联系州州：启用个签则显示个签文本，否则显示默认 QQ 群号
+            // 个签 / 联系州州：启用个签则显示个签文本，否则显示默认微信号
             if (s.SignEnabled == true && !string.IsNullOrEmpty(s.SignText))
                 TxtSign.Text = s.SignText;
             else
-                TxtSign.Text = "QQ群 " + QQ_GROUP_ID;
+                TxtSign.Text = "微信 " + WECHAT_ID;
         }
 
         // ===== 联系州州（信息条最右格点击）=====
@@ -199,8 +199,8 @@ namespace newgdq
         {
             try
             {
-                System.Windows.Clipboard.SetText(QQ_GROUP_ID);
-                HandyControl.Controls.Growl.Success("已复制 QQ 群号：" + QQ_GROUP_ID);
+                System.Windows.Clipboard.SetText(WECHAT_ID);
+                HandyControl.Controls.Growl.Success("已复制微信号：" + WECHAT_ID);
             }
             catch (Exception ex) { HandyControl.Controls.Growl.Error(ex.Message); }
         }
@@ -939,6 +939,7 @@ namespace newgdq
         // ===== 帮助菜单 =====
         private const string QQ_GROUP_URL = "https://qm.qq.com/q/eb2iF433q2";
         private const string QQ_GROUP_ID  = "17079867";
+        private const string WECHAT_ID    = "synhxb";
         private const string PROJECT_URL  = "https://github.com/lwl4613615/zhouzhou-typing";
 
         private void MenuItem_Hotkeys_Click(object sender, RoutedEventArgs e)

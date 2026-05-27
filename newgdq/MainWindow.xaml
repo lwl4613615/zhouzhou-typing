@@ -233,8 +233,8 @@
                 <TextBlock Grid.Row="1" Grid.Column="4" x:Name="TxtSpeed"      Text="0.00"   Style="{StaticResource LblValue}"/>
                 <TextBlock Grid.Row="1" Grid.Column="5" x:Name="TxtJj"         Text="0.00"   Style="{StaticResource LblValue}"/>
                 <TextBlock Grid.Row="1" Grid.Column="6" x:Name="TxtMc"         Text="0.00"   Style="{StaticResource LblValue}"/>
-                <TextBlock Grid.Row="1" Grid.Column="7" x:Name="TxtSign"       Text="QQ群 17079867"    Style="{StaticResource LblValue}"
-                           Cursor="Hand" ToolTip="左键：复制群号　右键：打开加群链接"
+                <TextBlock Grid.Row="1" Grid.Column="7" x:Name="TxtSign"       Text="微信 synhxb"    Style="{StaticResource LblValue}"
+                           Cursor="Hand" ToolTip="左键：复制微信号　右键：打开 QQ 加群链接"
                            MouseLeftButtonUp="TxtSign_LeftClick" MouseRightButtonUp="TxtSign_RightClick"/>
 
                 <!-- 列间分隔（细线） -->
