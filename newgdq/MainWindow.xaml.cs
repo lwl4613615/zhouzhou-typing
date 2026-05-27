@@ -996,10 +996,12 @@ namespace newgdq
             {
                 TxtTheoryMc.Text = "-";
                 ClearPhraseUnderlines();
+                RefreshBmTips();
                 HandyControl.Controls.Growl.Info("单字模式");
                 return;
             }
             ApplyPhraseUnderlines();
+            RefreshBmTips();
             ComputeAndShowTheoryMc();
         }
 
