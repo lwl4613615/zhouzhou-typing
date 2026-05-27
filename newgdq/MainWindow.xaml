@@ -257,7 +257,7 @@
             <RichTextBox Grid.Row="0" x:Name="RtbCompare" IsReadOnly="True"
                          BorderThickness="0" Background="White" Foreground="#222"
                          FontSize="22" FontFamily="宋体"
-                         VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                         VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled"
                          Padding="0">
                 <FlowDocument PagePadding="0">
                     <Paragraph Margin="0">
@@ -355,7 +355,7 @@
                          CaretBrush="#222"
                          FontSize="18" FontFamily="宋体"
                          AcceptsReturn="False" TextWrapping="Wrap"
-                         VerticalScrollBarVisibility="Auto"
+                         VerticalScrollBarVisibility="Visible"
                          Padding="0"/>
             </Border>
 
