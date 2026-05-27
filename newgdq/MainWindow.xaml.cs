@@ -1706,7 +1706,7 @@ namespace newgdq
                 When    = DateTime.Now,
                 Time    = DateTime.Now.ToString("HH:mm:ss"),
                 Title   = _session.Title,
-                Seg     = "1",
+                Seg     = _sending.State.Active ? (_sending.State.CurSeg - 1).ToString() : "1",
                 Speed   = Math.Round(speed, 2),
                 Speed2  = Math.Round(speed2, 2),
                 Jj      = Math.Round(jj, 2),
