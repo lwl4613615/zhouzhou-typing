@@ -1549,9 +1549,13 @@ namespace newgdq
 
             _session.Keys++;
 
-            // IME 退格计数（替代老版的"回车"列）：物理 Backspace + 此时 IME 在合成中
-            // = 用户在拼音候选框里删拼音，不是删跟打区已上屏的字（后者计入 Hg 回改）
-            if (isBackspace && _ime.IsComposing) _session.Enter++;
+            // IME 退格计数（替代老版的"回车"列）：物理 Backspace 时若 TextBox 长度没变
+            // = 用户在拼音候选框里删拼音，不是删跟打区已上屏的字（后者 input 变短 → Hg）
+            if (isBackspace)
+            {
+                int curLen = TbxInput.Text?.Length ?? 0;
+                if (curLen == _session.LastInputLen) _session.Enter++;
+            }
 
             // 选重计数（对齐老版）：按 ; (0xBA) / ' (0xDE) / 0-9 数字主键 时，
             // 若原文当前位置的字符不是这些"选重键字符"，认为用户在挑候选 → +1
