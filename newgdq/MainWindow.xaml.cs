@@ -1484,8 +1484,9 @@ namespace newgdq
 
             _session.Keys++;
 
-            // 回车计数（对齐老版 Glob.回车）
-            if (isEnter) _session.Enter++;
+            // IME 退格计数（替代老版的"回车"列）：物理 Backspace + 此时 IME 在合成中
+            // = 用户在拼音候选框里删拼音，不是删跟打区已上屏的字（后者计入 Hg 回改）
+            if (isBackspace && _ime.IsComposing) _session.Enter++;
 
             // 选重计数（对齐老版）：按 ; (0xBA) / ' (0xDE) / 0-9 数字主键 时，
             // 若原文当前位置的字符不是这些"选重键字符"，认为用户在挑候选 → +1
@@ -1782,7 +1783,7 @@ namespace newgdq
                 {
                     Message =
                         $"完成！速度 {speed:0.00}（错一罚五 {speed2:0.00}）| 击键 {jj:0.00} | 码长 {mc:0.00} | 用时 {sec:0.00}s\n" +
-                        $"错字 {_session.Cz} | 回改 {_session.Hg} | 键数 {_session.Keys} | 打词 {_session.Words} | 选重 {_session.Reselect} | 回车 {_session.Enter} | 左:右 {_session.LeftHand}:{_session.RightHand}",
+                        $"错字 {_session.Cz} | 回改 {_session.Hg} | 键数 {_session.Keys} | 打词 {_session.Words} | 选重 {_session.Reselect} | 拼回 {_session.Enter} | 左:右 {_session.LeftHand}:{_session.RightHand}",
                     WaitTime = 2,   // 默认 5 秒太长，缩到 2 秒
                     ShowDateTime = false,
                 });

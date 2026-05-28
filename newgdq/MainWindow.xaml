@@ -420,7 +420,8 @@
                     <TextBlock Grid.Column="9"  Text="字数" Style="{StaticResource LblValue}"/>
                     <TextBlock Grid.Column="10" Text="打词" Style="{StaticResource LblValue}"/>
                     <TextBlock Grid.Column="11" Text="选重" Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Column="12" Text="回车" Style="{StaticResource LblValue}"/>
+                    <TextBlock Grid.Column="12" Text="拼回" Style="{StaticResource LblValue}"
+                               ToolTip="拼音候选框里按退格删拼音的次数(不同于跟打区回改)"/>
                     <TextBlock Grid.Column="13" Text="左:右" Style="{StaticResource LblValue}"/>
                     <TextBlock Grid.Column="14" Text="用时" Style="{StaticResource LblValue}"/>
                 </Grid>
