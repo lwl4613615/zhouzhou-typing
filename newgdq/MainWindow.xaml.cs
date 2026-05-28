@@ -533,27 +533,16 @@ namespace newgdq
 
         private void MapAddSample()
         {
-            if (!_session.Started || _session.Finished) return;
+            // 节奏热力条：完全由 Report 事件驱动，TextChanged 里已自动重画
+            // 这里只在采样定时器里触发一次重画，确保即时更新
             if (MapPanel.Visibility != Visibility.Visible) return;
-            int total = _session.TypeText.Length;
-            if (total <= 0) return;
-
-            double sec = (DateTime.Now - _session.StartTime).TotalSeconds;
-            double pct = Math.Min(1.0, (double)_session.LastInputLen / total);
-            // 同一秒内不重复点；新点必须时间严格大于上次
-            if (_mapPoints.Count > 0 && sec - _mapPoints[_mapPoints.Count - 1].X < 0.05) return;
-            _mapPoints.Add(new System.Windows.Point(sec, pct));
-            // 限点：最多保留近 1200 点（足够覆盖 ~20 分钟以 200ms 采样）
-            const int MaxMapPoints = 1200;
-            if (_mapPoints.Count > MaxMapPoints) _mapPoints.RemoveRange(0, _mapPoints.Count - MaxMapPoints);
-            // 降频：每 5 次采样才重画 1 次（约 1s）
-            if ((++_mapDrawCounter % 5) == 0) RedrawMap();
+            RedrawMap();
         }
         private int _mapDrawCounter;
 
         private void MapReset()
         {
-            _mapPoints.Clear();
+            _charMs = null;
             RedrawMap();
         }
 
@@ -573,43 +562,91 @@ namespace newgdq
             }
         }
 
+        // 节奏热力条：每个字一格，按打这个字花的毫秒数上色
+        private double[] _charMs;
+
         private void RedrawMap()
         {
             if (MapCanvas == null) return;
             MapCanvas.Children.Clear();
             if (_mapW <= 1 || _mapH <= 1) return;
+            int total = _session.TypeText.Length;
+            if (total <= 0) return;
 
-            // 背景网格：4 等分横线
-            for (int i = 1; i < 4; i++)
+            // 从 Report 事件汇总每个字的耗时（事件 perChar 平均分摊到这次输入的字）
+            if (_charMs == null || _charMs.Length != total) _charMs = new double[total];
+            else Array.Clear(_charMs, 0, _charMs.Length);
+            int prevLen = 0;
+            foreach (var ev in _session.Report)
             {
-                double y = _mapH * i / 4.0;
-                MapCanvas.Children.Add(new System.Windows.Shapes.Line
+                if (ev.Length <= 0) { prevLen = ev.End; continue; }
+                double perCharMs = ev.TotalTime * 1000.0 / ev.Length;
+                int to = Math.Min(ev.End, total);
+                for (int i = prevLen; i < to; i++) _charMs[i] = perCharMs;
+                prevLen = ev.End;
+            }
+
+            // 找最慢字索引（用于发光）
+            double maxMs = 0; int maxIdx = -1;
+            for (int i = 0; i < total; i++)
+                if (_charMs[i] > maxMs) { maxMs = _charMs[i]; maxIdx = i; }
+
+            double cellW = _mapW / total;
+            // 每格至少 2px 宽，避免几百字时出现亚像素错位
+            double drawCellW = Math.Max(cellW, 1.5);
+
+            for (int i = 0; i < total; i++)
+            {
+                var fill = ColorForMs(_charMs[i]);
+                var rect = new System.Windows.Shapes.Rectangle
                 {
-                    X1 = 0, Y1 = y, X2 = _mapW, Y2 = y,
-                    Stroke = new SolidColorBrush(Color.FromRgb(0x2A, 0x2A, 0x30)),
-                    StrokeThickness = 1,
-                });
+                    Width = drawCellW,
+                    Height = _mapH,
+                    Fill = fill,
+                };
+                System.Windows.Controls.Canvas.SetLeft(rect, i * cellW);
+                System.Windows.Controls.Canvas.SetTop(rect, 0);
+                if (i == maxIdx && maxMs > 800)
+                {
+                    rect.Effect = new System.Windows.Media.Effects.DropShadowEffect
+                    {
+                        Color = Colors.White,
+                        BlurRadius = 8,
+                        ShadowDepth = 0,
+                        Opacity = 0.9,
+                    };
+                }
+                MapCanvas.Children.Add(rect);
             }
 
-            if (_mapPoints.Count < 2) return;
-
-            double maxSec = _mapPoints[_mapPoints.Count - 1].X;
-            if (maxSec < 1) maxSec = 1;
-
-            _mapLine = new System.Windows.Shapes.Polyline
+            // 顶部 1px 高光线 + 底部 1px 阴影线，立体感
+            MapCanvas.Children.Add(new System.Windows.Shapes.Line
             {
-                Stroke = new SolidColorBrush(Color.FromRgb(0x4F, 0xC3, 0xF7)),
-                StrokeThickness = 1.5,
-                StrokeLineJoin = PenLineJoin.Round,
-            };
-            foreach (var p in _mapPoints)
-            {
-                double x = (p.X / maxSec) * _mapW;
-                double y = _mapH - p.Y * _mapH;   // 纵轴翻转：0 在底
-                _mapLine.Points.Add(new System.Windows.Point(x, y));
-            }
-            MapCanvas.Children.Add(_mapLine);
+                X1 = 0, Y1 = 0, X2 = _mapW, Y2 = 0,
+                Stroke = new SolidColorBrush(Color.FromArgb(0x55, 0xFF, 0xFF, 0xFF)),
+                StrokeThickness = 1,
+            });
         }
+
+        /// <summary>毫秒 → 颜色（绿→黄→橙→红→深红）。空格未打的字用透明灰。</summary>
+        private static Brush ColorForMs(double ms)
+        {
+            if (ms <= 0) return new SolidColorBrush(Color.FromArgb(0x30, 0x55, 0x55, 0x60));
+            // 渐变锚点（ms, ARGB）：300 绿 / 600 黄 / 1200 橙 / 2500+ 深红
+            Color c;
+            if (ms <= 300) c = Lerp(Color.FromRgb(0x4C, 0xC9, 0x6A), Color.FromRgb(0xA8, 0xE0, 0x5F), Norm(ms, 0, 300));
+            else if (ms <= 600) c = Lerp(Color.FromRgb(0xA8, 0xE0, 0x5F), Color.FromRgb(0xFF, 0xD7, 0x2E), Norm(ms, 300, 600));
+            else if (ms <= 1200) c = Lerp(Color.FromRgb(0xFF, 0xD7, 0x2E), Color.FromRgb(0xFF, 0x8C, 0x1A), Norm(ms, 600, 1200));
+            else if (ms <= 2500) c = Lerp(Color.FromRgb(0xFF, 0x8C, 0x1A), Color.FromRgb(0xE7, 0x3E, 0x3E), Norm(ms, 1200, 2500));
+            else c = Color.FromRgb(0xB0, 0x1F, 0x1F);
+            return new SolidColorBrush(c);
+        }
+        private static double Norm(double v, double a, double b) { double t = (v - a) / (b - a); return t < 0 ? 0 : (t > 1 ? 1 : t); }
+        private static Color Lerp(Color a, Color b, double t) => Color.FromArgb(
+            (byte)(a.A + (b.A - a.A) * t),
+            (byte)(a.R + (b.R - a.R) * t),
+            (byte)(a.G + (b.G - a.G) * t),
+            (byte)(a.B + (b.B - a.B) * t));
 
         // ===== 编码提示（当前字 1 个）=====
 
@@ -1672,6 +1709,9 @@ namespace newgdq
 
             // 自动滚屏：让当前光标位置的字保持在对照区可见区域内
             ScrollCompareToCursor(len);
+
+            // 节奏热力条实时跟随（仅当开启）
+            if (MapPanel.Visibility == Visibility.Visible) RedrawMap();
 
             // 字数打满才考虑结束
             if (len >= _session.TypeText.Length)
