@@ -60,13 +60,13 @@ namespace newgdq.Views
             if (!(e.Row.Item is TypeDate td)) return;
             if (td.Length < 0)
             {
-                e.Row.Background = new SolidColorBrush(Color.FromRgb(0x3E, 0x38, 0x26)); // 回改黄底
-                e.Row.Foreground = new SolidColorBrush(Color.FromRgb(0xFF, 0xE0, 0x82));
+                e.Row.Background = new SolidColorBrush(Color.FromRgb(0xFF, 0xF3, 0xC4)); // 回改：奶油黄底
+                e.Row.Foreground = new SolidColorBrush(Color.FromRgb(0x6B, 0x4F, 0x00)); // 棕褐字
             }
             else if (_avgTotalTime > 0 && td.TotalTime > _avgTotalTime * 3)
             {
-                e.Row.Background = new SolidColorBrush(Color.FromRgb(0x4A, 0x26, 0x26)); // 长用时红底
-                e.Row.Foreground = new SolidColorBrush(Color.FromRgb(0xFF, 0xAB, 0xAB));
+                e.Row.Background = new SolidColorBrush(Color.FromRgb(0xFF, 0xD6, 0xD6)); // 卡顿：粉红底
+                e.Row.Foreground = new SolidColorBrush(Color.FromRgb(0x99, 0x1F, 0x1F)); // 深红字
             }
         }
 
