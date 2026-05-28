@@ -1571,13 +1571,13 @@ namespace newgdq
             len = realLen;
 
             int cz = 0;
-            // 差异染色：只对状态变化的 Run 实际改 Foreground/Background；稳定区域整段跳过。
-            // 大文段下 CPU 节省 ~95%（O(N) 整数比较仍要做以统计 cz，但属性写极少）。
+            // 差异染色：每次都对已输入区域整段重写背景，避免 RichTextBox 内部布局变化时
+            // 缓存状态匹配但 Brush 已丢失导致灰底消失（偶发渲染异常）。性能开销极小（属性赋值）。
             for (int i = 0; i < len; i++)
             {
                 byte newSt = input[i] == _session.TypeText[i] ? (byte)1 : (byte)2;
                 if (newSt == 2) cz++;
-                if (i >= _runStatus.Length || _runStatus[i] == newSt) continue;
+                if (i >= _runStatus.Length) continue;
                 var run = _charRuns[i];
                 if (newSt == 1) { run.Foreground = _brushRight; run.Background = _brushRightBg; }
                 else            { run.Foreground = _brushWrong; run.Background = _brushWrongBg; }
