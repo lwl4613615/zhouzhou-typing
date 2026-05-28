@@ -926,7 +926,7 @@ namespace newgdq
 
         // ===== 复位 =====清空当前文章、输入区、历史不动
         // ===== 发文 =====
-        private void MenuItem_OpenSendText_Click(object sender, RoutedEventArgs e) => OpenSendTextWindow();
+        private void MenuItem_OpenSendText_Click(object sender, RoutedEventArgs e) => OpenSendTextWindowWithConfirm();
 
         private void MenuItem_LoadClipboard_Click(object sender, RoutedEventArgs e) => LoadFromClipboard();
 
@@ -978,6 +978,21 @@ namespace newgdq
             {
                 HandyControl.Controls.Growl.Error("载文失败：" + ex.Message);
             }
+        }
+
+        /// <summary>F2 入口：已在发文中则先弹确认。</summary>
+        private void OpenSendTextWindowWithConfirm()
+        {
+            if (_sending.State.Active)
+            {
+                var r = HandyControl.Controls.MessageBox.Show(
+                    "已经在发文中（" + (_sending.State.Title ?? "-") + "）。\n是否重新开始一段新的发文？",
+                    "发文确认", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question);
+                if (r != System.Windows.MessageBoxResult.Yes) return;
+                _sending.Stop();
+                _sendStatusWin?.Refresh();
+            }
+            OpenSendTextWindow();
         }
 
         private void OpenSendTextWindow()
@@ -1390,17 +1405,16 @@ namespace newgdq
 
         private void KeyHook_KeyDown(object sender, int vk)
         {
-            // 全局热键：与老版 tygdq 对齐
-            //   F2 发文、F3 重打、F4 载文、F6 发下一段、F8 暂停/继续、F9 复制成绩
-            //   Ctrl+T 发送图片成绩 / Ctrl+B 击键评定 / Ctrl+E 速度分析 /
-            //   Ctrl+G 跟打报告 / Ctrl+Q 文章乱序 / Ctrl+W 英标转中标
+            // 所有热键都要求主窗激活才生效，避免在其他程序里误触
+            if (!this.IsActive) return;
+
             switch (vk)
             {
-                case 0x71: // F2 打开发文窗口（Ctrl+F2 改为打开发文状态窗）
-                    if (this.IsActive && IsCtrlDown())
+                case 0x71: // F2 打开发文窗口；Ctrl+F2 改为打开发文状态窗
+                    if (IsCtrlDown())
                         Dispatcher.BeginInvoke(new Action(ShowSendStatusWindow));
                     else
-                        Dispatcher.BeginInvoke(new Action(OpenSendTextWindow));
+                        Dispatcher.BeginInvoke(new Action(OpenSendTextWindowWithConfirm));
                     return;
                 case 0x72: // F3 重打
                     Dispatcher.BeginInvoke(new Action(Repeat));
@@ -1415,13 +1429,12 @@ namespace newgdq
                     Dispatcher.BeginInvoke(new Action(TogglePause));
                     return;
                 case 0x78: // F9 复制最新成绩
-                    if (this.IsActive)
-                        Dispatcher.BeginInvoke(new Action(() => MenuItem_CopyResult_Click(null, null)));
+                    Dispatcher.BeginInvoke(new Action(() => MenuItem_CopyResult_Click(null, null)));
                     return;
             }
 
-            // Ctrl+字母 组合键：只在主窗激活时响应（避免影响其它程序）
-            if (this.IsActive && IsCtrlDown())
+            // Ctrl+字母 组合键
+            if (IsCtrlDown())
             {
                 switch (vk)
                 {
