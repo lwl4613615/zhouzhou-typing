@@ -111,7 +111,7 @@
                             <TextBlock Text=" 字/分时不计入历史（0 = 关闭；配合底部 限制 按钮启用）" VerticalAlignment="Center"/>
                         </StackPanel>
                         <CheckBox x:Name="ChkMergeChord" Margin="0,12,0,0"
-                                  Content="并击合并模式（30ms 内多键算 1 击，最多 4 键；并击键盘用户必选，单键用户也安全）"/>
+                                  Content="并击模式（默认；按键数由输入框统计，与老版口径一致。关闭则用低层钩子统计每个物理键，适合单键输入法/排查异常）"/>
                     </StackPanel>
                 </Grid>
             </TabItem>

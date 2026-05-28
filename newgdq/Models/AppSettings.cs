@@ -61,6 +61,9 @@ namespace newgdq.Models
         // 单键用户两键间隔通常 >70ms，开启不影响；并击键盘组内多键 1–25ms 才会被合并。
         [DataMember(EmitDefaultValue = false)] public bool? MergeChord { get; set; }
 
+        // 成绩区只显示本进程启动后的段（默认 true）；切换为 false 显示全部历史
+        [DataMember(EmitDefaultValue = false)] public bool? ShowCurrentOnly { get; set; }
+
         // 发文参数预设（命名保存）
         [DataMember(EmitDefaultValue = false)] public System.Collections.Generic.List<SendPreset> SendPresets { get; set; }
     }

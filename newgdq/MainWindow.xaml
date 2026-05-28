@@ -435,6 +435,10 @@
                                ToolTip="拼音候选框里按退格删拼音的次数(不同于跟打区回改)"/>
                     <TextBlock Grid.Column="13" Text="左:右" Style="{StaticResource LblValue}"/>
                     <TextBlock Grid.Column="14" Text="用时" Style="{StaticResource LblValue}"/>
+                    <Button Grid.Column="14" x:Name="BtnScoreFilter" Content="本次"
+                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                            Margin="0,0,4,0" Padding="6,1" FontSize="11"
+                            Click="BtnScoreFilter_Click"/>
                 </Grid>
                 <DataGrid Grid.Row="1" x:Name="DgvHistory"
                           AutoGenerateColumns="False"

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -24,12 +26,6 @@ namespace newgdq
         /// TextChanged 中只对状态变化的 Run 真正赋 Foreground/Background，省 95%+ 重绘。</summary>
         private byte[] _runStatus = new byte[0];
         private int _historyIndex;
-
-        // 并击合并状态：滑动窗 30ms / 单组最多 4 键；退格/回车不参与
-        private const int ChordWindowMs = 30;
-        private const int ChordMaxKeys  = 4;
-        private DateTime _chordLastTime = DateTime.MinValue;
-        private int      _chordCount;
 
         // 服务 / 计时器
         private readonly KeyHook _keyHook = new KeyHook();
@@ -60,6 +56,11 @@ namespace newgdq
 
         public ObservableCollection<HistoryRow> History { get; } = new ObservableCollection<HistoryRow>();
 
+        // 成绩区视图模式：本次（默认）= 只显示本进程启动后完成的段；全部 = 显示历史 + 本次
+        // 锚点 _sessionStartAt 进程启动取一次，跨日/换文/F3 都不重置
+        private readonly DateTime _sessionStartAt = DateTime.Now;
+        private bool _showCurrentOnly = true;
+
         // 颜色（可通过设置窗实时更新）
         private Brush _brushDefault = new SolidColorBrush(Color.FromRgb(0x22, 0x22, 0x22));
         private Brush _brushRight   = new SolidColorBrush(Color.FromRgb(0x16, 0x6F, 0x16));
@@ -88,25 +89,31 @@ namespace newgdq
         {
             if (_charRuns.Count == 0) return;
             int idx = Math.Min(Math.Max(len, 0), _charRuns.Count - 1);
-            try
+            // 延迟到 Background 优先级 → 等 WPF 完成本轮 Measure/Arrange 再取 rect，
+            // 否则 IME 一次性上屏多字时 GetCharacterRect 会返回 IsEmpty，导致只能 BringIntoView
+            // 不能按 30% 锚点定位，表现为"不跟随"。
+            Dispatcher.BeginInvoke(new Action(() =>
             {
-                var run = _charRuns[idx];
-                var rect = run.ContentStart.GetCharacterRect(LogicalDirection.Forward);
-                if (rect.IsEmpty)
+                try
                 {
-                    run.BringIntoView();
-                    return;
+                    if (idx >= _charRuns.Count) return;
+                    var run  = _charRuns[idx];
+                    var rect = run.ContentStart.GetCharacterRect(LogicalDirection.Forward);
+                    if (rect.IsEmpty)
+                    {
+                        run.BringIntoView();
+                        return;
+                    }
+                    double targetTopRatio = 0.30;
+                    double anchorY = RtbCompare.ActualHeight * targetTopRatio;
+                    double delta = rect.Top - anchorY;
+                    if (Math.Abs(delta) < 4) return;
+                    double newOffset = RtbCompare.VerticalOffset + delta;
+                    if (newOffset < 0) newOffset = 0;
+                    RtbCompare.ScrollToVerticalOffset(newOffset);
                 }
-                // 预读：让光标处于视窗中部偏上 1/3 位置，确保下方至少看到 2-3 行
-                double targetTopRatio = 0.30;
-                double anchorY = RtbCompare.ActualHeight * targetTopRatio;
-                double delta = rect.Top - anchorY;
-                if (Math.Abs(delta) < 4) return;   // 微小变化不滚，避免抖动
-                double newOffset = RtbCompare.VerticalOffset + delta;
-                if (newOffset < 0) newOffset = 0;
-                RtbCompare.ScrollToVerticalOffset(newOffset);
-            }
-            catch { }
+                catch { }
+            }), System.Windows.Threading.DispatcherPriority.Background);
         }
 
         /// <summary>结算时统一染色：先涂回改(浅黄)，再涂慢字(浅绿)，错字红色已由 TextChanged 维护。
@@ -171,6 +178,11 @@ namespace newgdq
 
             // 从 %AppData%\newgdq\settings.json 恢复设置（窗口几何 + 标记栏开关）
             SettingsService.Load();
+            _showCurrentOnly = SettingsService.Instance.ShowCurrentOnly ?? true;
+            UpdateScoreFilterLabel();
+            // 成绩区视图过滤：本次模式 = 只显示 When >= _sessionStartAt 的行
+            var view = CollectionViewSource.GetDefaultView(History);
+            view.Filter = o => !_showCurrentOnly || (o is HistoryRow r && r.When >= _sessionStartAt);
             // SQLite 历史持久化初始化 + 装载最近 200 条
             HistoryRepository.Init();
             foreach (var row in HistoryRepository.LoadRecent(200))
@@ -889,10 +901,35 @@ namespace newgdq
             try
             {
                 _summaryCache = HistoryRepository.LoadSummary();
-                var avg = HistoryRepository.LoadAverages();
-                if (TxtFootTime != null)
+                if (TxtFootTime == null) return;
+
+                // 本次模式：footer 数字按"本进程启动后的段"现算（不查 DB）
+                if (_showCurrentOnly)
                 {
+                    var rows = History.Where(r => r.When >= _sessionStartAt).ToList();
+                    int segs = rows.Count;
+                    double totSec = rows.Sum(r => r.UseTime);
+                    int    totWds = rows.Sum(r => r.Words);
+                    double avgSp  = segs > 0 ? rows.Average(r => r.Speed) : 0;
+                    double avgJj  = segs > 0 ? rows.Average(r => r.Jj)    : 0;
+                    double avgMc  = segs > 0 ? rows.Average(r => r.Mc)    : 0;
+                    var ts = TimeSpan.FromSeconds(totSec);
+                    TxtFootLabel.Text = "本次";
+                    TxtFootTime.Text  = $"{(int)ts.TotalHours:D2}:{ts.Minutes:D2}:{ts.Seconds:D2}";
+                    TxtFootSegs.Text  = segs + "#";
+                    TxtFootSpeed.Text = avgSp.ToString("0.00");
+                    TxtFootJj.Text    = avgJj.ToString("0.00");
+                    TxtFootMc.Text    = avgMc.ToString("0.00");
+                    TxtFootWords.Text = totWds.ToString();
+                    var avg = HistoryRepository.LoadAverages();
+                    TxtFootAllAvg.Text = "累计 " + avg.totalSpeed.ToString("0.00");
+                    TxtFootAllJj.Text  = avg.totalJj.ToString("0.00");
+                }
+                else
+                {
+                    var avg = HistoryRepository.LoadAverages();
                     var ts = TimeSpan.FromSeconds(_summaryCache.todaySec);
+                    TxtFootLabel.Text = "今日";
                     TxtFootTime.Text  = $"{(int)ts.TotalHours:D2}:{ts.Minutes:D2}:{ts.Seconds:D2}";
                     TxtFootSegs.Text  = _summaryCache.todaySegs + "#";
                     TxtFootSpeed.Text = avg.todaySpeed.ToString("0.00");
@@ -905,6 +942,31 @@ namespace newgdq
             }
             catch { }
         }
+
+        /// <summary>切换"本次/全部"视图模式</summary>
+        private void ToggleScoreFilter()
+        {
+            _showCurrentOnly = !_showCurrentOnly;
+            SettingsService.Instance.ShowCurrentOnly = _showCurrentOnly;
+            try { SettingsService.Save(); } catch { }
+            CollectionViewSource.GetDefaultView(History)?.Refresh();
+            UpdateScoreFilterLabel();
+            RefreshSummaryCache();
+        }
+
+        private void UpdateScoreFilterLabel()
+        {
+            if (BtnScoreFilter == null) return;
+            int curCnt = History.Count(r => r.When >= _sessionStartAt);
+            BtnScoreFilter.Content = _showCurrentOnly
+                ? $"本次 {curCnt}"
+                : $"全部 {History.Count}";
+            BtnScoreFilter.ToolTip = _showCurrentOnly
+                ? "当前显示：本进程启动后完成的段（点击切换为 全部）"
+                : "当前显示：所有历史段（点击切换为 本次）";
+        }
+
+        private void BtnScoreFilter_Click(object sender, RoutedEventArgs e) => ToggleScoreFilter();
 
         // ===== 加载文章 =====
 
@@ -938,10 +1000,6 @@ namespace newgdq
 
             _session.Load(text, title);
             Services.KeyHook.LogLine($">>>> LOAD seg=[{title}] 字数={_session.TypeText.Length}");
-
-            // 重置并击合并窗：上一段最后一组按键不应跨段并入新段第一键
-            _chordCount    = 0;
-            _chordLastTime = DateTime.MinValue;
 
             // 重建对照区
             RtbCompare.Document.Blocks.Clear();
@@ -1676,29 +1734,15 @@ namespace newgdq
             if (!(isAlpha || isDigit || isNumpad || isPunct || isEnter || isBackspace || isSpace))
                 return;
 
-            // 并击合并：默认开启。滑动窗 30ms 内连续 down 视为同一组（最多 4 键）算 1 击；
-            // 退格/回车独立成击且关闭当前合并窗，避免连按退格被吞。
-            bool mergeChord  = Services.SettingsService.Instance.MergeChord ?? true;
-            bool isolated    = isBackspace || isEnter;
-            var  now         = DateTime.Now;
-            double gapMs     = (now - _chordLastTime).TotalMilliseconds;
-            bool inChord     = mergeChord
-                            && !isolated
-                            && _chordCount > 0
-                            && _chordCount < ChordMaxKeys
-                            && gapMs <= ChordWindowMs;
-
-            if (inChord)
-            {
-                _chordCount++;
-                _chordLastTime = now;
-                Services.KeyHook.LogLine($"  MERGED vk=0x{vk:X2} gap={gapMs:0}ms chord#{_chordCount} Keys={_session.Keys}");
-            }
-            else
+            // 计数模式（双口径，开关 = SettingsService.MergeChord）：
+            //   并击模式（true,默认）：键数在 TbxInput.PreviewKeyDown 里累加（即 IME 没吃掉的键）。
+            //     原因：并击键盘单次按 N 键 IME 只识别 1 个候选；钩子按 N 算就大于实际"动作"。
+            //   串行模式（false）：键数在这里（KeyHook）累加，每个物理 down 都算 1 击。
+            //     原因：单键用户每按一次都该计入，IME 候选/翻页都是真实按键。
+            bool mergeChord = Services.SettingsService.Instance.MergeChord ?? true;
+            if (!mergeChord)
             {
                 _session.Keys++;
-                if (isolated) { _chordCount = 0; _chordLastTime = DateTime.MinValue; }
-                else          { _chordCount = 1; _chordLastTime = now; }
                 Services.KeyHook.LogLine($"  COUNTED vk=0x{vk:X2} → Keys={_session.Keys}");
             }
 
@@ -1707,7 +1751,14 @@ namespace newgdq
             if (isBackspace)
             {
                 int curLen = TbxInput.Text?.Length ?? 0;
-                if (curLen == _session.LastInputLen) _session.Enter++;
+                if (curLen == _session.LastInputLen)
+                    _session.Enter++;
+                else
+                {
+                    // 真正回改：与老版 Glob.TextHg 对齐，从钩子直接累加 + 立即刷新 UI
+                    _session.Hg++;
+                    Dispatcher.BeginInvoke(new Action(() => TxtHg.Text = _session.Hg.ToString()));
+                }
             }
 
             // 选重计数（对齐老版）：按 ; (0xBA) / ' (0xDE) / 0-9 数字主键 时，
@@ -1733,11 +1784,30 @@ namespace newgdq
         private void TbxInput_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (!_session.Started) return;
-            if (e.Key == System.Windows.Input.Key.Back)
-            {
-                _session.Hg++;
-                TxtHg.Text = _session.Hg.ToString();
-            }
+
+            // 退格的 Hg/Enter 由 KeyHook 统一处理（保留老版口径，能区分 IME 删拼音 vs 删上屏字符）。
+            // 这里只负责并击模式下的 Keys 累加；串行模式不在这里计。
+            bool mergeChord = Services.SettingsService.Instance.MergeChord ?? true;
+            if (!mergeChord) return;
+
+            // 排除修饰键 / 功能键 / 方向键 / Tab / Esc / Win / IME ProcessKey 等
+            // 只统计字母 / 数字 / 标点 / 回车 / 退格 / 空格（与老版 TextBox.KeyDown 口径一致）
+            var k = e.Key == System.Windows.Input.Key.System ? e.SystemKey
+                  : e.Key == System.Windows.Input.Key.ImeProcessed ? e.ImeProcessedKey
+                  : e.Key;
+            int vk = System.Windows.Input.KeyInterop.VirtualKeyFromKey(k);
+
+            bool isAlpha     = (vk >= 0x41 && vk <= 0x5A);
+            bool isDigit     = (vk >= 0x30 && vk <= 0x39);
+            bool isNumpad    = (vk >= 0x60 && vk <= 0x69);
+            bool isPunct     = (vk >= 0xBA && vk <= 0xC0) || (vk >= 0xDB && vk <= 0xDE);
+            bool isEnter     = vk == 0x0D;
+            bool isBackspace = vk == 0x08;
+            bool isSpace     = vk == 0x20;
+            if (!(isAlpha || isDigit || isNumpad || isPunct || isEnter || isBackspace || isSpace)) return;
+
+            _session.Keys++;
+            Services.KeyHook.LogLine($"  TBOX vk=0x{vk:X2} → Keys={_session.Keys}");
         }
 
         // ===== 输入比对染色 =====
