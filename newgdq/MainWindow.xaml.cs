@@ -69,7 +69,7 @@ namespace newgdq
 
         // 上屏偏慢标记 + 回改位置标记（仅在跟打中收集，FinishTyping 时统一染色）
         private static readonly Brush SlowBrush = new SolidColorBrush(Color.FromRgb(0xC0, 0xE8, 0x9A));  // 浅绿 = 慢
-        private static readonly Brush HgBrush   = new SolidColorBrush(Color.FromRgb(0xFF, 0xE0, 0x8A));  // 浅黄 = 回改
+        private static readonly Brush HgBrush   = new SolidColorBrush(Color.FromRgb(0xF5, 0xB7, 0xD8));  // 粉红 = 回改
         private const double SlowCharThresholdSec = 1.2;
         private readonly HashSet<int> _slowMarks = new HashSet<int>();
         private readonly HashSet<int> _hgMarks   = new HashSet<int>();
@@ -615,8 +615,13 @@ namespace newgdq
                 var lbl = new TextBlock
                 {
                     Text = pct + "%",
-                    Foreground = new SolidColorBrush(Color.FromArgb(0xCC, 0xFF, 0xFF, 0xFF)),
-                    FontSize = 9,
+                    Foreground = Brushes.White,
+                    FontSize = 10,
+                    FontWeight = FontWeights.Bold,
+                    Effect = new System.Windows.Media.Effects.DropShadowEffect
+                    {
+                        Color = Colors.Black, BlurRadius = 3, ShadowDepth = 0, Opacity = 1.0,
+                    },
                 };
                 System.Windows.Controls.Canvas.SetLeft(lbl, x + 2);
                 System.Windows.Controls.Canvas.SetTop(lbl, topY);
@@ -646,8 +651,13 @@ namespace newgdq
                 var lbl = new TextBlock
                 {
                     Text = ((int)ms) + "ms",
-                    Foreground = new SolidColorBrush(Color.FromRgb(0xFF, 0xCC, 0xCC)),
-                    FontSize = 9,
+                    Foreground = Brushes.White,
+                    FontSize = 10,
+                    FontWeight = FontWeights.Bold,
+                    Effect = new System.Windows.Media.Effects.DropShadowEffect
+                    {
+                        Color = Colors.Black, BlurRadius = 3, ShadowDepth = 0, Opacity = 1.0,
+                    },
                 };
                 lbl.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
                 double labelX = x - lbl.DesiredSize.Width / 2;
