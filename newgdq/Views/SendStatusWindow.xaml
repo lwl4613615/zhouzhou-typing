@@ -13,18 +13,13 @@
         <SolidColorBrush x:Key="Cyan"  Color="#4FC3F7"/>
         <SolidColorBrush x:Key="Amber" Color="#FFD24C"/>
 
-        <!-- 卡片底色 + 字色都跟主题走，浅色模式下子窗也清晰 -->
-        <StaticResource x:Key="CardBg" ResourceKey="CellBG"/>
-        <StaticResource x:Key="Mute"   ResourceKey="LabelFG"/>
-        <StaticResource x:Key="Text"   ResourceKey="ValueFG"/>
-
         <Style x:Key="Lbl" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{StaticResource Mute}"/>
+            <Setter Property="Foreground" Value="{DynamicResource LabelFG}"/>
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
         <Style x:Key="Val" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{StaticResource Text}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ValueFG}"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
@@ -97,7 +92,7 @@
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0" CornerRadius="8" Padding="12,10"
-                Background="{StaticResource CardBg}" BorderBrush="#2A3346" BorderThickness="1">
+                Background="{DynamicResource CellBG}" BorderBrush="#2A3346" BorderThickness="1">
             <StackPanel>
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -106,22 +101,22 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="◆" Foreground="{StaticResource Cyan}" FontSize="14" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                        <TextBlock Text="发文进度" Foreground="{StaticResource Mute}" FontSize="11" VerticalAlignment="Center"/>
+                        <TextBlock Text="发文进度" Foreground="{DynamicResource LabelFG}" FontSize="11" VerticalAlignment="Center"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom">
                         <TextBlock x:Name="TxtCurSerial" Text="-" Foreground="{StaticResource Amber}" FontSize="22" FontWeight="Bold"/>
-                        <TextBlock Text=" / " Foreground="{StaticResource Mute}" FontSize="16" VerticalAlignment="Center"/>
-                        <TextBlock x:Name="TxtTotalSerial" Text="0" Foreground="{StaticResource Text}" FontSize="16" VerticalAlignment="Center"/>
+                        <TextBlock Text=" / " Foreground="{DynamicResource LabelFG}" FontSize="16" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="TxtTotalSerial" Text="0" Foreground="{DynamicResource ValueFG}" FontSize="16" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Grid>
                 <ProgressBar x:Name="PrgSent" Style="{StaticResource NeonBar}" Margin="0,8,0,2"
                              Minimum="0" Maximum="100" Value="0"/>
-                <TextBlock x:Name="TxtPct" Text="0%" Foreground="{StaticResource Mute}" FontSize="10" HorizontalAlignment="Right"/>
+                <TextBlock x:Name="TxtPct" Text="0%" Foreground="{DynamicResource LabelFG}" FontSize="10" HorizontalAlignment="Right"/>
             </StackPanel>
         </Border>
 
         <Border Grid.Row="1" CornerRadius="8" Padding="12,8" Margin="0,8,0,0"
-                Background="{StaticResource CardBg}" BorderBrush="#2A3346" BorderThickness="1">
+                Background="{DynamicResource CellBG}" BorderBrush="#2A3346" BorderThickness="1">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="60"/>
@@ -143,30 +138,30 @@
 
         <UniformGrid Grid.Row="2" Columns="3" Margin="0,8,0,0">
             <Border CornerRadius="8" Padding="8" Margin="0,0,4,0"
-                    Background="{StaticResource CardBg}" BorderBrush="#2A3346" BorderThickness="1">
+                    Background="{DynamicResource CellBG}" BorderBrush="#2A3346" BorderThickness="1">
                 <StackPanel>
                     <TextBlock Text="已发" Style="{StaticResource Lbl}"/>
                     <TextBlock x:Name="TxtMark" Text="0" Foreground="{StaticResource Cyan}" FontSize="18" FontWeight="Bold"/>
                 </StackPanel>
             </Border>
             <Border CornerRadius="8" Padding="8" Margin="2,0,2,0"
-                    Background="{StaticResource CardBg}" BorderBrush="#2A3346" BorderThickness="1">
+                    Background="{DynamicResource CellBG}" BorderBrush="#2A3346" BorderThickness="1">
                 <StackPanel>
                     <TextBlock Text="剩余" Style="{StaticResource Lbl}"/>
                     <TextBlock x:Name="TxtRemain" Text="0" Foreground="{StaticResource Amber}" FontSize="18" FontWeight="Bold"/>
                 </StackPanel>
             </Border>
             <Border CornerRadius="8" Padding="8" Margin="4,0,0,0"
-                    Background="{StaticResource CardBg}" BorderBrush="#2A3346" BorderThickness="1">
+                    Background="{DynamicResource CellBG}" BorderBrush="#2A3346" BorderThickness="1">
                 <StackPanel>
                     <TextBlock Text="总数" Style="{StaticResource Lbl}"/>
-                    <TextBlock x:Name="TxtTotal" Text="0" Foreground="{StaticResource Text}" FontSize="18" FontWeight="Bold"/>
+                    <TextBlock x:Name="TxtTotal" Text="0" Foreground="{DynamicResource ValueFG}" FontSize="18" FontWeight="Bold"/>
                 </StackPanel>
             </Border>
         </UniformGrid>
 
         <Border Grid.Row="3" CornerRadius="8" Padding="12,8" Margin="0,8,0,0"
-                Background="{StaticResource CardBg}" BorderBrush="#2A3346" BorderThickness="1">
+                Background="{DynamicResource CellBG}" BorderBrush="#2A3346" BorderThickness="1">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="80"/>
