@@ -1170,9 +1170,9 @@ namespace newgdq
             if (_sending.State.Active)
             {
                 var r = HandyControl.Controls.MessageBox.Show(
-                    "已经在发文中（" + (_sending.State.Title ?? "-") + "）。\n是否重新开始一段新的发文？",
-                    "发文确认", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question);
-                if (r != System.Windows.MessageBoxResult.Yes) return;
+                    "已经在发文中（" + (_sending.State.Title ?? "-") + "）。\n是否重新开始一段新的发文？\n\n[ Esc 取消 ]",
+                    "发文确认", System.Windows.MessageBoxButton.OKCancel, System.Windows.MessageBoxImage.Question);
+                if (r != System.Windows.MessageBoxResult.OK) return;
                 _sending.Stop();
                 _sendStatusWin?.Refresh();
             }
