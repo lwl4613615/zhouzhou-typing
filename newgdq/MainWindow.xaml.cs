@@ -61,6 +61,9 @@ namespace newgdq
         private readonly DateTime _sessionStartAt = DateTime.Now;
         private bool _showCurrentOnly = true;
 
+        // 剪贴板载文自增段号（无 "第N段" 头时使用，对齐老版 Glob.AZpre）
+        private int _clipboardSegCounter;
+
         // 颜色（可通过设置窗实时更新）
         private Brush _brushDefault = new SolidColorBrush(Color.FromRgb(0x22, 0x22, 0x22));
         private Brush _brushRight   = new SolidColorBrush(Color.FromRgb(0x16, 0x6F, 0x16));
@@ -1215,6 +1218,15 @@ namespace newgdq
                 {
                     title = $"第{m.Groups[1].Value}段 {m.Groups[2].Value.Trim()}".TrimEnd();
                     body  = m.Groups[3].Value;
+                    if (int.TryParse(m.Groups[1].Value, out var sn) && sn > 0)
+                        _currentSegNo = sn;
+                }
+                else
+                {
+                    // 未匹配 "第N段" 头：本进程内自增段号（对齐老版 Glob.AZpre 行为）
+                    _clipboardSegCounter++;
+                    _currentSegNo = _clipboardSegCounter;
+                    title = $"来自剪切板 · 第 {_currentSegNo} 段";
                 }
 
                 string text = TextProcessor.TickBlock(body);
