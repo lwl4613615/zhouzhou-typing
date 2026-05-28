@@ -437,6 +437,9 @@
                           RowBackground="{StaticResource PanelBG}"
                           AlternatingRowBackground="{DynamicResource AltRowBG}"
                           Foreground="{DynamicResource ValueFG}"
+                          ScrollViewer.VerticalScrollBarVisibility="Visible"
+                          ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                          ScrollViewer.CanContentScroll="True"
                           RowHeight="24" FontSize="12" FontFamily="微软雅黑">
                     <DataGrid.Columns>
                         <DataGridTextColumn Width="40" Binding="{Binding Index}"/>
