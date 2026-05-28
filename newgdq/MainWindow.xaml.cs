@@ -637,8 +637,10 @@ namespace newgdq
             // ===== 第 2 层：慢字标记（红色倒三角 + ms 数字，纵向堆叠避免重叠）=====
             // 先把所有标签 measure 一次，再贪心分层（多个标签共用 y 时按 X 排序左→右占位）
             var labelInfos = new List<(System.Windows.Shapes.Polygon tri, TextBlock lbl, double labelX, double width)>();
-            foreach (var (idx, ms) in slowTop.OrderBy(t => t.idx))
+            slowTop.Sort((a, b) => a.idx.CompareTo(b.idx));
+            foreach (var item in slowTop)
             {
+                int idx = item.idx; double ms = item.ms;
                 double x = (idx + 0.5) * cellW;
                 // 三角紧贴色块上方（指向具体字）
                 double triTop = midY + MidH - 6;
