@@ -237,7 +237,7 @@
 
         <!-- 6. 跟打地图（嵌入式，贴底标记栏上方）-->
         <Border DockPanel.Dock="Bottom" x:Name="MapPanel" Visibility="Collapsed"
-                Background="#16161A" BorderBrush="#333" BorderThickness="0,1,0,0"
+                Background="{DynamicResource AltRowBG}" BorderBrush="{DynamicResource GridLine}" BorderThickness="0,1,0,0"
                 Height="80">
             <Canvas x:Name="MapCanvas" ClipToBounds="True" SizeChanged="MapCanvas_SizeChanged"/>
         </Border>

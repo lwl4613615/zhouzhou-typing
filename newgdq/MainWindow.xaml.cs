@@ -415,11 +415,19 @@ namespace newgdq
 
         private void BuildInlineChart()
         {
+            // 从主题取色，浅色下白底深字、暗色下深底亮字
+            var bgBrush   = this.TryFindResource("PanelBG")  as SolidColorBrush ?? new SolidColorBrush(Color.FromRgb(0x1E,0x1E,0x1E));
+            var fgBrush   = this.TryFindResource("LabelFG")  as SolidColorBrush ?? new SolidColorBrush(Color.FromRgb(0x88,0x88,0x88));
+            var gridLine  = this.TryFindResource("GridLine") as SolidColorBrush ?? new SolidColorBrush(Color.FromArgb(0x22,0xFF,0xFF,0xFF));
+            var bgColor   = OxyPlot.OxyColor.FromArgb(0xFF, bgBrush.Color.R,  bgBrush.Color.G,  bgBrush.Color.B);
+            var fgColor   = OxyPlot.OxyColor.FromArgb(0xFF, fgBrush.Color.R,  fgBrush.Color.G,  fgBrush.Color.B);
+            var gridColor = OxyPlot.OxyColor.FromArgb(0x55, gridLine.Color.R, gridLine.Color.G, gridLine.Color.B);
+
             _chartModel = new OxyPlot.PlotModel
             {
-                Background          = OxyPlot.OxyColor.FromRgb(0x1E, 0x1E, 0x1E),
+                Background          = bgColor,
                 PlotAreaBorderColor = OxyPlot.OxyColors.Transparent,
-                TextColor           = OxyPlot.OxyColor.FromRgb(0x88, 0x88, 0x88),
+                TextColor           = fgColor,
                 PlotMargins         = new OxyPlot.OxyThickness(36, 4, 8, 20),
             };
             _chartModel.Axes.Add(new OxyPlot.Axes.LinearAxis
@@ -427,7 +435,7 @@ namespace newgdq
                 Position           = OxyPlot.Axes.AxisPosition.Bottom,
                 AxislineColor      = OxyPlot.OxyColors.Transparent,
                 MajorGridlineStyle = OxyPlot.LineStyle.Solid,
-                MajorGridlineColor = OxyPlot.OxyColor.FromArgb(0x22, 0xFF, 0xFF, 0xFF),
+                MajorGridlineColor = gridColor,
                 Minimum            = 0,
                 TickStyle          = OxyPlot.Axes.TickStyle.None,
                 FontSize           = 10,
@@ -437,7 +445,7 @@ namespace newgdq
                 Position           = OxyPlot.Axes.AxisPosition.Left,
                 AxislineColor      = OxyPlot.OxyColors.Transparent,
                 MajorGridlineStyle = OxyPlot.LineStyle.Solid,
-                MajorGridlineColor = OxyPlot.OxyColor.FromArgb(0x22, 0xFF, 0xFF, 0xFF),
+                MajorGridlineColor = gridColor,
                 Minimum            = 0,
                 TickStyle          = OxyPlot.Axes.TickStyle.None,
                 FontSize           = 10,
