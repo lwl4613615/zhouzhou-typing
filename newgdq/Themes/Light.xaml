@@ -7,16 +7,16 @@
     </ResourceDictionary.MergedDictionaries>
 
     <!-- 浅色主题（薄雾灰 + 琥珀强调） -->
-    <SolidColorBrush x:Key="PanelBG"   Color="#EEF1F6"/>
+    <SolidColorBrush x:Key="PanelBG"   Color="#F7F9FC"/>
     <SolidColorBrush x:Key="CellBG"    Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="DarkBG"    Color="#F7F9FC"/>
+    <SolidColorBrush x:Key="DarkBG"    Color="#FAFBFE"/>
     <SolidColorBrush x:Key="TickBG"    Color="#E4E8EF"/>
-    <SolidColorBrush x:Key="GridLine"  Color="#D2D8E0"/>
-    <SolidColorBrush x:Key="LabelFG"   Color="#6B7280"/>
-    <SolidColorBrush x:Key="ValueFG"   Color="#1F2937"/>
-    <SolidColorBrush x:Key="AccentFG"  Color="#E67E22"/>
-    <SolidColorBrush x:Key="AltRowBG"  Color="#F5F7FB"/>
-    <SolidColorBrush x:Key="FootSubFG" Color="#3A5FA8"/>
+    <SolidColorBrush x:Key="GridLine"  Color="#C0C8D2"/>
+    <SolidColorBrush x:Key="LabelFG"   Color="#374151"/>
+    <SolidColorBrush x:Key="ValueFG"   Color="#0F172A"/>
+    <SolidColorBrush x:Key="AccentFG"  Color="#D35400"/>
+    <SolidColorBrush x:Key="AltRowBG"  Color="#EEF2F7"/>
+    <SolidColorBrush x:Key="FootSubFG" Color="#1E40AF"/>
 
     <!-- 覆盖 HandyControl RegionBrush，营造柔和渐变 -->
     <LinearGradientBrush x:Key="RegionBrush" StartPoint="0,0" EndPoint="0,1">
