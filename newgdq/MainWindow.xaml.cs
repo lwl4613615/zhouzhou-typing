@@ -74,6 +74,9 @@ namespace newgdq
         private readonly HashSet<int> _slowMarks = new HashSet<int>();
         private readonly HashSet<int> _hgMarks   = new HashSet<int>();
 
+        // 当前段号：发文模式下记录"刚发出的段号"，结算时写入历史。非发文置 0。
+        private int _currentSegNo;
+
         /// <summary>把对照区滚到当前光标位置，保证最后一行不被卡在视窗下方。</summary>
         private void ScrollCompareToCursor(int len)
         {
@@ -726,6 +729,7 @@ namespace newgdq
             {
                 var text  = ArticleLoader.LoadInternal(fileName);
                 var title = mi.Header?.ToString() ?? string.Empty;
+                _currentSegNo = 0;
                 LoadArticle(text, title);
             }
             catch (Exception ex)
@@ -939,7 +943,7 @@ namespace newgdq
                 HandyControl.Controls.Growl.Info("跟打中，已重打当前段（如需载入新文请先按 F5 复位）");
                 return;
             }
-
+            _currentSegNo = 0;
             try
             {
                 string raw = System.Windows.Clipboard.GetText();
@@ -1040,6 +1044,7 @@ namespace newgdq
                 return;
             }
             LoadArticle(seg, $"{_sending.State.Title} · 第 {target} 段");
+            _currentSegNo = target;
             _sendStatusWin?.Refresh();
         }
 
@@ -1072,6 +1077,7 @@ namespace newgdq
                 return;
             }
             int curSeg = _sending.State.CurSeg - 1; // SentSeg 已 ++，当前段号 = StartSeg + (SentSeg - 1)
+            _currentSegNo = curSeg;
             string title = $"{_sending.State.Title} · 第 {curSeg} 段";
             LoadArticle(seg, title);
             _sendStatusWin?.Refresh();
@@ -1281,6 +1287,7 @@ namespace newgdq
                     string seg = _sending.JumpToSeg(captured);
                     if (seg == null) { HandyControl.Controls.Growl.Warning("跳转失败"); return; }
                     LoadArticle(seg, $"{_sending.State.Title} · 第 {captured} 段");
+                    _currentSegNo = captured;
                 };
                 menu.Items.Add(mi);
             }
@@ -1311,6 +1318,7 @@ namespace newgdq
             InlineChartReset();
             MapReset();
             _repeatCount = 0;
+            _currentSegNo = 0;
             RefreshExtraStatus();
             HandyControl.Controls.Growl.Info("已复位");
         }
@@ -1730,7 +1738,7 @@ namespace newgdq
                 When    = DateTime.Now,
                 Time    = DateTime.Now.ToString("HH:mm:ss"),
                 Title   = _session.Title,
-                Seg     = _sending.State.Active ? (_sending.State.CurSeg - 1).ToString() : "1",
+                Seg     = _currentSegNo > 0 ? _currentSegNo.ToString() : "1",
                 Speed   = Math.Round(speed, 2),
                 Speed2  = Math.Round(speed2, 2),
                 Jj      = Math.Round(jj, 2),
