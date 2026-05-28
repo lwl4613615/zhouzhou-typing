@@ -767,6 +767,14 @@ namespace newgdq
             TbxInput.MaxLength = _session.TypeText.Length;
             TbxInput.Clear();
             TbxInput.Focus();
+
+            // 新段载入后把对照区滚回顶部 (BringIntoView 在 Loaded 之前可能没生效，用 Dispatcher 延后一帧)
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                try { RtbCompare.ScrollToHome(); } catch { }
+                try { TbxInput.ScrollToHome(); } catch { }
+            }), System.Windows.Threading.DispatcherPriority.Loaded);
+
             UpdateProgress();
             RefreshBmTips();
             ComputeAndShowTheoryMc();
