@@ -57,6 +57,10 @@ namespace newgdq.Models
         // 速度门槛：完成段时速度（字/分）低于此值不入历史/不发图。0 = 关闭。
         [DataMember(EmitDefaultValue = false)] public double? SpeedLimit { get; set; }
 
+        // 并击模式：30ms 滑动窗内连续 down 合并为 1 击，最多 4 键一组；退格/回车独立计。默认开启。
+        // 单键用户两键间隔通常 >70ms，开启不影响；并击键盘组内多键 1–25ms 才会被合并。
+        [DataMember(EmitDefaultValue = false)] public bool? MergeChord { get; set; }
+
         // 发文参数预设（命名保存）
         [DataMember(EmitDefaultValue = false)] public System.Collections.Generic.List<SendPreset> SendPresets { get; set; }
     }

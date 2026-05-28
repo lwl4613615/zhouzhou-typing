@@ -25,6 +25,12 @@ namespace newgdq
         private byte[] _runStatus = new byte[0];
         private int _historyIndex;
 
+        // 并击合并状态：滑动窗 30ms / 单组最多 4 键；退格/回车不参与
+        private const int ChordWindowMs = 30;
+        private const int ChordMaxKeys  = 4;
+        private DateTime _chordLastTime = DateTime.MinValue;
+        private int      _chordCount;
+
         // 服务 / 计时器
         private readonly KeyHook _keyHook = new KeyHook();
         private readonly ImeWatcher _ime = new ImeWatcher();
@@ -933,6 +939,10 @@ namespace newgdq
             _session.Load(text, title);
             Services.KeyHook.LogLine($">>>> LOAD seg=[{title}] 字数={_session.TypeText.Length}");
 
+            // 重置并击合并窗：上一段最后一组按键不应跨段并入新段第一键
+            _chordCount    = 0;
+            _chordLastTime = DateTime.MinValue;
+
             // 重建对照区
             RtbCompare.Document.Blocks.Clear();
             RtbCompare.Document.PagePadding = new Thickness(0);
@@ -1666,8 +1676,31 @@ namespace newgdq
             if (!(isAlpha || isDigit || isNumpad || isPunct || isEnter || isBackspace || isSpace))
                 return;
 
-            _session.Keys++;
-            Services.KeyHook.LogLine($"  COUNTED vk=0x{vk:X2} → Keys={_session.Keys}");
+            // 并击合并：默认开启。滑动窗 30ms 内连续 down 视为同一组（最多 4 键）算 1 击；
+            // 退格/回车独立成击且关闭当前合并窗，避免连按退格被吞。
+            bool mergeChord  = Services.SettingsService.Instance.MergeChord ?? true;
+            bool isolated    = isBackspace || isEnter;
+            var  now         = DateTime.Now;
+            double gapMs     = (now - _chordLastTime).TotalMilliseconds;
+            bool inChord     = mergeChord
+                            && !isolated
+                            && _chordCount > 0
+                            && _chordCount < ChordMaxKeys
+                            && gapMs <= ChordWindowMs;
+
+            if (inChord)
+            {
+                _chordCount++;
+                _chordLastTime = now;
+                Services.KeyHook.LogLine($"  MERGED vk=0x{vk:X2} gap={gapMs:0}ms chord#{_chordCount} Keys={_session.Keys}");
+            }
+            else
+            {
+                _session.Keys++;
+                if (isolated) { _chordCount = 0; _chordLastTime = DateTime.MinValue; }
+                else          { _chordCount = 1; _chordLastTime = now; }
+                Services.KeyHook.LogLine($"  COUNTED vk=0x{vk:X2} → Keys={_session.Keys}");
+            }
 
             // IME 退格计数（替代老版的"回车"列）：物理 Backspace 时若 TextBox 长度没变
             // = 用户在拼音候选框里删拼音，不是删跟打区已上屏的字（后者 input 变短 → Hg）

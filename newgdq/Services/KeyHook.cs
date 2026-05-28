@@ -15,7 +15,7 @@ namespace newgdq.Services
         public event EventHandler<int> KeyUp;     // 参数：vkCode
 
         /// <summary>调试日志开关。开启时把每个 KeyHook 事件写到 exe 同目录的 keyhook.log。</summary>
-        public static bool DebugLog { get; set; } = true;
+        public static bool DebugLog { get; set; } = false;
         private static readonly string LogPath = Path.Combine(
             Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? ".",
             "keyhook.log");

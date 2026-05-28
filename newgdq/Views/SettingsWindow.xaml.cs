@@ -66,6 +66,7 @@ namespace newgdq.Views
             ChkMinimizeToTray.IsChecked = s.MinimizeToTray ?? false;
             NudAutoRepeat.Value = s.AutoRepeatMinutes ?? 0;
             NudSpeedLimit.Value = s.SpeedLimit ?? 0;
+            ChkMergeChord.IsChecked = s.MergeChord ?? true;
 
             // 存储 Tab
             TxtConfigPath.Text = SettingsService.FilePath;
@@ -167,6 +168,7 @@ namespace newgdq.Views
             s.MinimizeToTray = ChkMinimizeToTray.IsChecked == true;
             s.AutoRepeatMinutes = (int?)NudAutoRepeat.Value;
             s.SpeedLimit = NudSpeedLimit.Value;
+            s.MergeChord = ChkMergeChord.IsChecked == true;
 
             string oldTheme = string.IsNullOrEmpty(s.ThemeName) ? "Dark" : s.ThemeName;
             s.ThemeName = RdoThemeLight.IsChecked == true ? "Light" : "Dark";
