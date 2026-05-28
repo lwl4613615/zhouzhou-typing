@@ -18,6 +18,9 @@ namespace newgdq.Services
         private const int WM_KEYUP       = 0x0101;
         private const int WM_SYSKEYDOWN  = 0x0104;
         private const int WM_SYSKEYUP    = 0x0105;
+        // KBDLLHOOKSTRUCT.flags bits
+        private const int LLKHF_INJECTED       = 0x10;
+        private const int LLKHF_LOWER_IL_INJECTED = 0x02;
 
         private IntPtr _hookId = IntPtr.Zero;
         private LowLevelKeyboardProc _proc; // 防止 GC 回收
@@ -49,10 +52,16 @@ namespace newgdq.Services
             {
                 int msg = wParam.ToInt32();
                 int vk  = Marshal.ReadInt32(lParam);
-                if (msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN)
-                    KeyDown?.Invoke(this, vk);
-                else if (msg == WM_KEYUP || msg == WM_SYSKEYUP)
-                    KeyUp?.Invoke(this, vk);
+                // KBDLLHOOKSTRUCT 偏移 8 字节是 flags：过滤 IME / SendInput 注入的事件
+                int flags = Marshal.ReadInt32(lParam, 8);
+                bool injected = (flags & (LLKHF_INJECTED | LLKHF_LOWER_IL_INJECTED)) != 0;
+                if (!injected)
+                {
+                    if (msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN)
+                        KeyDown?.Invoke(this, vk);
+                    else if (msg == WM_KEYUP || msg == WM_SYSKEYUP)
+                        KeyUp?.Invoke(this, vk);
+                }
             }
             return CallNextHookEx(_hookId, nCode, wParam, lParam);
         }
