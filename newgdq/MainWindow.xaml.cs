@@ -1208,7 +1208,8 @@ namespace newgdq
                     return;
                 }
 
-                // 尝试识别原版"-----第N段 标题\n正文\n-----"格式
+                // 尝试识别原版"-----第N段 标题\n正文\n-----"格式：只剥头取正文/标题，
+                // 段号一律忽略剪贴板里写的数字，统一用本进程载入次数（对齐老版 Glob.AZpre）
                 string title = "来自剪切板";
                 string body  = raw;
                 var m = System.Text.RegularExpressions.Regex.Match(
@@ -1216,18 +1217,15 @@ namespace newgdq
                     @"-{3,}\s*第(\d+)段\s*([^\r\n]*)\r?\n([\s\S]+?)(?:\r?\n-{3,}|$)");
                 if (m.Success)
                 {
-                    title = $"第{m.Groups[1].Value}段 {m.Groups[2].Value.Trim()}".TrimEnd();
+                    string titlePart = m.Groups[2].Value.Trim();
                     body  = m.Groups[3].Value;
-                    if (int.TryParse(m.Groups[1].Value, out var sn) && sn > 0)
-                        _currentSegNo = sn;
+                    title = string.IsNullOrEmpty(titlePart) ? "来自剪切板" : titlePart;
                 }
-                else
-                {
-                    // 未匹配 "第N段" 头：本进程内自增段号（对齐老版 Glob.AZpre 行为）
-                    _clipboardSegCounter++;
-                    _currentSegNo = _clipboardSegCounter;
-                    title = $"来自剪切板 · 第 {_currentSegNo} 段";
-                }
+
+                // 段号本进程内自增，每按一次 F4 / 菜单载入剪贴板都 +1
+                _clipboardSegCounter++;
+                _currentSegNo = _clipboardSegCounter;
+                title = $"{title} · 第 {_currentSegNo} 段";
 
                 string text = TextProcessor.TickBlock(body);
                 if (text.Length == 0)
