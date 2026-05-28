@@ -51,17 +51,26 @@ namespace newgdq.Services
             if (nCode >= 0)
             {
                 int msg = wParam.ToInt32();
-                int vk  = Marshal.ReadInt32(lParam);
-                // KBDLLHOOKSTRUCT 偏移 8 字节是 flags：过滤 IME / SendInput 注入的事件
-                int flags = Marshal.ReadInt32(lParam, 8);
+                int vk        = Marshal.ReadInt32(lParam);       // offset 0
+                int scanCode  = Marshal.ReadInt32(lParam, 4);    // offset 4
+                int flags     = Marshal.ReadInt32(lParam, 8);    // offset 8
+
+                // 严格物理键过滤（5 层）：
+                // 1) LLKHF_INJECTED (0x10) - 标准注入
+                // 2) LLKHF_LOWER_IL_INJECTED (0x02) - 低权限注入
+                // 3) scanCode == 0 - 物理键必有扫描码，IME/SendKey 常为 0
+                // 4) vk == 0xE5 (VK_PROCESSKEY) - IME 占位
+                // 5) vk == 0xFF / 0 - 非法 vk
                 bool injected = (flags & (LLKHF_INJECTED | LLKHF_LOWER_IL_INJECTED)) != 0;
-                if (!injected)
-                {
-                    if (msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN)
-                        KeyDown?.Invoke(this, vk);
-                    else if (msg == WM_KEYUP || msg == WM_SYSKEYUP)
-                        KeyUp?.Invoke(this, vk);
-                }
+                bool noScan   = scanCode == 0;
+                bool imeKey   = vk == 0xE5 || vk == 0xFF || vk == 0;
+                if (injected || noScan || imeKey)
+                    return CallNextHookEx(_hookId, nCode, wParam, lParam);
+
+                if (msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN)
+                    KeyDown?.Invoke(this, vk);
+                else if (msg == WM_KEYUP || msg == WM_SYSKEYUP)
+                    KeyUp?.Invoke(this, vk);
             }
             return CallNextHookEx(_hookId, nCode, wParam, lParam);
         }
