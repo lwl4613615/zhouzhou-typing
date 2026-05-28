@@ -77,12 +77,30 @@ namespace newgdq
         // 当前段号：发文模式下记录"刚发出的段号"，结算时写入历史。非发文置 0。
         private int _currentSegNo;
 
-        /// <summary>把对照区滚到当前光标位置，保证最后一行不被卡在视窗下方。</summary>
+        /// <summary>把对照区滚到当前光标位置前一行（预读），保证下一行始终可见。</summary>
         private void ScrollCompareToCursor(int len)
         {
             if (_charRuns.Count == 0) return;
             int idx = Math.Min(Math.Max(len, 0), _charRuns.Count - 1);
-            try { _charRuns[idx].BringIntoView(); } catch { }
+            try
+            {
+                var run = _charRuns[idx];
+                var rect = run.ContentStart.GetCharacterRect(LogicalDirection.Forward);
+                if (rect.IsEmpty)
+                {
+                    run.BringIntoView();
+                    return;
+                }
+                // 预读：让光标处于视窗中部偏上 1/3 位置，确保下方至少看到 2-3 行
+                double targetTopRatio = 0.30;
+                double anchorY = RtbCompare.ActualHeight * targetTopRatio;
+                double delta = rect.Top - anchorY;
+                if (Math.Abs(delta) < 4) return;   // 微小变化不滚，避免抖动
+                double newOffset = RtbCompare.VerticalOffset + delta;
+                if (newOffset < 0) newOffset = 0;
+                RtbCompare.ScrollToVerticalOffset(newOffset);
+            }
+            catch { }
         }
 
         /// <summary>结算时统一染色：先涂回改(浅黄)，再涂慢字(浅绿)，错字红色已由 TextChanged 维护。
@@ -1990,8 +2008,15 @@ namespace newgdq
                             w * 2, h * 2, 192, 192,    // 2x DPI 让图更清晰
                             System.Windows.Media.PixelFormats.Pbgra32);
                         rtb.Render(card);
-                        System.Windows.Clipboard.SetImage(rtb);
-                        HandyControl.Controls.Growl.Success("成绩图已自动复制到剪贴板");
+                        System.Windows.Media.Imaging.BitmapSource frozen = rtb;
+                        // 防 OpenClipboard 0x800401D0：被其他进程占用时重试
+                        bool ok = false;
+                        for (int retry = 0; retry < 4 && !ok; retry++)
+                        {
+                            try { System.Windows.Clipboard.SetImage(frozen); ok = true; }
+                            catch { System.Threading.Thread.Sleep(80); }
+                        }
+                        if (ok) HandyControl.Controls.Growl.Success("成绩图已自动复制到剪贴板");
                     }
                     catch (Exception ex) { System.Diagnostics.Debug.WriteLine("AutoCopyResultImage render: " + ex); }
                 }), System.Windows.Threading.DispatcherPriority.Loaded);

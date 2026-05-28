@@ -106,8 +106,15 @@ namespace newgdq.Views
             {
                 var img = RenderWindowImage();
                 if (img == null) { HandyControl.Controls.Growl.Warning("没有可截取的内容"); return; }
-                Clipboard.SetImage(img);
-                HandyControl.Controls.Growl.Success("成绩图已复制到剪贴板");
+                // 防 OpenClipboard 0x800401D0：被其他进程占用时重试
+                bool ok = false;
+                for (int retry = 0; retry < 4 && !ok; retry++)
+                {
+                    try { Clipboard.SetImage(img); ok = true; }
+                    catch { System.Threading.Thread.Sleep(80); }
+                }
+                if (ok) HandyControl.Controls.Growl.Success("成绩图已复制到剪贴板");
+                else HandyControl.Controls.Growl.Warning("剪贴板被占用，复制失败，请重试");
             }
             catch (Exception ex) { HandyControl.Controls.Growl.Error(ex.Message); }
         }
