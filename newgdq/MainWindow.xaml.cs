@@ -931,6 +931,7 @@ namespace newgdq
                 text = Services.TextProcessor.En2Cn(text);
 
             _session.Load(text, title);
+            Services.KeyHook.LogLine($">>>> LOAD seg=[{title}] 字数={_session.TypeText.Length}");
 
             // 重建对照区
             RtbCompare.Document.Blocks.Clear();
@@ -1666,6 +1667,7 @@ namespace newgdq
                 return;
 
             _session.Keys++;
+            Services.KeyHook.LogLine($"  COUNTED vk=0x{vk:X2} → Keys={_session.Keys}");
 
             // IME 退格计数（替代老版的"回车"列）：物理 Backspace 时若 TextBox 长度没变
             // = 用户在拼音候选框里删拼音，不是删跟打区已上屏的字（后者 input 变短 → Hg）
@@ -1924,6 +1926,8 @@ namespace newgdq
             RefreshBmTips();
 
             var (speed, speed2, jj, mc, sec) = _session.ComputeStats(total);
+            Services.KeyHook.LogLine($"==== FINISH 字数={total} Keys={_session.Keys} Hg={_session.Hg} Cz={_session.Cz} "
+                + $"用时={sec:0.00}s 速度={speed:0.00} 击键={jj:0.00} 码长={mc:0.00} ====");
 
             // 速度门槛：底部"限制"按钮启用 + 设置中阈值 > 0 + 当前速度低于阈值 → 不入历史
             bool blockedByLimit = false;

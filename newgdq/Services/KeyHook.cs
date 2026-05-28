@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace newgdq.Services
@@ -12,6 +13,23 @@ namespace newgdq.Services
     {
         public event EventHandler<int> KeyDown;   // 参数：vkCode
         public event EventHandler<int> KeyUp;     // 参数：vkCode
+
+        /// <summary>调试日志开关。开启时把每个 KeyHook 事件写到 exe 同目录的 keyhook.log。</summary>
+        public static bool DebugLog { get; set; } = true;
+        private static readonly string LogPath = Path.Combine(
+            Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? ".",
+            "keyhook.log");
+        private static readonly object LogLock = new object();
+        public static void LogLine(string s)
+        {
+            if (!DebugLog) return;
+            try
+            {
+                lock (LogLock)
+                    File.AppendAllText(LogPath, DateTime.Now.ToString("HH:mm:ss.fff ") + s + Environment.NewLine);
+            }
+            catch { }
+        }
 
         private const int WH_KEYBOARD_LL = 13;
         private const int WM_KEYDOWN     = 0x0100;
@@ -61,10 +79,14 @@ namespace newgdq.Services
                 // 其他特征（scanCode==0 / 低权限注入位）会误杀部分 IME 候选时真实按键，已禁用。
                 bool injected = (flags & LLKHF_INJECTED) != 0;
                 bool imeProcess = vk == 0xE5;
+                bool isDown = (msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN);
+                if (isDown)
+                    LogLine($"DOWN vk=0x{vk:X2} sc=0x{scanCode:X2} flags=0x{flags:X2}"
+                            + (injected ? " INJ" : "") + (imeProcess ? " IME" : ""));
                 if (injected || imeProcess)
                     return CallNextHookEx(_hookId, nCode, wParam, lParam);
 
-                if (msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN)
+                if (isDown)
                     KeyDown?.Invoke(this, vk);
                 else if (msg == WM_KEYUP || msg == WM_SYSKEYUP)
                     KeyUp?.Invoke(this, vk);
