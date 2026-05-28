@@ -599,7 +599,8 @@ namespace newgdq
             double drawCellW = Math.Max(cellW, 1.5);
 
             // 三层高度分配（总高 32）：上 12 = 刻度，中 8 = 标记，下 12 = 色块
-            const double TopH = 12, MidH = 8, BotH = 12;
+            // 三层高度：顶 14 刻度 / 中 32 标签堆叠区(2-3 行 ms 标签) / 下 14 色块
+            const double TopH = 14, MidH = 32, BotH = 14;
             double topY = 0, midY = TopH, botY = TopH + MidH;
 
             // ===== 第 1 层：顶部刻度（0%/25%/50%/75%/100%）=====
@@ -633,21 +634,24 @@ namespace newgdq
                 MapCanvas.Children.Add(lbl);
             }
 
-            // ===== 第 2 层：慢字标记（红色倒三角 + ms 数字）=====
-            foreach (var (idx, ms) in slowTop)
+            // ===== 第 2 层：慢字标记（红色倒三角 + ms 数字，纵向堆叠避免重叠）=====
+            // 先把所有标签 measure 一次，再贪心分层（多个标签共用 y 时按 X 排序左→右占位）
+            var labelInfos = new List<(System.Windows.Shapes.Polygon tri, TextBlock lbl, double labelX, double width)>();
+            foreach (var (idx, ms) in slowTop.OrderBy(t => t.idx))
             {
                 double x = (idx + 0.5) * cellW;
+                // 三角紧贴色块上方（指向具体字）
+                double triTop = midY + MidH - 6;
                 var tri = new System.Windows.Shapes.Polygon
                 {
                     Points = new System.Windows.Media.PointCollection
                     {
-                        new System.Windows.Point(x - 4, midY),
-                        new System.Windows.Point(x + 4, midY),
-                        new System.Windows.Point(x,     midY + MidH - 1),
+                        new System.Windows.Point(x - 4, triTop),
+                        new System.Windows.Point(x + 4, triTop),
+                        new System.Windows.Point(x,     triTop + 6),
                     },
                     Fill = new SolidColorBrush(Color.FromRgb(0xFF, 0x55, 0x55)),
                 };
-                MapCanvas.Children.Add(tri);
                 var lbl = new TextBlock
                 {
                     Text = ((int)ms) + "ms",
@@ -660,13 +664,41 @@ namespace newgdq
                     },
                 };
                 lbl.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-                double labelX = x - lbl.DesiredSize.Width / 2;
+                double w = lbl.DesiredSize.Width;
+                double labelX = x - w / 2;
                 if (labelX < 0) labelX = 0;
-                if (labelX + lbl.DesiredSize.Width > _mapW) labelX = _mapW - lbl.DesiredSize.Width;
-                System.Windows.Controls.Canvas.SetLeft(lbl, labelX);
-                System.Windows.Controls.Canvas.SetTop(lbl, midY - 1);   // 略微压在三角上方
-                MapCanvas.Children.Add(lbl);
+                if (labelX + w > _mapW) labelX = _mapW - w;
+                labelInfos.Add((tri, lbl, labelX, w));
             }
+
+            // 贪心多行布局：每层一个 list 记录已占区间，新标签找第一个不冲突的层
+            var rows = new List<List<(double left, double right)>>();
+            const double LineH = 12;            // 每层高度
+            const double PadX = 3;              // 横向间距
+            foreach (var info in labelInfos)
+            {
+                MapCanvas.Children.Add(info.tri);
+                int row = 0;
+                while (true)
+                {
+                    if (row >= rows.Count) rows.Add(new List<(double, double)>());
+                    bool conflict = false;
+                    foreach (var (l, r) in rows[row])
+                        if (!(info.labelX + info.width + PadX < l || info.labelX > r + PadX)) { conflict = true; break; }
+                    if (!conflict) { rows[row].Add((info.labelX, info.labelX + info.width)); break; }
+                    row++;
+                }
+                // 标签从中部最上排起，往下堆叠
+                double y = midY + row * LineH;
+                System.Windows.Controls.Canvas.SetLeft(info.lbl, info.labelX);
+                System.Windows.Controls.Canvas.SetTop(info.lbl, y);
+                MapCanvas.Children.Add(info.lbl);
+            }
+
+            // 如果标签层数超过 1，动态加高容器（让标签不被裁）
+            int neededRows = rows.Count;
+            double needH = topY + neededRows * LineH + MidH + BotH + 2;
+            if (MapPanel.Height < needH) MapPanel.Height = needH;
 
             // ===== 第 3 层：色块条 =====
             for (int i = 0; i < total; i++)

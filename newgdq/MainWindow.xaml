@@ -238,7 +238,7 @@
         <!-- 6. 节奏热力条（贴底标记栏上方）：每格=1字，绿→红 = 该字耗时 -->
         <Border DockPanel.Dock="Bottom" x:Name="MapPanel" Visibility="Collapsed"
                 Background="{DynamicResource AltRowBG}" BorderBrush="{DynamicResource GridLine}" BorderThickness="0,1,0,0"
-                Height="32" ToolTip="节奏热力条：上=刻度(0-100%)，中=慢字标记，下=色块（绿快/红卡）">
+                Height="60" ToolTip="节奏热力条：上=刻度(0-100%)，中=慢字标记(纵向堆叠避免重叠)，下=色块（绿快/红卡）">
             <Canvas x:Name="MapCanvas" ClipToBounds="True" SizeChanged="MapCanvas_SizeChanged"/>
         </Border>
 
