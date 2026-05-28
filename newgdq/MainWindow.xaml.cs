@@ -409,7 +409,7 @@ namespace newgdq
         {
             bool on = TogChart.IsChecked == true;
             if (on && _chartModel == null) BuildInlineChart();
-            ChartCol.Width          = on ? new GridLength(300) : new GridLength(0);
+            ChartCol.Width          = on ? new GridLength(180) : new GridLength(0);
             ChartSplitterCol.Width  = on ? new GridLength(4)   : new GridLength(0);
         }
 
