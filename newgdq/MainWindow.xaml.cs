@@ -573,7 +573,7 @@ namespace newgdq
             int total = _session.TypeText.Length;
             if (total <= 0) return;
 
-            // 从 Report 事件汇总每个字的耗时（事件 perChar 平均分摊到这次输入的字）
+            // 从 Report 事件汇总每个字的耗时
             if (_charMs == null || _charMs.Length != total) _charMs = new double[total];
             else Array.Clear(_charMs, 0, _charMs.Length);
             int prevLen = 0;
@@ -586,26 +586,90 @@ namespace newgdq
                 prevLen = ev.End;
             }
 
-            // 找最慢字索引（用于发光）
-            double maxMs = 0; int maxIdx = -1;
+            // 找最慢的几个字（前 3 名，用于上方标记）
+            var slowTop = new List<(int idx, double ms)>();
             for (int i = 0; i < total; i++)
-                if (_charMs[i] > maxMs) { maxMs = _charMs[i]; maxIdx = i; }
+                if (_charMs[i] > 800) slowTop.Add((i, _charMs[i]));
+            slowTop.Sort((a, b) => b.ms.CompareTo(a.ms));
+            if (slowTop.Count > 3) slowTop.RemoveRange(3, slowTop.Count - 3);
+            int maxIdx = slowTop.Count > 0 ? slowTop[0].idx : -1;
+            double maxMs = slowTop.Count > 0 ? slowTop[0].ms : 0;
 
             double cellW = _mapW / total;
-            // 每格至少 2px 宽，避免几百字时出现亚像素错位
             double drawCellW = Math.Max(cellW, 1.5);
 
+            // 三层高度分配（总高 32）：上 12 = 刻度，中 8 = 标记，下 12 = 色块
+            const double TopH = 12, MidH = 8, BotH = 12;
+            double topY = 0, midY = TopH, botY = TopH + MidH;
+
+            // ===== 第 1 层：顶部刻度（0%/25%/50%/75%/100%）=====
+            var tickColor = new SolidColorBrush(Color.FromArgb(0x88, 0xFF, 0xFF, 0xFF));
+            for (int pct = 0; pct <= 100; pct += 25)
+            {
+                double x = _mapW * pct / 100.0;
+                MapCanvas.Children.Add(new System.Windows.Shapes.Line
+                {
+                    X1 = x, Y1 = topY, X2 = x, Y2 = topY + TopH,
+                    Stroke = tickColor, StrokeThickness = 1,
+                });
+                var lbl = new TextBlock
+                {
+                    Text = pct + "%",
+                    Foreground = new SolidColorBrush(Color.FromArgb(0xCC, 0xFF, 0xFF, 0xFF)),
+                    FontSize = 9,
+                };
+                System.Windows.Controls.Canvas.SetLeft(lbl, x + 2);
+                System.Windows.Controls.Canvas.SetTop(lbl, topY);
+                if (pct == 100)
+                {
+                    lbl.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                    System.Windows.Controls.Canvas.SetLeft(lbl, x - lbl.DesiredSize.Width - 2);
+                }
+                MapCanvas.Children.Add(lbl);
+            }
+
+            // ===== 第 2 层：慢字标记（红色倒三角 + ms 数字）=====
+            foreach (var (idx, ms) in slowTop)
+            {
+                double x = (idx + 0.5) * cellW;
+                var tri = new System.Windows.Shapes.Polygon
+                {
+                    Points = new System.Windows.Media.PointCollection
+                    {
+                        new System.Windows.Point(x - 4, midY),
+                        new System.Windows.Point(x + 4, midY),
+                        new System.Windows.Point(x,     midY + MidH - 1),
+                    },
+                    Fill = new SolidColorBrush(Color.FromRgb(0xFF, 0x55, 0x55)),
+                };
+                MapCanvas.Children.Add(tri);
+                var lbl = new TextBlock
+                {
+                    Text = ((int)ms) + "ms",
+                    Foreground = new SolidColorBrush(Color.FromRgb(0xFF, 0xCC, 0xCC)),
+                    FontSize = 9,
+                };
+                lbl.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                double labelX = x - lbl.DesiredSize.Width / 2;
+                if (labelX < 0) labelX = 0;
+                if (labelX + lbl.DesiredSize.Width > _mapW) labelX = _mapW - lbl.DesiredSize.Width;
+                System.Windows.Controls.Canvas.SetLeft(lbl, labelX);
+                System.Windows.Controls.Canvas.SetTop(lbl, midY - 1);   // 略微压在三角上方
+                MapCanvas.Children.Add(lbl);
+            }
+
+            // ===== 第 3 层：色块条 =====
             for (int i = 0; i < total; i++)
             {
                 var fill = ColorForMs(_charMs[i]);
                 var rect = new System.Windows.Shapes.Rectangle
                 {
                     Width = drawCellW,
-                    Height = _mapH,
+                    Height = BotH,
                     Fill = fill,
                 };
                 System.Windows.Controls.Canvas.SetLeft(rect, i * cellW);
-                System.Windows.Controls.Canvas.SetTop(rect, 0);
+                System.Windows.Controls.Canvas.SetTop(rect, botY);
                 if (i == maxIdx && maxMs > 800)
                 {
                     rect.Effect = new System.Windows.Media.Effects.DropShadowEffect
@@ -618,14 +682,6 @@ namespace newgdq
                 }
                 MapCanvas.Children.Add(rect);
             }
-
-            // 顶部 1px 高光线 + 底部 1px 阴影线，立体感
-            MapCanvas.Children.Add(new System.Windows.Shapes.Line
-            {
-                X1 = 0, Y1 = 0, X2 = _mapW, Y2 = 0,
-                Stroke = new SolidColorBrush(Color.FromArgb(0x55, 0xFF, 0xFF, 0xFF)),
-                StrokeThickness = 1,
-            });
         }
 
         /// <summary>毫秒 → 颜色（绿→黄→橙→红→深红）。空格未打的字用透明灰。</summary>
