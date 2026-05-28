@@ -55,16 +55,13 @@ namespace newgdq.Services
                 int scanCode  = Marshal.ReadInt32(lParam, 4);    // offset 4
                 int flags     = Marshal.ReadInt32(lParam, 8);    // offset 8
 
-                // 严格物理键过滤（5 层）：
-                // 1) LLKHF_INJECTED (0x10) - 标准注入
-                // 2) LLKHF_LOWER_IL_INJECTED (0x02) - 低权限注入
-                // 3) scanCode == 0 - 物理键必有扫描码，IME/SendKey 常为 0
-                // 4) vk == 0xE5 (VK_PROCESSKEY) - IME 占位
-                // 5) vk == 0xFF / 0 - 非法 vk
-                bool injected = (flags & (LLKHF_INJECTED | LLKHF_LOWER_IL_INJECTED)) != 0;
-                bool noScan   = scanCode == 0;
-                bool imeKey   = vk == 0xE5 || vk == 0xFF || vk == 0;
-                if (injected || noScan || imeKey)
+                // 物理键过滤：只过滤明确的"软件模拟"事件，避免误杀真实按键。
+                // - LLKHF_INJECTED 是 Win32 唯一可靠的"非物理键"信号
+                // - VK_PROCESSKEY (0xE5) 是 IME 占位符，物理键不会是这个值
+                // 其他特征（scanCode==0 / 低权限注入位）会误杀部分 IME 候选时真实按键，已禁用。
+                bool injected = (flags & LLKHF_INJECTED) != 0;
+                bool imeProcess = vk == 0xE5;
+                if (injected || imeProcess)
                     return CallNextHookEx(_hookId, nCode, wParam, lParam);
 
                 if (msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN)
