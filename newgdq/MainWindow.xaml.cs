@@ -1741,9 +1741,14 @@ namespace newgdq
             }
             else
             {
-                HandyControl.Controls.Growl.Success(
-                    $"完成！速度 {speed:0.00}（错一罚五 {speed2:0.00}）| 击键 {jj:0.00} | 码长 {mc:0.00} | 用时 {sec:0.00}s\n" +
-                    $"错字 {_session.Cz} | 回改 {_session.Hg} | 键数 {_session.Keys} | 打词 {_session.Words} | 选重 {_session.Reselect} | 回车 {_session.Enter} | 左:右 {_session.LeftHand}:{_session.RightHand}");
+                HandyControl.Controls.Growl.Success(new HandyControl.Data.GrowlInfo
+                {
+                    Message =
+                        $"完成！速度 {speed:0.00}（错一罚五 {speed2:0.00}）| 击键 {jj:0.00} | 码长 {mc:0.00} | 用时 {sec:0.00}s\n" +
+                        $"错字 {_session.Cz} | 回改 {_session.Hg} | 键数 {_session.Keys} | 打词 {_session.Words} | 选重 {_session.Reselect} | 回车 {_session.Enter} | 左:右 {_session.LeftHand}:{_session.RightHand}",
+                    WaitTime = 2,   // 默认 5 秒太长，缩到 2 秒
+                    ShowDateTime = false,
+                });
 
                 // 图片成绩：完成自动截 ReportWindow 复制到剪贴板
                 if (TogImage != null && TogImage.IsChecked == true)
