@@ -1,0 +1,146 @@
+<UserControl x:Class="newgdq.Views.ScoreCard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:oxy="http://oxyplot.org/wpf"
+             Width="720" Height="380"
+             FontFamily="微软雅黑">
+    <UserControl.Resources>
+        <SolidColorBrush x:Key="ScCardBG"   Color="#1E2533"/>
+        <SolidColorBrush x:Key="ScSubBG"    Color="#283044"/>
+        <SolidColorBrush x:Key="ScText"     Color="#F1F5F9"/>
+        <SolidColorBrush x:Key="ScMute"     Color="#94A3B8"/>
+        <SolidColorBrush x:Key="ScAccent"   Color="#FFD54F"/>
+        <SolidColorBrush x:Key="ScGreen"    Color="#4ADE80"/>
+        <SolidColorBrush x:Key="ScCyan"    Color="#22D3EE"/>
+        <SolidColorBrush x:Key="ScRed"     Color="#F87171"/>
+    </UserControl.Resources>
+
+    <!-- 渐变深空蓝背景 -->
+    <Grid>
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Offset="0" Color="#0F172A"/>
+                <GradientStop Offset="1" Color="#1E293B"/>
+            </LinearGradientBrush>
+        </Grid.Background>
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>     <!-- 顶部标题 -->
+                <RowDefinition Height="*"/>         <!-- 主体两列 -->
+                <RowDefinition Height="Auto"/>     <!-- 底部一行统计 -->
+            </Grid.RowDefinitions>
+
+            <!-- 顶部标题 -->
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                <Ellipse Width="10" Height="10" Fill="{StaticResource ScAccent}" VerticalAlignment="Center"/>
+                <TextBlock x:Name="TxtTitle" Foreground="{StaticResource ScText}" FontSize="18" FontWeight="Bold" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                <TextBlock x:Name="TxtSubtitle" Foreground="{StaticResource ScMute}" FontSize="12" Margin="12,0,0,0" VerticalAlignment="Bottom"/>
+                <TextBlock Text="州州跟打器" Foreground="{StaticResource ScMute}" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                           Margin="0,0,0,2">
+                    <TextBlock.RenderTransform>
+                        <TranslateTransform X="0" Y="0"/>
+                    </TextBlock.RenderTransform>
+                </TextBlock>
+            </StackPanel>
+
+            <!-- 主体：左 5 大数字卡 / 右 双图区 -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="220"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- 左：核心 KPI 5 块 -->
+                <Grid Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="6"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="6"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="6"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <!-- 速度（大） -->
+                    <Border Grid.Row="0" Grid.RowSpan="3" Grid.Column="0" Background="{StaticResource ScCardBG}" CornerRadius="8" Padding="14">
+                        <StackPanel>
+                            <TextBlock Text="速度 字/分" Foreground="{StaticResource ScMute}" FontSize="11"/>
+                            <TextBlock x:Name="TxtSpeed" Text="0.00" Foreground="{StaticResource ScAccent}" FontSize="48" FontWeight="Bold" Margin="0,2,0,0"/>
+                            <TextBlock x:Name="TxtSpeed2" Text="罚五 0.00" Foreground="{StaticResource ScMute}" FontSize="11" Margin="0,-2,0,0"/>
+                            <Border Background="#0A1525" CornerRadius="4" Padding="8" Margin="0,12,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="用时" Foreground="{StaticResource ScMute}" FontSize="10"/>
+                                    <TextBlock x:Name="TxtSec" Text="0.0s" Foreground="{StaticResource ScCyan}" FontSize="20" FontWeight="Bold"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                    <!-- 击键 -->
+                    <Border Grid.Row="0" Grid.Column="2" Background="{StaticResource ScSubBG}" CornerRadius="8" Padding="10">
+                        <StackPanel>
+                            <TextBlock Text="击键 /s" Foreground="{StaticResource ScMute}" FontSize="10"/>
+                            <TextBlock x:Name="TxtJj" Text="0.00" Foreground="{StaticResource ScGreen}" FontSize="22" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Border>
+                    <!-- 码长 -->
+                    <Border Grid.Row="2" Grid.Column="2" Background="{StaticResource ScSubBG}" CornerRadius="8" Padding="10">
+                        <StackPanel>
+                            <TextBlock Text="码长 /字" Foreground="{StaticResource ScMute}" FontSize="10"/>
+                            <TextBlock x:Name="TxtMc" Text="0.00" Foreground="{StaticResource ScCyan}" FontSize="22" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Border>
+                    <!-- 错字 -->
+                    <Border Grid.Row="4" Grid.Column="2" Background="{StaticResource ScSubBG}" CornerRadius="8" Padding="10">
+                        <StackPanel>
+                            <TextBlock Text="错字" Foreground="{StaticResource ScMute}" FontSize="10"/>
+                            <TextBlock x:Name="TxtCz" Text="0" Foreground="{StaticResource ScRed}" FontSize="22" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- 右：曲线 + 节奏热力 -->
+                <Grid Grid.Column="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="6"/>
+                        <RowDefinition Height="80"/>
+                    </Grid.RowDefinitions>
+                    <Border Grid.Row="0" Background="{StaticResource ScCardBG}" CornerRadius="8" ClipToBounds="True">
+                        <Grid>
+                            <TextBlock Text="速度走势" Foreground="{StaticResource ScMute}" FontSize="11"
+                                       Margin="12,8,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                            <oxy:PlotView x:Name="MiniChart" Background="Transparent" Margin="0,24,0,0"
+                                          TextOptions.TextFormattingMode="Ideal"
+                                          TextOptions.TextRenderingMode="ClearType"/>
+                        </Grid>
+                    </Border>
+                    <Border Grid.Row="2" Background="{StaticResource ScCardBG}" CornerRadius="8">
+                        <Grid>
+                            <TextBlock Text="节奏热力（绿快/红卡）" Foreground="{StaticResource ScMute}" FontSize="11"
+                                       Margin="12,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                            <Canvas x:Name="HeatCanvas" Margin="12,24,12,10" ClipToBounds="True"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Grid>
+
+            <!-- 底部：详细统计行 -->
+            <Border Grid.Row="2" Background="{StaticResource ScCardBG}" CornerRadius="8" Padding="14,10" Margin="0,12,0,0">
+                <UniformGrid Columns="8">
+                    <StackPanel><TextBlock Text="字数"  Foreground="{StaticResource ScMute}" FontSize="10"/><TextBlock x:Name="TxtWords"   Text="0" Foreground="{StaticResource ScText}" FontWeight="Bold"/></StackPanel>
+                    <StackPanel><TextBlock Text="键数"  Foreground="{StaticResource ScMute}" FontSize="10"/><TextBlock x:Name="TxtKeys"    Text="0" Foreground="{StaticResource ScText}" FontWeight="Bold"/></StackPanel>
+                    <StackPanel><TextBlock Text="回改"  Foreground="{StaticResource ScMute}" FontSize="10"/><TextBlock x:Name="TxtHg"      Text="0" Foreground="{StaticResource ScText}" FontWeight="Bold"/></StackPanel>
+                    <StackPanel><TextBlock Text="打词"  Foreground="{StaticResource ScMute}" FontSize="10"/><TextBlock x:Name="TxtDaci"    Text="0" Foreground="{StaticResource ScText}" FontWeight="Bold"/></StackPanel>
+                    <StackPanel><TextBlock Text="选重"  Foreground="{StaticResource ScMute}" FontSize="10"/><TextBlock x:Name="TxtResel"   Text="0" Foreground="{StaticResource ScText}" FontWeight="Bold"/></StackPanel>
+                    <StackPanel><TextBlock Text="拼回"  Foreground="{StaticResource ScMute}" FontSize="10"/><TextBlock x:Name="TxtImeBs"   Text="0" Foreground="{StaticResource ScText}" FontWeight="Bold"/></StackPanel>
+                    <StackPanel><TextBlock Text="左:右" Foreground="{StaticResource ScMute}" FontSize="10"/><TextBlock x:Name="TxtLeftRight" Text="0:0" Foreground="{StaticResource ScText}" FontWeight="Bold"/></StackPanel>
+                    <StackPanel><TextBlock Text="键准"  Foreground="{StaticResource ScMute}" FontSize="10"/><TextBlock x:Name="TxtAcc"     Text="100%" Foreground="{StaticResource ScGreen}" FontWeight="Bold"/></StackPanel>
+                </UniformGrid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

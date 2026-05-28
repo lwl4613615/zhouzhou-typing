@@ -1968,38 +1968,32 @@ namespace newgdq
             InlineChartMarkFinish();
         }
 
-        /// <summary>完成时若"图片"开启，弹一个隐藏的 ReportWindow 截图复制到剪贴板。</summary>
+        /// <summary>完成时若"图片"开启，渲染 ScoreCard UserControl 复制到剪贴板。</summary>
         private void AutoCopyResultImage()
         {
             try
             {
-                var rw = new Views.ReportWindow(_session, this)
-                {
-                    WindowStartupLocation = WindowStartupLocation.Manual,
-                    Left = -10000, Top = -10000,   // 屏外预渲染避免闪烁
-                    ShowInTaskbar = false,
-                };
-                rw.Show();
-                // 等 WPF 完成布局再截图
-                rw.Dispatcher.BeginInvoke(new Action(() =>
+                var card = new Views.ScoreCard(_session);
+                // 强制布局尺寸（UserControl 未挂到窗口树时不会自动 Measure/Arrange）
+                card.Measure(new Size(card.Width, card.Height));
+                card.Arrange(new Rect(0, 0, card.Width, card.Height));
+                card.UpdateLayout();
+
+                // 延迟一帧让 OxyPlot / Canvas SizeChanged 完成绘制
+                Dispatcher.BeginInvoke(new Action(() =>
                 {
                     try
                     {
-                        var visual = (System.Windows.Media.Visual)rw.Content;
-                        var bounds = System.Windows.Media.VisualTreeHelper.GetDescendantBounds(visual);
-                        int w = (int)Math.Ceiling(bounds.Width);
-                        int h = (int)Math.Ceiling(bounds.Height);
-                        if (w > 0 && h > 0)
-                        {
-                            var rtb = new System.Windows.Media.Imaging.RenderTargetBitmap(w, h, 96, 96,
-                                System.Windows.Media.PixelFormats.Pbgra32);
-                            rtb.Render(visual);
-                            System.Windows.Clipboard.SetImage(rtb);
-                            HandyControl.Controls.Growl.Success("成绩图已自动复制到剪贴板");
-                        }
+                        int w = (int)Math.Ceiling(card.Width);
+                        int h = (int)Math.Ceiling(card.Height);
+                        var rtb = new System.Windows.Media.Imaging.RenderTargetBitmap(
+                            w * 2, h * 2, 192, 192,    // 2x DPI 让图更清晰
+                            System.Windows.Media.PixelFormats.Pbgra32);
+                        rtb.Render(card);
+                        System.Windows.Clipboard.SetImage(rtb);
+                        HandyControl.Controls.Growl.Success("成绩图已自动复制到剪贴板");
                     }
-                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine("AutoCopyResultImage: " + ex); }
-                    finally { rw.Close(); }
+                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine("AutoCopyResultImage render: " + ex); }
                 }), System.Windows.Threading.DispatcherPriority.Loaded);
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine("AutoCopyResultImage outer: " + ex); }

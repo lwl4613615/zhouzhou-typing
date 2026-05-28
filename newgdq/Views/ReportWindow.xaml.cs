@@ -82,15 +82,21 @@ namespace newgdq.Views
 
         private System.Windows.Media.Imaging.BitmapSource RenderWindowImage()
         {
-            // 截取当前窗口内容（DPI 自适应：按 96 渲染，避免被高分屏放大太多）
-            var visual = (System.Windows.Media.Visual)this.Content;
-            var bounds = System.Windows.Media.VisualTreeHelper.GetDescendantBounds(visual);
-            int w = (int)Math.Ceiling(bounds.Width);
-            int h = (int)Math.Ceiling(bounds.Height);
+            // 渲染独立的 ScoreCard 现代化成绩卡，而不是截 ReportWindow 本身
+            var card = new ScoreCard(_session);
+            card.Measure(new Size(card.Width, card.Height));
+            card.Arrange(new Rect(0, 0, card.Width, card.Height));
+            card.UpdateLayout();
+            // 再 Pump 一次让 OxyPlot / Canvas SizeChanged 完成
+            card.Dispatcher.Invoke(() => { }, System.Windows.Threading.DispatcherPriority.Loaded);
+
+            int w = (int)Math.Ceiling(card.Width);
+            int h = (int)Math.Ceiling(card.Height);
             if (w <= 0 || h <= 0) return null;
-            var rtb = new System.Windows.Media.Imaging.RenderTargetBitmap(w, h, 96, 96,
+            var rtb = new System.Windows.Media.Imaging.RenderTargetBitmap(
+                w * 2, h * 2, 192, 192,    // 2x DPI 让图更清晰
                 System.Windows.Media.PixelFormats.Pbgra32);
-            rtb.Render(visual);
+            rtb.Render(card);
             return rtb;
         }
 

@@ -177,6 +177,14 @@
       <DependentUpon>SendStatusWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Views\ScoreCard.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="Views\ScoreCard.xaml.cs">
+      <DependentUpon>ScoreCard.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\bm.txt" />
