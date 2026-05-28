@@ -46,7 +46,7 @@
             <!-- 主体：左 5 大数字卡 / 右 双图区 -->
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="220"/>
+                    <ColumnDefinition Width="260"/>
                     <ColumnDefinition Width="12"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
@@ -69,12 +69,12 @@
                     <Border Grid.Row="0" Grid.RowSpan="3" Grid.Column="0" Background="{StaticResource ScCardBG}" CornerRadius="8" Padding="14">
                         <StackPanel>
                             <TextBlock Text="速度 字/分" Foreground="{StaticResource ScMute}" FontSize="11"/>
-                            <TextBlock x:Name="TxtSpeed" Text="0.00" Foreground="{StaticResource ScAccent}" FontSize="48" FontWeight="Bold" Margin="0,2,0,0"/>
+                            <TextBlock x:Name="TxtSpeed" Text="0.00" Foreground="{StaticResource ScAccent}" FontSize="42" FontWeight="Bold" Margin="0,2,0,0" TextWrapping="NoWrap"/>
                             <TextBlock x:Name="TxtSpeed2" Text="罚五 0.00" Foreground="{StaticResource ScMute}" FontSize="11" Margin="0,-2,0,0"/>
-                            <Border Background="#0A1525" CornerRadius="4" Padding="8" Margin="0,12,0,0">
-                                <StackPanel>
-                                    <TextBlock Text="用时" Foreground="{StaticResource ScMute}" FontSize="10"/>
-                                    <TextBlock x:Name="TxtSec" Text="0.0s" Foreground="{StaticResource ScCyan}" FontSize="20" FontWeight="Bold"/>
+                            <Border Background="#0A1525" CornerRadius="4" Padding="8,4" Margin="0,10,0,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="用时" Foreground="{StaticResource ScMute}" FontSize="10" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="TxtSec" Text="0.0s" Foreground="{StaticResource ScCyan}" FontSize="18" FontWeight="Bold" Margin="6,0,0,0" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </Border>
                         </StackPanel>
