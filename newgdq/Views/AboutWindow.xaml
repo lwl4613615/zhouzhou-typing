@@ -21,27 +21,27 @@
             <Image Source="pack://application:,,,/Resources/myicon.ico" Width="48" Height="48" Margin="0,0,12,0"/>
             <StackPanel VerticalAlignment="Center">
                 <TextBlock x:Name="TxtTitle" Text="州州跟打器 v0.3.0" FontSize="18" FontWeight="Bold"/>
-                <TextBlock Text="现代 WPF 跟打练习器（基于 taliove/tygdq 重写）" Foreground="#888"/>
+                <TextBlock Text="现代 WPF 跟打练习器（基于 taliove/tygdq 重写）" Foreground="{DynamicResource LabelFG}"/>
             </StackPanel>
         </StackPanel>
 
         <!-- 项目信息 -->
-        <Border Grid.Row="1" Background="#2D2D30" CornerRadius="3" Padding="10" Margin="0,0,0,12">
+        <Border Grid.Row="1" Background="{DynamicResource PanelBG}" CornerRadius="3" Padding="10" Margin="0,0,0,12">
             <StackPanel>
                 <TextBlock>
-                    <Run Text="项目主页：" Foreground="#888"/>
+                    <Run Text="项目主页：" Foreground="{DynamicResource LabelFG}"/>
                     <Hyperlink x:Name="LnkProject" Click="LnkProject_Click">
                         <Run x:Name="TxtProjectUrl" Text="https://github.com/lwl4613615/zhouzhou-typing"/>
                     </Hyperlink>
                 </TextBlock>
-                <TextBlock Margin="0,4,0,0"><Run Text="QQ 群：    " Foreground="#888"/><Run Text="17079867"/></TextBlock>
-                <TextBlock Margin="0,4,0,0"><Run Text="作者邮箱： " Foreground="#888"/><Run Text="4613615@qq.com"/></TextBlock>
-                <TextBlock Margin="0,4,0,0"><Run Text="协议：    " Foreground="#888"/><Run Text="Apache License 2.0"/></TextBlock>
+                <TextBlock Margin="0,4,0,0"><Run Text="QQ 群：    " Foreground="{DynamicResource LabelFG}"/><Run Text="17079867"/></TextBlock>
+                <TextBlock Margin="0,4,0,0"><Run Text="作者邮箱： " Foreground="{DynamicResource LabelFG}"/><Run Text="4613615@qq.com"/></TextBlock>
+                <TextBlock Margin="0,4,0,0"><Run Text="协议：    " Foreground="{DynamicResource LabelFG}"/><Run Text="Apache License 2.0"/></TextBlock>
             </StackPanel>
         </Border>
 
         <!-- 中部：联系州州（按钮 + 折叠的二维码图） -->
-        <Border Grid.Row="2" Background="#1F1F22" BorderBrush="#444" BorderThickness="1" CornerRadius="3" Padding="12">
+        <Border Grid.Row="2" Background="{DynamicResource AltRowBG}" BorderBrush="#444" BorderThickness="1" CornerRadius="3" Padding="12">
             <DockPanel>
                 <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
                     <TextBlock Text="联系州州" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,12,0"/>

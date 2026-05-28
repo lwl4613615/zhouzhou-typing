@@ -8,10 +8,10 @@
         ShowInTaskbar="False"
         Topmost="True"
         Background="#E62D2D30"
-        Foreground="#EEE">
-    <Border BorderBrush="#555" BorderThickness="1" CornerRadius="4" Padding="6">
+        Foreground="{DynamicResource ValueFG}">
+    <Border BorderBrush="{DynamicResource GridLine}" BorderThickness="1" CornerRadius="4" Padding="6">
         <StackPanel Orientation="Vertical">
-            <TextBlock x:Name="TxtTitle" Text="编码提示" FontSize="11" Foreground="#888" Margin="0,0,0,4"/>
+            <TextBlock x:Name="TxtTitle" Text="编码提示" FontSize="11" Foreground="{DynamicResource LabelFG}" Margin="0,0,0,4"/>
             <TextBlock x:Name="TxtContent" Text="-" FontSize="14" FontFamily="Consolas, 微软雅黑"
                        TextWrapping="Wrap"/>
         </StackPanel>

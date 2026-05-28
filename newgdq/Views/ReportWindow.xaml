@@ -10,16 +10,16 @@
     <DockPanel Margin="12" LastChildFill="True">
 
         <!-- 顶部：摘要 -->
-        <Border DockPanel.Dock="Top" Background="#2D2D30" Padding="10" CornerRadius="3">
+        <Border DockPanel.Dock="Top" Background="{DynamicResource PanelBG}" Padding="10" CornerRadius="3">
             <StackPanel>
-                <TextBlock x:Name="TxtTitle" FontSize="14" FontWeight="Bold" Foreground="#EEE"/>
+                <TextBlock x:Name="TxtTitle" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ValueFG}"/>
                 <UniformGrid Columns="6" Margin="0,8,0,0" x:Name="StatGrid">
-                    <StackPanel><TextBlock Text="速度"    Foreground="#888"/><TextBlock x:Name="TxtSpeed"  Foreground="#FFE082" FontSize="16" FontWeight="Bold"/></StackPanel>
-                    <StackPanel><TextBlock Text="罚五"    Foreground="#888"/><TextBlock x:Name="TxtSpeed2" Foreground="#FFE082" FontSize="16" FontWeight="Bold"/></StackPanel>
-                    <StackPanel><TextBlock Text="击键"    Foreground="#888"/><TextBlock x:Name="TxtJj"     Foreground="#81C784" FontSize="16" FontWeight="Bold"/></StackPanel>
-                    <StackPanel><TextBlock Text="码长"    Foreground="#888"/><TextBlock x:Name="TxtMc"     Foreground="#81C784" FontSize="16" FontWeight="Bold"/></StackPanel>
-                    <StackPanel><TextBlock Text="用时(s)" Foreground="#888"/><TextBlock x:Name="TxtSec"    Foreground="#90CAF9" FontSize="16" FontWeight="Bold"/></StackPanel>
-                    <StackPanel><TextBlock Text="键/字/错/回改" Foreground="#888"/><TextBlock x:Name="TxtCounts" Foreground="#EEE" FontSize="14"/></StackPanel>
+                    <StackPanel><TextBlock Text="速度"    Foreground="{DynamicResource LabelFG}"/><TextBlock x:Name="TxtSpeed"  Foreground="#FFE082" FontSize="16" FontWeight="Bold"/></StackPanel>
+                    <StackPanel><TextBlock Text="罚五"    Foreground="{DynamicResource LabelFG}"/><TextBlock x:Name="TxtSpeed2" Foreground="#FFE082" FontSize="16" FontWeight="Bold"/></StackPanel>
+                    <StackPanel><TextBlock Text="击键"    Foreground="{DynamicResource LabelFG}"/><TextBlock x:Name="TxtJj"     Foreground="#81C784" FontSize="16" FontWeight="Bold"/></StackPanel>
+                    <StackPanel><TextBlock Text="码长"    Foreground="{DynamicResource LabelFG}"/><TextBlock x:Name="TxtMc"     Foreground="#81C784" FontSize="16" FontWeight="Bold"/></StackPanel>
+                    <StackPanel><TextBlock Text="用时(s)" Foreground="{DynamicResource LabelFG}"/><TextBlock x:Name="TxtSec"    Foreground="#90CAF9" FontSize="16" FontWeight="Bold"/></StackPanel>
+                    <StackPanel><TextBlock Text="键/字/错/回改" Foreground="{DynamicResource LabelFG}"/><TextBlock x:Name="TxtCounts" Foreground="{DynamicResource ValueFG}" FontSize="14"/></StackPanel>
                 </UniformGrid>
             </StackPanel>
         </Border>
@@ -37,8 +37,8 @@
                   AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True"
                   HeadersVisibility="Column" GridLinesVisibility="Horizontal"
                   RowHeight="22" FontSize="12"
-                  Background="#1F1F22" Foreground="#EEE"
-                  RowBackground="#1F1F22" AlternatingRowBackground="#26262A"
+                  Background="{DynamicResource AltRowBG}" Foreground="{DynamicResource ValueFG}"
+                  RowBackground="{DynamicResource AltRowBG}" AlternatingRowBackground="#26262A"
                   LoadingRow="DgvEvents_LoadingRow">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="序"      Binding="{Binding Index}"                          Width="50"/>

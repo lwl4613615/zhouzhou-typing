@@ -35,7 +35,7 @@
                     <ComboBox Grid.Row="1" Grid.Column="1" x:Name="CmbInputFamily" Margin="0,4" IsEditable="True"/>
                     <hc:NumericUpDown Grid.Row="1" Grid.Column="2" x:Name="NudInputSize" Margin="6,4,0,4" Minimum="8" Maximum="96" Value="18"/>
 
-                    <TextBlock Grid.Row="2" Grid.ColumnSpan="3" Foreground="#888" TextWrapping="Wrap" Margin="0,10,0,0"
+                    <TextBlock Grid.Row="2" Grid.ColumnSpan="3" Foreground="{DynamicResource LabelFG}" TextWrapping="Wrap" Margin="0,10,0,0"
                                Text="字体名可直接输入（如 宋体、微软雅黑、Consolas）；点确定后立即生效。"/>
                 </Grid>
             </TabItem>
@@ -131,7 +131,7 @@
                         <RadioButton x:Name="RdoThemeDark"  Content="暗色 Dark"  GroupName="Theme" Margin="0,0,16,0"/>
                         <RadioButton x:Name="RdoThemeLight" Content="浅色 Light" GroupName="Theme"/>
                     </StackPanel>
-                    <TextBlock Grid.Row="4" Foreground="#888" TextWrapping="Wrap" Margin="0,16,0,0"
+                    <TextBlock Grid.Row="4" Foreground="{DynamicResource LabelFG}" TextWrapping="Wrap" Margin="0,16,0,0"
                                Text="整个程序文件夹（含 settings.json）拷哪都行：U 盘、其它电脑、新用户。换机就直接复制文件夹。&#10;主题切换后需要重启程序才能完全应用（确定后会提示）。"/>
                 </Grid>
             </TabItem>

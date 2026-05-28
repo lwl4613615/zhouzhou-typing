@@ -10,14 +10,14 @@
         WindowStartupLocation="CenterOwner">
     <DockPanel Margin="12" LastChildFill="True">
 
-        <Border DockPanel.Dock="Top" Background="#2D2D30" Padding="10" CornerRadius="3">
+        <Border DockPanel.Dock="Top" Background="{DynamicResource PanelBG}" Padding="10" CornerRadius="3">
             <StackPanel>
-                <TextBlock x:Name="TxtTitle" FontSize="14" FontWeight="Bold" Foreground="#EEE"/>
+                <TextBlock x:Name="TxtTitle" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ValueFG}"/>
                 <UniformGrid Columns="4" Margin="0,8,0,0">
-                    <StackPanel><TextBlock Text="实际速度"    Foreground="#888"/><TextBlock x:Name="TxtSpeed"  Foreground="#FFE082" FontSize="16" FontWeight="Bold"/></StackPanel>
-                    <StackPanel><TextBlock Text="错一罚五"    Foreground="#888"/><TextBlock x:Name="TxtSpeed2" Foreground="#FFE082" FontSize="16" FontWeight="Bold"/></StackPanel>
-                    <StackPanel><TextBlock Text="理想速度*"   Foreground="#888"/><TextBlock x:Name="TxtIdeal"  Foreground="#81C784" FontSize="16" FontWeight="Bold"/></StackPanel>
-                    <StackPanel><TextBlock Text="总用时(s)"   Foreground="#888"/><TextBlock x:Name="TxtSec"    Foreground="#90CAF9" FontSize="16" FontWeight="Bold"/></StackPanel>
+                    <StackPanel><TextBlock Text="实际速度"    Foreground="{DynamicResource LabelFG}"/><TextBlock x:Name="TxtSpeed"  Foreground="#FFE082" FontSize="16" FontWeight="Bold"/></StackPanel>
+                    <StackPanel><TextBlock Text="错一罚五"    Foreground="{DynamicResource LabelFG}"/><TextBlock x:Name="TxtSpeed2" Foreground="#FFE082" FontSize="16" FontWeight="Bold"/></StackPanel>
+                    <StackPanel><TextBlock Text="理想速度*"   Foreground="{DynamicResource LabelFG}"/><TextBlock x:Name="TxtIdeal"  Foreground="#81C784" FontSize="16" FontWeight="Bold"/></StackPanel>
+                    <StackPanel><TextBlock Text="总用时(s)"   Foreground="{DynamicResource LabelFG}"/><TextBlock x:Name="TxtSec"    Foreground="#90CAF9" FontSize="16" FontWeight="Bold"/></StackPanel>
                 </UniformGrid>
                 <TextBlock Foreground="#666" FontSize="11" Margin="0,4,0,0"
                            Text="* 理想速度 = 假设所有事件都按 正常打字 速度完成的推算值"/>
@@ -29,6 +29,6 @@
             <Button Content="关闭" Width="80" Margin="6,0" Click="BtnClose_Click"/>
         </StackPanel>
 
-        <oxy:PlotView x:Name="Plot" Background="#1F1F22" Margin="0,12,0,0"/>
+        <oxy:PlotView x:Name="Plot" Background="{DynamicResource AltRowBG}" Margin="0,12,0,0"/>
     </DockPanel>
 </hc:Window>
