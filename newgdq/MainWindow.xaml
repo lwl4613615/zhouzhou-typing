@@ -269,12 +269,13 @@
                           DragIncrement="4"
                           Cursor="SizeNS" Background="#3A3A3D"/>
 
-            <!-- 下半整体：状态条(Auto) + 输入区(100固定) + 历史区(*) -->
+            <!-- 下半整体：信息条(Auto固定高) + 输入区(*可拖) + splitter + 历史区(*可拖) -->
             <Grid Grid.Row="2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="100"/>
-                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="1*" MinHeight="60"/>
+                    <RowDefinition Height="4"/>
+                    <RowDefinition Height="2*" MinHeight="80"/>
                 </Grid.RowDefinitions>
 
             <!-- 状态条（对照区与输入区之间） -->
@@ -367,7 +368,14 @@
 
             <!-- 历史 Grid：原版无表头，第 0 行作为表头加粗显示 -->
             <!-- 历史区 + 内嵌速度曲线（左 = 曲线，右 = 历史表） -->
-            <Grid Grid.Row="2" x:Name="HistoryBox">
+            <GridSplitter Grid.Row="2" Height="4" HorizontalAlignment="Stretch"
+                          ResizeDirection="Rows" ResizeBehavior="PreviousAndNext" ShowsPreview="True"
+                          DragIncrement="4"
+                          Cursor="SizeNS" Background="#3A3A3D"/>
+
+            <!-- 历史 Grid：原版无表头，第 0 行作为表头加粗显示 -->
+            <!-- 历史区 + 内嵌速度曲线（左 = 曲线，右 = 历史表） -->
+            <Grid Grid.Row="3" x:Name="HistoryBox">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition x:Name="ChartCol" Width="0"/>
                     <ColumnDefinition x:Name="ChartSplitterCol" Width="0"/>
