@@ -428,35 +428,55 @@ namespace newgdq
                 Background          = bgColor,
                 PlotAreaBorderColor = OxyPlot.OxyColors.Transparent,
                 TextColor           = fgColor,
-                PlotMargins         = new OxyPlot.OxyThickness(36, 4, 8, 20),
+                DefaultFont         = "微软雅黑",
+                DefaultFontSize     = 11,
+                PlotMargins         = new OxyPlot.OxyThickness(42, 8, 10, 24),
+                Padding             = new OxyPlot.OxyThickness(0),
+                Title               = null,
             };
             _chartModel.Axes.Add(new OxyPlot.Axes.LinearAxis
             {
                 Position           = OxyPlot.Axes.AxisPosition.Bottom,
-                AxislineColor      = OxyPlot.OxyColors.Transparent,
+                Title              = "用时(s)",
+                TitleFontSize      = 10,
+                AxislineColor      = gridColor,
+                AxislineThickness  = 1,
                 MajorGridlineStyle = OxyPlot.LineStyle.Solid,
                 MajorGridlineColor = gridColor,
+                MinorGridlineStyle = OxyPlot.LineStyle.Dot,
+                MinorGridlineColor = OxyPlot.OxyColor.FromArgb(0x33, gridLine.Color.R, gridLine.Color.G, gridLine.Color.B),
                 Minimum            = 0,
-                TickStyle          = OxyPlot.Axes.TickStyle.None,
+                IntervalLength     = 60,
+                TickStyle          = OxyPlot.Axes.TickStyle.Outside,
+                MajorTickSize      = 4,
+                MinorTickSize      = 2,
                 FontSize           = 10,
             });
             _chartModel.Axes.Add(new OxyPlot.Axes.LinearAxis
             {
                 Position           = OxyPlot.Axes.AxisPosition.Left,
-                AxislineColor      = OxyPlot.OxyColors.Transparent,
+                Title              = "速度(字/分)",
+                TitleFontSize      = 10,
+                AxislineColor      = gridColor,
+                AxislineThickness  = 1,
                 MajorGridlineStyle = OxyPlot.LineStyle.Solid,
                 MajorGridlineColor = gridColor,
+                MinorGridlineStyle = OxyPlot.LineStyle.None,
                 Minimum            = 0,
-                TickStyle          = OxyPlot.Axes.TickStyle.None,
+                TickStyle          = OxyPlot.Axes.TickStyle.Outside,
+                MajorTickSize      = 4,
                 FontSize           = 10,
+                StringFormat       = "0",
             });
             _chartSpeed = new OxyPlot.Series.AreaSeries
             {
+                Title           = "速度",
                 Color           = OxyPlot.OxyColor.FromRgb(0xFF, 0xB0, 0x2E),
-                StrokeThickness = 2,
+                StrokeThickness = 1.6,
                 MarkerType      = OxyPlot.MarkerType.None,
-                Fill            = OxyPlot.OxyColor.FromArgb(0x44, 0xFF, 0xB0, 0x2E),
+                Fill            = OxyPlot.OxyColor.FromArgb(0x55, 0xFF, 0xB0, 0x2E),
                 InterpolationAlgorithm = OxyPlot.InterpolationAlgorithms.CanonicalSpline,
+                LineJoin        = OxyPlot.LineJoin.Round,
             };
             _chartModel.Series.Add(_chartSpeed);
             InlineChart.Model = _chartModel;

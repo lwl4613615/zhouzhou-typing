@@ -384,7 +384,10 @@
 
                 <!-- 左：嵌入式速度曲线（TogChart 切换可见性） -->
                 <Border Grid.Column="0" Background="{DynamicResource AltRowBG}" BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,0,0">
-                    <oxy:PlotView x:Name="InlineChart" Background="Transparent"/>
+                    <oxy:PlotView x:Name="InlineChart" Background="Transparent"
+                                  RenderOptions.EdgeMode="Unspecified"
+                                  TextOptions.TextFormattingMode="Ideal"
+                                  TextOptions.TextRenderingMode="ClearType"/>
                 </Border>
                 <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Stretch"
                               ResizeDirection="Columns" ResizeBehavior="PreviousAndNext"
