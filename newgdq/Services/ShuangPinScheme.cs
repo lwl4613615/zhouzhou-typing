@@ -88,11 +88,22 @@ namespace newgdq.Services
         {
             k1 = k2 = '\0';
             if (string.IsNullOrEmpty(yunmu)) return false;
-            if (!_finalToKey.TryGetValue(yunmu, out k2)) return false;
 
             if (string.IsNullOrEmpty(shengmu))
-                k1 = yunmu[0];                 // 零声母：占位键 = 韵母首字母(a/e/o)
-            else if (shengmu.Length == 1)
+            {
+                // 零声母编码表（自然码/小鹤通用）：
+                // 单字母韵母双写(a→aa/e→ee/o→oo)，双字母原样(ai→ai…er→er)，
+                // 三字母用首字母+双拼键(ang→ah, eng→eg)。
+                k1 = yunmu[0];
+                if (yunmu.Length <= 2)
+                    k2 = yunmu[yunmu.Length - 1];
+                else if (!_finalToKey.TryGetValue(yunmu, out k2))
+                    return false;
+                return true;
+            }
+
+            if (!_finalToKey.TryGetValue(yunmu, out k2)) return false;
+            if (shengmu.Length == 1)
                 k1 = shengmu[0];               // 普通单字母声母，键位即其本身
             else if (_initialToKey.TryGetValue(shengmu, out var ik))
                 k1 = ik;                       // zh/ch/sh
