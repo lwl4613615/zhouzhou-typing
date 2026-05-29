@@ -59,6 +59,15 @@ namespace newgdq.Views
         private readonly DispatcherTimer _flash = new DispatcherTimer
         { Interval = TimeSpan.FromMilliseconds(170) };
         private char _flashKey;
+        private Action _afterFlash;   // 闪烁结束后要做的动作（换题 / 进入下一键）
+
+        // ===== 简单字模式 =====
+        private const int ModeSimple = 3;
+        private List<SimpleChar> _charPool = new List<SimpleChar>();
+        private readonly Queue<SimpleChar> _charBag = new Queue<SimpleChar>();
+        private SimpleChar _curChar;
+        private char[] _curCode;   // 当前字的两键
+        private int _step;         // 0=第一键 1=第二键
 
         public ShuangPinPracticeControl()
         {
@@ -180,6 +189,17 @@ namespace newgdq.Views
 
         private void RebuildPool()
         {
+            if (_mode == ModeSimple)
+            {
+                // 简单字：取本方案能换算的字（含 ü 等无法换算的已自动剔除）
+                _charPool = SimpleCharTable.Items
+                    .Where(sc => _scheme.TryEncode(sc.Shengmu, sc.Yunmu, out _, out _))
+                    .ToList();
+                _charBag.Clear();
+                _pool = new List<DrillItem>();
+                _bag.Clear();
+                return;
+            }
             IEnumerable<DrillItem> q = _scheme.Drills;
             if (_mode == 1) q = q.Where(d => d.IsInitial);
             else if (_mode == 2) q = q.Where(d => !d.IsInitial);
@@ -256,6 +276,7 @@ namespace newgdq.Views
 
         private void NextItem()
         {
+            if (_mode == ModeSimple) { NextChar(); return; }
             ClearKeyHighlights();
             if (_pool.Count == 0) { _current = null; TxtPrompt.Text = "—"; return; }
             if (_bag.Count == 0) RefillBag();
@@ -263,6 +284,96 @@ namespace newgdq.Views
             TxtPromptKind.Text = _current.IsInitial ? "声母" : "韵母";
             TxtPrompt.Text = _current.Token;
             UpdateHint();
+        }
+
+        // ===== 简单字出题 / 判定 =====
+
+        private void NextChar()
+        {
+            ClearKeyHighlights();
+            _current = null;
+            if (_charPool.Count == 0)
+            {
+                _curChar = null;
+                TxtPromptKind.Text = "简单字";
+                TxtPrompt.Text = "—";
+                TxtHint.Text = " ";
+                Hands.Point(null);
+                return;
+            }
+            if (_charBag.Count == 0) RefillCharBag();
+            _curChar = _charBag.Dequeue();
+            _scheme.TryEncode(_curChar.Shengmu, _curChar.Yunmu, out char k1, out char k2);
+            _curCode = new[] { k1, k2 };
+            _step = 0;
+            UpdateCharHint();
+        }
+
+        private void RefillCharBag()
+        {
+            if (_charPool.Count == 0) return;
+            var list = new List<SimpleChar>(_charPool);
+            for (int i = list.Count - 1; i > 0; i--)
+            {
+                int j = _rng.Next(i + 1);
+                var t = list[i]; list[i] = list[j]; list[j] = t;
+            }
+            if (list.Count > 1 && _curChar != null && ReferenceEquals(list[0], _curChar))
+            {
+                int s = 1 + _rng.Next(list.Count - 1);
+                var t = list[0]; list[0] = list[s]; list[s] = t;
+            }
+            foreach (var c in list) _charBag.Enqueue(c);
+        }
+
+        private void UpdateCharHint()
+        {
+            if (_curChar == null) return;
+            TxtPromptKind.Text = "简单字 · " + _curChar.Pinyin;
+            TxtPrompt.Text = _curChar.Char;
+            char cur = _curCode[_step];
+            if (ChkHint.IsChecked == true)
+            {
+                bool hasFinger = FingerHandsControl.TryGetFinger(cur, out var finger);
+                string code = char.ToUpper(_curCode[0]).ToString() + char.ToUpper(_curCode[1]);
+                string step = _step == 0 ? "第1键" : "第2键";
+                TxtHint.Text = hasFinger
+                    ? $"{code}    现在按 {step}  {char.ToUpper(cur)} · {FingerHandsControl.FingerName(finger)}"
+                    : $"{code}    现在按 {step}  {char.ToUpper(cur)}";
+                HighlightTarget(cur);
+                Hands.Point(hasFinger ? finger : (Finger?)null);
+            }
+            else
+            {
+                TxtHint.Text = " ";
+                ClearKeyHighlights();
+                Hands.Point(null);
+            }
+        }
+
+        private void JudgeChar(char pressed)
+        {
+            char target = _curCode[_step];
+            _attempts[target] = (_attempts.TryGetValue(target, out var a) ? a : 0) + 1;
+            if (pressed == target)
+            {
+                if (_step == 0)
+                {
+                    FlashKey(target, true, () => { _step = 1; UpdateCharHint(); });
+                }
+                else
+                {
+                    _ok++; _streak++;
+                    FlashKey(target, true, NextChar);
+                }
+            }
+            else
+            {
+                _bad++; _streak = 0;
+                _errors[target] = (_errors.TryGetValue(target, out var er) ? er : 0) + 1;
+                FlashKey(pressed, false, () => { _step = 0; UpdateCharHint(); });
+            }
+            UpdateStats();
         }
 
         private void UpdateHint()
@@ -309,8 +420,15 @@ namespace newgdq.Views
         protected override void OnPreviewKeyDown(KeyEventArgs e)
         {
             base.OnPreviewKeyDown(e);
-            if (_current == null) return;
             if (!TryMapKey(e.Key, out char c)) return;
+            if (_mode == ModeSimple)
+            {
+                if (_curChar == null) return;
+                e.Handled = true;
+                JudgeChar(c);
+                return;
+            }
+            if (_current == null) return;
             e.Handled = true;
             Judge(c);
         }
@@ -335,24 +453,24 @@ namespace newgdq.Views
             if (correct)
             {
                 _ok++; _streak++;
-                FlashKey(_current.Key, true);
+                FlashKey(_current.Key, true, NextItem);
             }
             else
             {
                 _bad++; _streak = 0;
                 _errors[target] = (_errors.TryGetValue(target, out var er) ? er : 0) + 1;
-                FlashKey(pressed, false);
+                FlashKey(pressed, false, null);
             }
             UpdateStats();
         }
 
-        private void FlashKey(char key, bool ok)
+        private void FlashKey(char key, bool ok, Action after)
         {
             _flashKey = key;
             if (_keyBorders.TryGetValue(key, out var b))
                 b.Background = ok ? new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50))
                                   : new SolidColorBrush(Color.FromRgb(0xE5, 0x39, 0x35));
-            _flash.Tag = ok;
+            _afterFlash = after;
             _flash.Stop();
             _flash.Start();
         }
@@ -360,10 +478,10 @@ namespace newgdq.Views
         private void Flash_Tick(object sender, EventArgs e)
         {
             _flash.Stop();
-            bool ok = _flash.Tag is bool b2 && b2;
             if (_keyBorders.TryGetValue(_flashKey, out var b))
                 b.Background = (Brush)FindResource("CellBG");
-            if (ok) NextItem();  // 答对后才换题；答错保留当前题继续尝试
+            var a = _afterFlash; _afterFlash = null;
+            a?.Invoke();   // 答对→换题/进入下一键；答错→保留或回到第一键
         }
 
         private void UpdateStats()
@@ -394,7 +512,8 @@ namespace newgdq.Views
             _ok = _bad = _streak = 0;
             _attempts.Clear();
             _errors.Clear();
-            _bag.Clear();   // 清空牌堆，按重置后的权重重新发牌
+            _bag.Clear();      // 清空牌堆，按重置后的权重重新发牌
+            _charBag.Clear();
             UpdateStats();
             NextItem();
             FocusForInput();

@@ -33,6 +33,7 @@
                     <ComboBoxItem Content="混合" IsSelected="True"/>
                     <ComboBoxItem Content="仅声母"/>
                     <ComboBoxItem Content="仅韵母"/>
+                    <ComboBoxItem Content="简单字"/>
                 </ComboBox>
 
                 <CheckBox DockPanel.Dock="Left" x:Name="ChkHint" Content="显示提示键"

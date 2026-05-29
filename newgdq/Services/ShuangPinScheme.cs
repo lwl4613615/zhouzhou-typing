@@ -42,6 +42,10 @@ namespace newgdq.Services
         /// <summary>全部练习项（声母 zh/ch/sh + 所有韵母）。</summary>
         public IReadOnlyList<DrillItem> Drills { get; }
 
+        // 反查表：韵母 → 键、特殊声母(zh/ch/sh) → 键，用于"简单字"换算双拼码。
+        private readonly Dictionary<string, char> _finalToKey = new Dictionary<string, char>();
+        private readonly Dictionary<string, char> _initialToKey = new Dictionary<string, char>();
+
         private ShuangPinScheme(ShuangPinKind kind, string name,
             Dictionary<char, string> initials,
             Dictionary<char, string[]> finals)
@@ -52,6 +56,11 @@ namespace newgdq.Services
             KeyFinals = finals.ToDictionary(
                 kv => kv.Key,
                 kv => (IReadOnlyList<string>)kv.Value.ToList());
+
+            foreach (var kv in initials) _initialToKey[kv.Value] = kv.Key;
+            foreach (var kv in finals)
+                foreach (var f in kv.Value)
+                    if (!_finalToKey.ContainsKey(f)) _finalToKey[f] = kv.Key;
 
             var drills = new List<DrillItem>();
             foreach (var kv in initials)             // zh/ch/sh
@@ -69,6 +78,27 @@ namespace newgdq.Services
             if (KeyInitial.TryGetValue(key, out var ini)) parts.Add(ini);
             if (KeyFinals.TryGetValue(key, out var fs)) parts.AddRange(fs);
             return string.Join(" ", parts);
+        }
+
+        /// <summary>
+        /// 把"声母+韵母"换算成双拼两键。声母为空=零声母（占位键取韵母拼音首字母）。
+        /// 失败（如韵母不在本方案表中）返回 false。
+        /// </summary>
+        public bool TryEncode(string shengmu, string yunmu, out char k1, out char k2)
+        {
+            k1 = k2 = '\0';
+            if (string.IsNullOrEmpty(yunmu)) return false;
+            if (!_finalToKey.TryGetValue(yunmu, out k2)) return false;
+
+            if (string.IsNullOrEmpty(shengmu))
+                k1 = yunmu[0];                 // 零声母：占位键 = 韵母首字母(a/e/o)
+            else if (shengmu.Length == 1)
+                k1 = shengmu[0];               // 普通单字母声母，键位即其本身
+            else if (_initialToKey.TryGetValue(shengmu, out var ik))
+                k1 = ik;                       // zh/ch/sh
+            else
+                return false;
+            return true;
         }
 
         // ===== 方案表 =====
