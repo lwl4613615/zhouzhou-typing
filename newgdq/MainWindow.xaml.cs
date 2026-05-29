@@ -1604,6 +1604,12 @@ namespace newgdq
         private void MenuItem_AuxCodeHelp_Click(object sender, RoutedEventArgs e)
             => new Views.AuxCodeHelpWindow(this).ShowDialog();
 
+        private void MenuItem_XhAuxCodeHelp_Click(object sender, RoutedEventArgs e)
+        {
+            try { System.Diagnostics.Process.Start("https://flypy.cc/help/#/xh"); }
+            catch (Exception ex) { HandyControl.Controls.Growl.Error(ex.Message); }
+        }
+
         private void EnterPracticeMode()
         {
             if (_practiceMode) return;
