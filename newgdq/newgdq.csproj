@@ -97,8 +97,7 @@
     <Compile Include="Services\SendingService.cs" />
     <Compile Include="Services\SettingsService.cs" />
     <Compile Include="Services\HistoryRepository.cs" />
-    <Compile Include="Services\ShuangPinScheme.cs" />
-    <Compile Include="Models\HistoryRow.cs" />
+    <Compile Include="Services\ShuangPinScheme.cs" />    <Compile Include="Models\HistoryRow.cs" />
     <Compile Include="Models\TypeDate.cs" />
     <Compile Include="Models\TypingSession.cs" />
     <Compile Include="Models\BmEntry.cs" />
@@ -194,6 +193,7 @@
       <DependentUpon>ShuangPinPracticeControl.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Views\FingerHandsControl.cs" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\bm.txt" />

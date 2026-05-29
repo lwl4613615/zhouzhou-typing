@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:views="clr-namespace:newgdq.Views"
              mc:Ignorable="d"
              Focusable="True"
              Background="{DynamicResource PanelBG}"
@@ -78,8 +79,12 @@
                            Foreground="{DynamicResource AccentFG}" FontSize="14" Margin="0,2,0,0"/>
             </StackPanel>
 
-            <!-- 虚拟键盘（代码动态生成键） -->
-            <StackPanel Grid.Row="1" x:Name="KeyboardHost" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            <!-- 虚拟键盘 + 矢量双手 -->
+            <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <StackPanel x:Name="KeyboardHost" HorizontalAlignment="Center"/>
+                <views:FingerHandsControl x:Name="Hands" Width="380" Height="170"
+                                          Margin="0,14,0,0" HorizontalAlignment="Center"/>
+            </StackPanel>
         </Grid>
     </DockPanel>
 </UserControl>

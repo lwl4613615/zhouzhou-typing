@@ -203,17 +203,22 @@ namespace newgdq.Views
 
         private void UpdateHint()
         {
-            if (_current == null) { TxtHint.Text = " "; return; }
+            if (_current == null) { TxtHint.Text = " "; Hands.Point(null); return; }
+            bool hasFinger = FingerHandsControl.TryGetFinger(_current.Key, out var finger);
             bool showHint = ChkHint.IsChecked == true;
             if (showHint)
             {
-                TxtHint.Text = "按下  " + char.ToUpper(_current.Key);
+                TxtHint.Text = hasFinger
+                    ? $"按下  {char.ToUpper(_current.Key)}   ·   {FingerHandsControl.FingerName(finger)}"
+                    : "按下  " + char.ToUpper(_current.Key);
                 HighlightTarget(_current.Key);
+                Hands.Point(hasFinger ? finger : (Finger?)null);
             }
             else
             {
                 TxtHint.Text = " ";
                 ClearKeyHighlights();
+                Hands.Point(null);
             }
         }
 
