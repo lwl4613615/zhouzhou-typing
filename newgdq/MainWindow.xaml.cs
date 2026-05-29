@@ -64,6 +64,8 @@ namespace newgdq
         // 锚点 _sessionStartAt 进程启动取一次，跨日/换文/F3 都不重置
         private readonly DateTime _sessionStartAt = DateTime.Now;
         private bool _showCurrentOnly = true;
+        // "本次/全部"切换列的原生列头引用（Loaded 时捕获），用于更新文字
+        private System.Windows.Controls.Primitives.DataGridColumnHeader _scoreFilterHeader;
 
         // 剪贴板载文自增段号（无 "第N段" 头时使用，对齐老版 Glob.AZpre）
         private int _clipboardSegCounter;
@@ -965,14 +967,21 @@ namespace newgdq
 
         private void UpdateScoreFilterLabel()
         {
-            if (BtnScoreFilter == null) return;
+            if (_scoreFilterHeader == null) return;
             int curCnt = History.Count(r => r.When >= _sessionStartAt);
-            BtnScoreFilter.Content = _showCurrentOnly
+            _scoreFilterHeader.Content = _showCurrentOnly
                 ? $"本次 {curCnt}"
                 : $"全部 {History.Count}";
-            BtnScoreFilter.ToolTip = _showCurrentOnly
+            _scoreFilterHeader.ToolTip = _showCurrentOnly
                 ? "当前显示：本进程启动后完成的段（点击切换为 全部）"
                 : "当前显示：所有历史段（点击切换为 本次）";
+        }
+
+        /// <summary>列头加载时捕获引用并立即刷新文字</summary>
+        private void ScoreFilterHeader_Loaded(object sender, RoutedEventArgs e)
+        {
+            _scoreFilterHeader = sender as System.Windows.Controls.Primitives.DataGridColumnHeader;
+            UpdateScoreFilterLabel();
         }
 
         private void BtnScoreFilter_Click(object sender, RoutedEventArgs e) => ToggleScoreFilter();

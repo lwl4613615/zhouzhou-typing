@@ -448,39 +448,18 @@
                         <DataGridTextColumn Header="选重"  Width="50" Binding="{Binding Reselect}"/>
                         <DataGridTextColumn Header="拼回"  Width="50" Binding="{Binding Enter}"/>
                         <DataGridTextColumn Header="左:右" Width="70" Binding="{Binding LeftRight}"/>
-                        <!-- 用时列：列头里嵌入"本次/全部"可点击标签（居中显示用时，右侧为切换按钮） -->
-                        <DataGridTextColumn Width="*" Binding="{Binding UseTime, StringFormat=0.00}">
-                            <DataGridTextColumn.Header>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="用时" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    <Button x:Name="BtnScoreFilter" Grid.Column="1" Content="本次"
-                                            VerticalAlignment="Stretch" Padding="8,0" FontSize="12"
-                                            FontWeight="Bold" Cursor="Hand"
-                                            Background="Transparent" Foreground="{DynamicResource AccentFG}"
-                                            BorderThickness="1,0,0,0" BorderBrush="{DynamicResource GridLine}"
-                                            Click="BtnScoreFilter_Click">
-                                        <Button.Template>
-                                            <ControlTemplate TargetType="Button">
-                                                <Border x:Name="Bd" Background="{TemplateBinding Background}"
-                                                        BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
-                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                                      Margin="{TemplateBinding Padding}"/>
-                                                </Border>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AltRowBG}"/>
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Button.Template>
-                                    </Button>
-                                </Grid>
-                            </DataGridTextColumn.Header>
-                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="用时" Width="*" Binding="{Binding UseTime, StringFormat=0.00}"/>
+                        <!-- 独立的"本次/全部"切换列：用原生 DataGridColumnHeader（本身就是 ButtonBase），
+                             普通字符串表头 → 与其它列头字体/颜色/对齐完全一致；HeaderStyle 挂 Click 事件 -->
+                        <DataGridTemplateColumn Width="56" Header="本次">
+                            <DataGridTemplateColumn.HeaderStyle>
+                                <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                                    <Setter Property="Cursor" Value="Hand"/>
+                                    <EventSetter Event="Loaded" Handler="ScoreFilterHeader_Loaded"/>
+                                    <EventSetter Event="Click" Handler="BtnScoreFilter_Click"/>
+                                </Style>
+                            </DataGridTemplateColumn.HeaderStyle>
+                        </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
 
