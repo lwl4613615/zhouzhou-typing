@@ -97,6 +97,7 @@
     <Compile Include="Services\SendingService.cs" />
     <Compile Include="Services\SettingsService.cs" />
     <Compile Include="Services\HistoryRepository.cs" />
+    <Compile Include="Services\ShuangPinScheme.cs" />
     <Compile Include="Models\HistoryRow.cs" />
     <Compile Include="Models\TypeDate.cs" />
     <Compile Include="Models\TypingSession.cs" />
@@ -183,6 +184,14 @@
     </Page>
     <Compile Include="Views\ScoreCard.xaml.cs">
       <DependentUpon>ScoreCard.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Page Include="Views\ShuangPinPracticeControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="Views\ShuangPinPracticeControl.xaml.cs">
+      <DependentUpon>ShuangPinPracticeControl.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

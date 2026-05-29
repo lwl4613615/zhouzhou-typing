@@ -64,6 +64,9 @@ namespace newgdq.Models
         // 成绩区只显示本进程启动后的段（默认 true）；切换为 false 显示全部历史
         [DataMember(EmitDefaultValue = false)] public bool? ShowCurrentOnly { get; set; }
 
+        // 双拼键位练习所选方案："Xiaohe" / "Ziranma"。默认 Xiaohe。
+        [DataMember(EmitDefaultValue = false)] public string ShuangPinScheme { get; set; }
+
         // 发文参数预设（命名保存）
         [DataMember(EmitDefaultValue = false)] public System.Collections.Generic.List<SendPreset> SendPresets { get; set; }
     }

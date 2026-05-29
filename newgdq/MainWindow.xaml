@@ -7,6 +7,7 @@
         xmlns:oxy="http://oxyplot.org/wpf"
         xmlns:tb="http://www.hardcodet.net/taskbar"
         xmlns:local="clr-namespace:newgdq"
+        xmlns:views="clr-namespace:newgdq.Views"
         mc:Ignorable="d"
         Title="州州跟打器" Height="620" Width="940"
         FontFamily="微软雅黑" FontSize="12"
@@ -125,6 +126,9 @@
                 <MenuItem Header="速度分析..." InputGestureText="Ctrl+E" Click="MenuItem_OpenSpeedAnalysis_Click"/>
                 <MenuItem Header="跟打报告..." InputGestureText="Ctrl+G" Click="MenuItem_OpenReport_Click"/>
                 <Separator/>
+                <MenuItem Header="双拼键位练习" Click="MenuItem_OpenShuangPin_Click"
+                          ToolTip="小鹤双拼 / 自然码 声母韵母键位练习（内嵌面板）"/>
+                <Separator/>
                 <MenuItem Header="测试自定义 bm.txt..." Click="MenuItem_TestBmFile_Click"
                           ToolTip="选一个 bm.txt 文件，验证格式是否合法 + 显示统计信息&#10;不会替换当前词典，仅用于自检"/>
                 <MenuItem Header="词组模式" x:Name="MnuSmartCi" IsCheckable="True"
@@ -149,7 +153,7 @@
         <!-- 2. 段号刻度尺已废弃（用户反馈无用） -->
 
         <!-- 3. 信息条（两行紧贴：上=标签 / 下=值，每个数据独占一列） -->
-        <Border DockPanel.Dock="Top" Background="{StaticResource PanelBG}" Padding="0">
+        <Border DockPanel.Dock="Top" x:Name="InfoBar" Background="{StaticResource PanelBG}" Padding="0">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="18"/>
@@ -206,7 +210,7 @@
         </Border>
 
         <!-- 5. 底部：标记栏（贴底） -->
-        <Border DockPanel.Dock="Bottom" Background="{StaticResource PanelBG}" Padding="4,2">
+        <Border DockPanel.Dock="Bottom" x:Name="MarkerBar" Background="{StaticResource PanelBG}" Padding="4,2">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <ToggleButton x:Name="TogImage" Style="{StaticResource MarkerText}" Content="图片"
                               ToolTip="完成段时自动复制成绩图到剪贴板"/>
@@ -242,8 +246,9 @@
             <Canvas x:Name="MapCanvas" ClipToBounds="True" SizeChanged="MapCanvas_SizeChanged"/>
         </Border>
 
-        <!-- 4. 主体：对照区 + 状态条 + 输入区 + 历史 Grid -->
-        <Grid Background="{StaticResource PanelBG}">
+        <!-- 4. 主体：对照区 + 状态条 + 输入区 + 历史 Grid（外套容器供双拼练习面板覆盖） -->
+        <Grid x:Name="ContentHost">
+        <Grid x:Name="MainContentRoot" Background="{StaticResource PanelBG}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="2*" MinHeight="120"/>
                 <RowDefinition Height="4"/>
@@ -498,6 +503,10 @@
                 </Grid>  <!-- end right grid -->
             </Grid>
             </Grid>  <!-- end 下半整体 -->
+        </Grid>
+
+            <!-- 双拼键位练习面板（默认隐藏，菜单 功能 → 双拼键位练习 切换） -->
+            <views:ShuangPinPracticeControl x:Name="PracticePanel" Visibility="Collapsed"/>
         </Grid>
     </DockPanel>
 </hc:Window>
