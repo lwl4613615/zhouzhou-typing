@@ -1,0 +1,118 @@
+<hc:Window x:Class="newgdq.Views.AuxCodeHelpWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
+        Title="自然码辅助码说明" Width="640" Height="660"
+        Icon="pack://application:,,,/Resources/myicon.ico"
+        FontFamily="微软雅黑" FontSize="13"
+        Background="{DynamicResource RegionBrush}"
+        WindowStartupLocation="CenterOwner">
+    <Grid Margin="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <FlowDocumentScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+            <FlowDocument FontFamily="微软雅黑" FontSize="13" LineHeight="22"
+                          Foreground="{DynamicResource PrimaryTextBrush}"
+                          PagePadding="6">
+
+                <Paragraph FontSize="18" FontWeight="Bold" Foreground="{DynamicResource AccentFG}">
+                    一句话本质
+                </Paragraph>
+                <Paragraph>
+                    辅助码 = <Bold>这个字偏旁部首的拼音，取第一个声母字母</Bold>。就一个字母，没别的。
+                    它的唯一作用是<Bold>减少重码、少翻页</Bold>，不是必须打。
+                </Paragraph>
+
+                <Paragraph FontSize="16" FontWeight="Bold" Foreground="{DynamicResource AccentFG}" Margin="0,10,0,0">
+                    总规则：声 + 韵 + 形
+                </Paragraph>
+                <Paragraph>
+                    前两位是读音双拼（自然码键位），第三位「形」=
+                    <Bold>该字偏旁部首本字读音的声母</Bold>（一个字母）。
+                </Paragraph>
+
+                <Paragraph FontSize="15" FontWeight="Bold" Margin="0,8,0,0">
+                    一、偏旁怎么取声母（念偏旁的本字读音）
+                </Paragraph>
+                <Table CellSpacing="0" Margin="0,4,0,0">
+                    <Table.Columns>
+                        <TableColumn Width="80"/>
+                        <TableColumn Width="140"/>
+                        <TableColumn Width="100"/>
+                    </Table.Columns>
+                    <TableRowGroup>
+                        <TableRow Background="{DynamicResource PanelBG}">
+                            <TableCell><Paragraph FontWeight="Bold">偏旁</Paragraph></TableCell>
+                            <TableCell><Paragraph FontWeight="Bold">念作</Paragraph></TableCell>
+                            <TableCell><Paragraph FontWeight="Bold">取声母</Paragraph></TableCell>
+                        </TableRow>
+                        <TableRow><TableCell><Paragraph>木</Paragraph></TableCell><TableCell><Paragraph>mù</Paragraph></TableCell><TableCell><Paragraph><Bold>m</Bold></Paragraph></TableCell></TableRow>
+                        <TableRow><TableCell><Paragraph>氵</Paragraph></TableCell><TableCell><Paragraph>水 shuǐ</Paragraph></TableCell><TableCell><Paragraph><Bold>s</Bold></Paragraph></TableCell></TableRow>
+                        <TableRow><TableCell><Paragraph>亻</Paragraph></TableCell><TableCell><Paragraph>人 rén</Paragraph></TableCell><TableCell><Paragraph><Bold>r</Bold></Paragraph></TableCell></TableRow>
+                        <TableRow><TableCell><Paragraph>辶</Paragraph></TableCell><TableCell><Paragraph>走 zǒu</Paragraph></TableCell><TableCell><Paragraph><Bold>z</Bold></Paragraph></TableCell></TableRow>
+                        <TableRow><TableCell><Paragraph>扌</Paragraph></TableCell><TableCell><Paragraph>手 shǒu</Paragraph></TableCell><TableCell><Paragraph><Bold>s</Bold></Paragraph></TableCell></TableRow>
+                        <TableRow><TableCell><Paragraph>讠</Paragraph></TableCell><TableCell><Paragraph>言 yán</Paragraph></TableCell><TableCell><Paragraph><Bold>y</Bold></Paragraph></TableCell></TableRow>
+                        <TableRow><TableCell><Paragraph>禾</Paragraph></TableCell><TableCell><Paragraph>hé</Paragraph></TableCell><TableCell><Paragraph><Bold>h</Bold></Paragraph></TableCell></TableRow>
+                        <TableRow><TableCell><Paragraph>纟</Paragraph></TableCell><TableCell><Paragraph>丝 sī</Paragraph></TableCell><TableCell><Paragraph><Bold>s</Bold></Paragraph></TableCell></TableRow>
+                        <TableRow><TableCell><Paragraph>口</Paragraph></TableCell><TableCell><Paragraph>kǒu</Paragraph></TableCell><TableCell><Paragraph><Bold>k</Bold></Paragraph></TableCell></TableRow>
+                        <TableRow><TableCell><Paragraph>艹</Paragraph></TableCell><TableCell><Paragraph>cǎo</Paragraph></TableCell><TableCell><Paragraph><Bold>c</Bold></Paragraph></TableCell></TableRow>
+                        <TableRow><TableCell><Paragraph>阝</Paragraph></TableCell><TableCell><Paragraph>耳/邑（习惯）</Paragraph></TableCell><TableCell><Paragraph><Bold>e</Bold></Paragraph></TableCell></TableRow>
+                    </TableRowGroup>
+                </Table>
+
+                <Paragraph FontSize="15" FontWeight="Bold" Margin="0,10,0,0">
+                    二、单字（3 码）：声母键 + 韵母键 + 偏旁声母
+                </Paragraph>
+                <List MarkerStyle="Disc" Margin="20,0,0,0">
+                    <ListItem><Paragraph>李 = l + i + 木(<Bold>m</Bold>) → <Bold>lim</Bold></Paragraph></ListItem>
+                    <ListItem><Paragraph>秀 = x + q(iu) + 禾(<Bold>h</Bold>) → <Bold>xqh</Bold></Paragraph></ListItem>
+                    <ListItem><Paragraph>通 = t + s(ong) + 辶(<Bold>z</Bold>) → <Bold>tsz</Bold></Paragraph></ListItem>
+                </List>
+                <Paragraph Foreground="{DynamicResource LabelFG}">
+                    打前两键就能出一堆同音字，加上第三键（偏旁声母）马上把目标字顶到最前，省去翻页。
+                </Paragraph>
+
+                <Paragraph FontSize="15" FontWeight="Bold" Margin="0,10,0,0">
+                    三、双字词：各字双拼 + 任一字偏旁声母
+                </Paragraph>
+                <List MarkerStyle="Disc" Margin="20,0,0,0">
+                    <ListItem><Paragraph>适用 = 适(ui) + 用(ys) + 适的辶(<Bold>z</Bold>) → <Bold>uiysz</Bold></Paragraph></ListItem>
+                    <ListItem><Paragraph>布什 = 布(bu) + 什(ui) + 什的亻(<Bold>r</Bold>) → <Bold>buuir</Bold></Paragraph></ListItem>
+                </List>
+                <Paragraph Foreground="{DynamicResource LabelFG}">
+                    取哪个字的偏旁都行，选你最有把握拆的。整词都不好拆时，<Bold>强行拆最后一个字</Bold>。
+                </Paragraph>
+
+                <Paragraph FontSize="15" FontWeight="Bold" Margin="0,10,0,0">
+                    四、三字词：三字双拼 + 后两字任一偏旁声母
+                </Paragraph>
+                <List MarkerStyle="Disc" Margin="20,0,0,0">
+                    <ListItem><Paragraph>实际的 = ui + ji + de + 际的阝(<Bold>e</Bold>) → <Bold>uijidee</Bold></Paragraph></ListItem>
+                    <ListItem><Paragraph>黎鸣明 = li + my + my + 鸣的口(<Bold>k</Bold>) → <Bold>limymyk</Bold></Paragraph></ListItem>
+                </List>
+
+                <Paragraph FontSize="15" FontWeight="Bold" Margin="0,12,0,0" Foreground="{DynamicResource AccentFG}">
+                    只需记住三句话
+                </Paragraph>
+                <List MarkerStyle="Decimal" Margin="20,0,0,0">
+                    <ListItem><Paragraph>辅助码 = 偏旁的拼音首字母（三点水→s、走之→z、单人旁→r、提手旁→s…）。</Paragraph></ListItem>
+                    <ListItem><Paragraph>单字打 3 码：双拼 + 偏旁声母。</Paragraph></ListItem>
+                    <ListItem><Paragraph>词组打「各字双拼 + 最后补一个偏旁声母」。</Paragraph></ListItem>
+                </List>
+
+                <Paragraph Foreground="{DynamicResource LabelFG}" Margin="0,8,0,0" FontSize="12">
+                    说明：辅助码（偏旁声母）是自然码特有的形码；小鹤双拼本身没有辅助码，
+                    其带形码的版本「小鹤音形」是另一套字根形码规则，与此不通用。
+                </Paragraph>
+
+            </FlowDocument>
+        </FlowDocumentScrollViewer>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="关闭" Width="80" Click="BtnClose_Click"/>
+        </StackPanel>
+    </Grid>
+</hc:Window>

@@ -1601,6 +1601,9 @@ namespace newgdq
         // ===== 双拼键位练习（内嵌面板） =====
         private void MenuItem_OpenShuangPin_Click(object sender, RoutedEventArgs e) => EnterPracticeMode();
 
+        private void MenuItem_AuxCodeHelp_Click(object sender, RoutedEventArgs e)
+            => new Views.AuxCodeHelpWindow(this).ShowDialog();
+
         private void EnterPracticeMode()
         {
             if (_practiceMode) return;

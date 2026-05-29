@@ -128,6 +128,8 @@
                 <Separator/>
                 <MenuItem Header="双拼键位练习" Click="MenuItem_OpenShuangPin_Click"
                           ToolTip="小鹤双拼 / 自然码 声母韵母键位练习（内嵌面板）"/>
+                <MenuItem Header="自然码辅助码说明..." Click="MenuItem_AuxCodeHelp_Click"
+                          ToolTip="讲清自然码「声+韵+形」辅助码怎么打（偏旁声母）"/>
                 <Separator/>
                 <MenuItem Header="测试自定义 bm.txt..." Click="MenuItem_TestBmFile_Click"
                           ToolTip="选一个 bm.txt 文件，验证格式是否合法 + 显示统计信息&#10;不会替换当前词典，仅用于自检"/>
