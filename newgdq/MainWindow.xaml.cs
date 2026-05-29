@@ -66,6 +66,8 @@ namespace newgdq
         private bool _showCurrentOnly = true;
         // "本次/全部"切换列的原生列头引用（Loaded 时捕获），用于更新文字
         private System.Windows.Controls.Primitives.DataGridColumnHeader _scoreFilterHeader;
+        // 双拼键位练习面板是否激活：激活期间屏蔽全局键钩/自动重打/自动进段
+        private bool _practiceMode;
 
         // 剪贴板载文自增段号（无 "第N段" 头时使用，对齐老版 Glob.AZpre）
         private int _clipboardSegCounter;
@@ -145,7 +147,6 @@ namespace newgdq
 
         // 跟打地图：嵌入式 Canvas + Polyline，横轴=用时，纵轴=已打字数占比
         private readonly System.Collections.Generic.List<System.Windows.Point> _mapPoints = new System.Collections.Generic.List<System.Windows.Point>();
-        private System.Windows.Shapes.Polyline _mapLine;
         private double _mapW, _mapH;
 
         // 长时间未跟打自动重打（对齐老版 timer5）
@@ -585,7 +586,6 @@ namespace newgdq
             if (MapPanel.Visibility != Visibility.Visible) return;
             RedrawMap();
         }
-        private int _mapDrawCounter;
 
         private void MapReset()
         {
@@ -596,6 +596,7 @@ namespace newgdq
         // 长时间未跟打自动重打：每秒检查一次，若跟打中且距上次输入超过阈值分钟 → 触发 F3
         private void AutoRepeatTimer_Tick(object sender, EventArgs e)
         {
+            if (_practiceMode) return;
             int? th = SettingsService.Instance.AutoRepeatMinutes;
             if (!th.HasValue || th.Value <= 0) return;
             if (!_session.Started || _session.Finished) return;
@@ -1422,6 +1423,7 @@ namespace newgdq
         private void AutoAdvanceTimer_Tick(object sender, EventArgs e)
         {
             _autoAdvanceTimer.Stop();
+            if (_practiceMode) return;
             // 二次校验：计时器排队期间状态可能已变（用户手动跳段/停发文/重开）
             if (!_sending.State.Active || !_sending.State.AutoAdvance) return;
             SendNext();
@@ -1594,6 +1596,48 @@ namespace newgdq
             new Views.JjCheckWindow(this).Show();
         }
 
+        // ===== 双拼键位练习（内嵌面板） =====
+        private void MenuItem_OpenShuangPin_Click(object sender, RoutedEventArgs e) => EnterPracticeMode();
+
+        private void MenuItem_AuxCodeHelp_Click(object sender, RoutedEventArgs e)
+            => new Views.AuxCodeHelpWindow(this).ShowDialog();
+
+        private void MenuItem_XhAuxCodeHelp_Click(object sender, RoutedEventArgs e)
+        {
+            try { System.Diagnostics.Process.Start("https://flypy.cc/help/#/xh"); }
+            catch (Exception ex) { HandyControl.Controls.Growl.Error(ex.Message); }
+        }
+
+        private void EnterPracticeMode()
+        {
+            if (_practiceMode) return;
+            _practiceMode = true;
+            PauseType();   // 停掉跟打计时，避免后台计数
+            PracticePanel.BackRequested -= PracticePanel_BackRequested;
+            PracticePanel.BackRequested += PracticePanel_BackRequested;
+            InfoBar.Visibility        = Visibility.Collapsed;
+            MarkerBar.Visibility      = Visibility.Collapsed;
+            MapPanel.Visibility       = Visibility.Collapsed;
+            MainContentRoot.Visibility = Visibility.Collapsed;
+            PracticePanel.Visibility  = Visibility.Visible;
+            PracticePanel.FocusForInput();
+        }
+
+        private void PracticePanel_BackRequested(object sender, EventArgs e) => ExitPracticeMode();
+
+        private void ExitPracticeMode()
+        {
+            if (!_practiceMode) return;
+            _practiceMode = false;
+            PracticePanel.Visibility   = Visibility.Collapsed;
+            MainContentRoot.Visibility = Visibility.Visible;
+            InfoBar.Visibility         = Visibility.Visible;
+            MarkerBar.Visibility       = Visibility.Visible;
+            // 节奏热力条（MapPanel）恢复到“节奏”开关的原状态
+            MapPanel.Visibility = (TogMap != null && TogMap.IsChecked == true)
+                ? Visibility.Visible : Visibility.Collapsed;
+        }
+
         private void MenuItem_OpenSpeedAnalysis_Click(object sender, RoutedEventArgs e)
         {
             if (_session.TypeText.Length == 0 && _session.Report.Count == 0)
@@ -1737,6 +1781,8 @@ namespace newgdq
 
         private void KeyHook_KeyDown(object sender, int vk)
         {
+            // 双拼练习模式：面板自己通过 WPF 焦点接收按键，全局钩/热键/计数全部停用
+            if (_practiceMode) return;
             // 所有热键都要求主窗激活才生效，避免在其他程序里误触
             if (!this.IsActive) return;
 

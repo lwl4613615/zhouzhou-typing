@@ -110,8 +110,10 @@
                             <hc:NumericUpDown x:Name="NudSpeedLimit" Width="100" Minimum="0" Maximum="500" Value="0"/>
                             <TextBlock Text=" 字/分时不计入历史（0 = 关闭；配合底部 限制 按钮启用）" VerticalAlignment="Center"/>
                         </StackPanel>
-                        <CheckBox x:Name="ChkMergeChord" Margin="0,12,0,0"
-                                  Content="并击模式（默认；按键数由输入框统计，与老版口径一致。关闭则用低层钩子统计每个物理键，适合单键输入法/排查异常）"/>
+                        <CheckBox x:Name="ChkMergeChord" Margin="0,12,0,0" VerticalContentAlignment="Top">
+                            <TextBlock TextWrapping="Wrap" MaxWidth="520"
+                                       Text="并击模式（默认；按键数由输入框统计，与老版口径一致。关闭则用低层钩子统计每个物理键，适合单键输入法/排查异常）"/>
+                        </CheckBox>
                     </StackPanel>
                 </Grid>
             </TabItem>
