@@ -30,6 +30,7 @@ namespace newgdq.Views
         private ShuangPinScheme _scheme;
         private int _mode;            // 0=混合 1=仅声母 2=仅韵母
         private List<DrillItem> _pool = new List<DrillItem>();
+        private readonly Queue<DrillItem> _bag = new Queue<DrillItem>();  // 洗牌发牌队列，保证均匀覆盖
         private DrillItem _current;
         private readonly Random _rng = new Random();
 
@@ -164,6 +165,26 @@ namespace newgdq.Views
             if (_mode == 1) q = q.Where(d => d.IsInitial);
             else if (_mode == 2) q = q.Where(d => !d.IsInitial);
             _pool = q.ToList();
+            _bag.Clear();   // 范围/方案变了重新发牌
+        }
+
+        /// <summary>把整池打乱后压入发牌队列；避免新一轮首项与上一题相同。</summary>
+        private void RefillBag()
+        {
+            if (_pool.Count == 0) return;
+            var shuffled = _pool.ToList();
+            for (int i = shuffled.Count - 1; i > 0; i--)
+            {
+                int j = _rng.Next(i + 1);
+                var t = shuffled[i]; shuffled[i] = shuffled[j]; shuffled[j] = t;
+            }
+            // 池子>1 时，若新一轮首项与刚出的题相同，把它和后面某项交换，避免连续重复
+            if (shuffled.Count > 1 && _current != null && ReferenceEquals(shuffled[0], _current))
+            {
+                int swap = 1 + _rng.Next(shuffled.Count - 1);
+                var t = shuffled[0]; shuffled[0] = shuffled[swap]; shuffled[swap] = t;
+            }
+            foreach (var d in shuffled) _bag.Enqueue(d);
         }
 
         private void CmbScheme_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -195,7 +216,8 @@ namespace newgdq.Views
         {
             ClearKeyHighlights();
             if (_pool.Count == 0) { _current = null; TxtPrompt.Text = "—"; return; }
-            _current = _pool[_rng.Next(_pool.Count)];
+            if (_bag.Count == 0) RefillBag();
+            _current = _bag.Dequeue();
             TxtPromptKind.Text = _current.IsInitial ? "声母" : "韵母";
             TxtPrompt.Text = _current.Token;
             UpdateHint();
