@@ -86,10 +86,10 @@ namespace newgdq.Views
             _flash.Tick += Flash_Tick;
             BuildKeyboard();
 
-            // 恢复上次方案
+            // 恢复上次方案（未保存过时默认自然码）
             var saved = SettingsService.Instance.ShuangPinScheme;
             _suppressEvents = true;
-            CmbScheme.SelectedIndex = saved == "Wubi" ? 2 : (saved == "Ziranma" ? 1 : 0);
+            CmbScheme.SelectedIndex = saved == "Wubi" ? 2 : (saved == "Xiaohe" ? 0 : 1);
             _soundOn = SettingsService.Instance.PracticeSoundOn ?? true;
             ChkSound.IsChecked = _soundOn;
             // 恢复范围 + 提示键开关
@@ -106,7 +106,7 @@ namespace newgdq.Views
             }
             else
             {
-                ApplyScheme(CmbScheme.SelectedIndex == 1 ? ShuangPinKind.Ziranma : ShuangPinKind.Xiaohe);
+                ApplyScheme(CmbScheme.SelectedIndex == 0 ? ShuangPinKind.Xiaohe : ShuangPinKind.Ziranma);
             }
 
             this.Loaded += (s, e) => FocusForInput();

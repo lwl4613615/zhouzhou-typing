@@ -74,6 +74,7 @@
 
     <DockPanel LastChildFill="True">
 
+
         <!-- 托盘图标：左键点击还原；右键弹菜单 -->
         <tb:TaskbarIcon x:Name="TrayIcon"
                         IconSource="pack://application:,,,/Resources/myicon.ico"
@@ -97,6 +98,18 @@
                 <MenuItem Header="发文..."    InputGestureText="F2" Click="MenuItem_OpenSendText_Click"/>
                 <MenuItem Header="载文"       InputGestureText="F4" Click="MenuItem_LoadClipboard_Click"/>
                 <MenuItem Header="外观..." Click="MenuItem_OpenSettings_Click"/>
+                <MenuItem Header="界面缩放" x:Name="MnuUiScale">
+                    <MenuItem Header="放大  (Ctrl + 滚轮上)" InputGestureText="Ctrl+加号" Click="MenuItem_ScaleUp_Click"/>
+                    <MenuItem Header="缩小  (Ctrl + 滚轮下)" InputGestureText="Ctrl+减号" Click="MenuItem_ScaleDown_Click"/>
+                    <Separator/>
+                    <MenuItem Header="100%" Tag="1.0"  IsCheckable="True" Click="MenuItem_ScaleSet_Click"/>
+                    <MenuItem Header="125%" Tag="1.25" IsCheckable="True" Click="MenuItem_ScaleSet_Click"/>
+                    <MenuItem Header="150%" Tag="1.5"  IsCheckable="True" Click="MenuItem_ScaleSet_Click"/>
+                    <MenuItem Header="175%" Tag="1.75" IsCheckable="True" Click="MenuItem_ScaleSet_Click"/>
+                    <MenuItem Header="200%" Tag="2.0"  IsCheckable="True" Click="MenuItem_ScaleSet_Click"/>
+                    <MenuItem Header="225%" Tag="2.25" IsCheckable="True" Click="MenuItem_ScaleSet_Click"/>
+                    <MenuItem Header="250%" Tag="2.5"  IsCheckable="True" Click="MenuItem_ScaleSet_Click"/>
+                </MenuItem>
                 <MenuItem Header="暂停"   InputGestureText="F8" x:Name="MnuPause" Click="MenuItem_Pause_Click"/>
                 <Separator/>
                 <MenuItem Header="复制成绩" InputGestureText="F9"     Click="MenuItem_CopyResult_Click"/>

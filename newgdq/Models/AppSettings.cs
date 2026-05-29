@@ -78,5 +78,12 @@ namespace newgdq.Models
 
         // 发文参数预设（命名保存）
         [DataMember(EmitDefaultValue = false)] public System.Collections.Generic.List<SendPreset> SendPresets { get; set; }
+
+        // 界面整体缩放倍数（1.0 = 100%）。高分屏（4K 等）默认显示偏小时调大。范围 1.0–2.5。
+        // 首次启动为 null → 按系统 DPI 自动推荐（见 MainWindow.AutoRecommendUiScale）。
+        [DataMember(EmitDefaultValue = false)] public double? UiScale { get; set; }
+
+        // 发文窗口"本次发送字数"上次填写值。默认 25。
+        [DataMember(EmitDefaultValue = false)] public int? LastSendCount { get; set; }
     }
 }

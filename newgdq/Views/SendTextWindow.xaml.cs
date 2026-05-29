@@ -45,6 +45,10 @@ namespace newgdq.Views
             foreach (var b in Builtin) LbxBuiltin.Items.Add(b.Header);
             ReloadPresets();
             CmbStyle.SelectedIndex = 0;  // 自动
+
+            // 恢复上次"本次发送字数"（默认 25）
+            int lastCount = SettingsService.Instance.LastSendCount ?? 25;
+            if (lastCount > 0) TbxSendCount.Text = lastCount.ToString();
         }
 
         /// <summary>当前用户选择的文段类型；返回 null 表示"自动按是否含中文标点判断"。</summary>
@@ -259,6 +263,9 @@ namespace newgdq.Views
                 HandyControl.Controls.Growl.Warning("发送字数无效");
                 return;
             }
+            // 记住本次发送字数，下次打开沿用
+            SettingsService.Instance.LastSendCount = countPerSeg;
+            try { SettingsService.Save(); } catch { }
             int.TryParse(TbxSendStart.Text, out int mark);
             int.TryParse(TbxStartSeg.Text, out int startSeg);
             if (startSeg <= 0) startSeg = 1;

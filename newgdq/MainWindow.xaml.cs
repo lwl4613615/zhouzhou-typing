@@ -29,7 +29,6 @@ namespace newgdq
 
         // 服务 / 计时器
         private readonly KeyHook _keyHook = new KeyHook();
-        private readonly ImeWatcher _ime = new ImeWatcher();
         private readonly DispatcherTimer _timerTime  = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
         private readonly DispatcherTimer _timerStats = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(200) };
 
@@ -168,7 +167,6 @@ namespace newgdq
             InitializeComponent();
             TbxInput.TextChanged += TbxInput_TextChanged;
             TbxInput.PreviewKeyDown += TbxInput_PreviewKeyDown;
-            _ime.Attach(TbxInput);
             TbxInput.LostFocus += (s, e) => PauseType();
             _flashTimer.Tick += FlashTimer_Tick;
             _hgFlashTimer.Tick += HgFlashTimer_Tick;
@@ -181,6 +179,10 @@ namespace newgdq
 
             _timerTime.Tick  += TimerTime_Tick;
             _timerStats.Tick += TimerStats_Tick;
+
+            // 界面缩放由全局 UiScaleManager 统一处理（Ctrl+滚轮 / Ctrl+加减号 / 菜单）
+            UiScaleManager.SetManageSize(this, false); // 主窗口自己持久化几何，不让管理器二次缩放尺寸
+            UiScaleManager.ScaleChanged += _ => UpdateScaleMenuChecks();
 
             _keyHook.KeyDown += KeyHook_KeyDown;
             try { _keyHook.Start(); } catch { /* 钩子安装失败，不影响 UI */ }
@@ -245,6 +247,39 @@ namespace newgdq
 
             // 字体/颜色/个签
             ApplyAppearance();
+
+            // 同步界面缩放菜单勾选（缩放本身由 UiScaleManager 在窗口加载时已应用）
+            UpdateScaleMenuChecks();
+        }
+
+        // ===== 界面缩放菜单（实际缩放逻辑在 Services.UiScaleManager） =====
+
+        private void UpdateScaleMenuChecks()
+        {
+            if (MnuUiScale == null) return;
+            double cur = UiScaleManager.Scale;
+            foreach (var obj in MnuUiScale.Items)
+            {
+                if (obj is MenuItem mi && mi.IsCheckable
+                    && mi.Tag is string tag && double.TryParse(tag,
+                        System.Globalization.NumberStyles.Float,
+                        System.Globalization.CultureInfo.InvariantCulture, out double v))
+                {
+                    mi.IsChecked = Math.Abs(v - cur) < 0.001;
+                }
+            }
+        }
+
+        private void MenuItem_ScaleUp_Click(object sender, RoutedEventArgs e) => UiScaleManager.StepUp();
+
+        private void MenuItem_ScaleDown_Click(object sender, RoutedEventArgs e) => UiScaleManager.StepDown();
+
+        private void MenuItem_ScaleSet_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuItem mi && mi.Tag is string tag && double.TryParse(tag,
+                    System.Globalization.NumberStyles.Float,
+                    System.Globalization.CultureInfo.InvariantCulture, out double v))
+                UiScaleManager.SetScale(v);
         }
 
         /// <summary>把 SettingsService.Instance 的字体/颜色/个签应用到 UI。
@@ -760,6 +795,8 @@ namespace newgdq
                     Height = BotH,
                     Fill = fill,
                 };
+                // 悬停提示：显示该格对应的原文字符 + 耗时（中文/英文/标点皆原样显示）
+                rect.ToolTip = BuildMapTooltip(i, _charMs[i]);
                 System.Windows.Controls.Canvas.SetLeft(rect, i * cellW);
                 System.Windows.Controls.Canvas.SetTop(rect, botY);
                 if (i == maxIdx && maxMs > 800)
@@ -774,6 +811,30 @@ namespace newgdq
                 }
                 MapCanvas.Children.Add(rect);
             }
+        }
+
+        /// <summary>节奏色块悬停提示：第 idx 个字符（原文）+ 耗时。</summary>
+        private string BuildMapTooltip(int idx, double ms)
+        {
+            string ch;
+            if (idx >= 0 && idx < _session.TypeText.Length)
+            {
+                char c = _session.TypeText[idx];
+                switch (c)
+                {
+                    case ' ':  ch = "空格"; break;
+                    case '\u3000': ch = "全角空格"; break;
+                    case '\t': ch = "Tab"; break;
+                    case '\r':
+                    case '\n': ch = "换行"; break;
+                    default:   ch = c.ToString(); break;
+                }
+            }
+            else ch = "?";
+
+            return ms > 0
+                ? $"第{idx + 1}字：{ch}    {(int)ms}ms"
+                : $"第{idx + 1}字：{ch}    （未打）";
         }
 
         /// <summary>毫秒 → 颜色（绿→黄→橙→红→深红）。空格未打的字用透明灰。</summary>
@@ -1949,13 +2010,32 @@ namespace newgdq
             if (_session.TypeText.Length == 0) return;
             if (_session.Finished) return;
 
-            // \u6682\u505c\u4e2d\u6562\u952e \u2192 \u81ea\u52a8\u7ee7\u7eed\uff08\u539f\u7248\u903b\u8f91\uff09
+            // 暂停中敲键 → 自动继续（原版逻辑）
             if (_isPaused) EndPause();
 
-            // IME 合成中（拼音未提交）跳过染色，避免字母被判成"错字"
-            if (_ime.IsComposing) return;
-
-            var input = TbxInput.Text ?? string.Empty;
+            // 取文本框全文。
+            // IME 合成防护（实测根因）：WPF 走 TSF 而非 IMM，合成期间无法可靠取到合成串长度；
+            // 且拼音合成时输入法会先往 TextBox.Text 塞入占位符（半角空格 U+0020 / 字母），
+            // 它被当成已上屏字符与中文原文比对 → 把"对的字"染成红色。
+            //
+            // 规则：只剥离"尾部"处于中文原文位置上的 ASCII 占位串。合成中间态只会出现在文本末尾，
+            // 且很快会被上屏的汉字替换；而真正打错的空格只要后面还有其它字符（继续打了下一个字），
+            // 它就不在末尾、会照常参与比对并计错。这样既挡住合成占位符，又不会吞掉真打的空格及其后续字符。
+            var rawInput = TbxInput.Text ?? string.Empty;
+            int realLen = rawInput.Length;
+            while (realLen > 0)
+            {
+                int i = realLen - 1;
+                char inp = rawInput[i];
+                bool inpIsImeJunk = inp == ' ' || inp == '\u3000'
+                                    || (inp >= 'a' && inp <= 'z')
+                                    || (inp >= 'A' && inp <= 'Z')
+                                    || (inp >= '0' && inp <= '9');
+                bool srcIsCjk = i < _session.TypeText.Length && _session.TypeText[i] > 127;
+                if (srcIsCjk && inpIsImeJunk) realLen--;
+                else break;
+            }
+            var input = realLen < rawInput.Length ? rawInput.Substring(0, realLen) : rawInput;
 
             // 双保险：如果输入长度等于上次染色长度且未回退，说明只是 IME 切换/光标移动，跳过
             if (input.Length == _session.LastInputLen && _session.Started) return;
@@ -1981,10 +2061,6 @@ namespace newgdq
             _lastInputAt = DateTime.Now;
 
             int len = Math.Min(input.Length, _charRuns.Count);
-
-            // 调试：把 TextChanged 时的真实输入打到 VS 输出窗口
-            System.Diagnostics.Debug.WriteLine(
-                $"[TextChanged] InputLen={input.Length} Composing={_ime.IsComposing} Text=[{input}]");
 
             // 对照逻辑与老版本（D:\old1）保持一致：逐字直接比较，不匹配即错字（含空格/字母/数字）。
             // 旧的"IME 漏字符防护"会把中文位置的空格当成未输入而截断，导致真打的空格既不显红也不计错，已移除。

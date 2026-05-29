@@ -16,6 +16,8 @@ namespace newgdq.Views
         {
             InitializeComponent();
             _owner = owner;
+            // 跟打状态浮窗比主窗口小一圈（实际缩放 = 全局倍数 × 0.8）
+            Services.UiScaleManager.SetScaleFactor(this, 0.8);
             if (owner != null)
             {
                 Owner = owner;

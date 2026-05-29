@@ -52,6 +52,9 @@ namespace newgdq
             Services.SettingsService.Load();
             ApplyTheme(Services.SettingsService.Instance.ThemeName);
 
+            // 全局界面缩放：确定初始倍数并钩住所有窗口，使各窗体字体/控件一起缩放
+            Services.UiScaleManager.Initialize();
+
             base.OnStartup(e);
         }
 
