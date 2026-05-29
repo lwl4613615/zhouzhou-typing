@@ -359,19 +359,25 @@ namespace newgdq.Views
             {
                 if (_step == 0)
                 {
-                    FlashKey(target, true, () => { _step = 1; UpdateCharHint(); });
+                    // 立即推进到第二键，避免按得太快时仍按第一键判定
+                    _step = 1;
+                    UpdateCharHint();
+                    FlashKey(target, true, null);   // 视觉反馈放在刷新之后，绿闪可见
                 }
                 else
                 {
                     _ok++; _streak++;
-                    FlashKey(target, true, NextChar);
+                    NextChar();                     // 立即换字
+                    FlashKey(target, true, null);
                 }
             }
             else
             {
                 _bad++; _streak = 0;
                 _errors[target] = (_errors.TryGetValue(target, out var er) ? er : 0) + 1;
-                FlashKey(pressed, false, () => { _step = 0; UpdateCharHint(); });
+                _step = 0;                          // 答错回到第一键
+                UpdateCharHint();
+                FlashKey(pressed, false, null);
             }
             UpdateStats();
         }
