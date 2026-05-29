@@ -167,7 +167,11 @@ namespace newgdq
             InitializeComponent();
             TbxInput.TextChanged += TbxInput_TextChanged;
             TbxInput.PreviewKeyDown += TbxInput_PreviewKeyDown;
-            TbxInput.LostFocus += (s, e) => PauseType();
+            // IME 合成态侦测（方案 A'）：用 WPF TSF 合成事件维护 _imeComposing，
+            // 合成中（拼音未上屏）才保护尾部占位串；非合成（英文直打/已上屏）则逐字判错。
+            System.Windows.Input.TextCompositionManager.AddPreviewTextInputStartHandler(TbxInput, TbxInput_TextInputStart);
+            System.Windows.Input.TextCompositionManager.AddPreviewTextInputHandler(TbxInput, TbxInput_TextInputDone);
+            TbxInput.LostFocus += (s, e) => { _imeComposing = false; PauseType(); };
             _flashTimer.Tick += FlashTimer_Tick;
             _hgFlashTimer.Tick += HgFlashTimer_Tick;
             _autoRepeatTimer.Tick += AutoRepeatTimer_Tick;
@@ -2028,6 +2032,24 @@ namespace newgdq
             Services.KeyHook.LogLine($"  TBOX vk=0x{vk:X2} → Keys={_session.Keys}");
         }
 
+        // ===== IME 合成态侦测（方案 A'）=====
+        // TSF 合成期间（输入拼音、未上屏），TbxInput.Text 会被实时塞入合成中间态（拼音字母/占位空格）。
+        // TextInputStart → 合成开始；PreviewTextInput → 合成提交（上屏）/结束。靠这对事件维护标志，
+        // 比"猜尾部 ASCII 占位符"可靠：英文直打或已上屏时 _imeComposing=false → 一律逐字判错。
+        private bool _imeComposing;
+
+        private void TbxInput_TextInputStart(object sender, System.Windows.Input.TextCompositionEventArgs e)
+        {
+            // 仅当存在真实合成（输入法在组字）时才置位；普通字符的 TextInput 不会进入此事件。
+            _imeComposing = true;
+        }
+
+        private void TbxInput_TextInputDone(object sender, System.Windows.Input.TextCompositionEventArgs e)
+        {
+            // 合成提交/结束（汉字上屏或英文直接输入完成）→ 解除保护，让 TextChanged 走纯逐字比对。
+            _imeComposing = false;
+        }
+
         // ===== 输入比对染色 =====
 
         private void TbxInput_TextChanged(object sender, TextChangedEventArgs e)
@@ -2043,12 +2065,12 @@ namespace newgdq
             // 且拼音合成时输入法会先往 TextBox.Text 塞入占位符（半角空格 U+0020 / 字母），
             // 它被当成已上屏字符与中文原文比对 → 把"对的字"染成红色。
             //
-            // 规则：只剥离"尾部"处于中文原文位置上的 ASCII 占位串。合成中间态只会出现在文本末尾，
-            // 且很快会被上屏的汉字替换；而真正打错的空格只要后面还有其它字符（继续打了下一个字），
-            // 它就不在末尾、会照常参与比对并计错。这样既挡住合成占位符，又不会吞掉真打的空格及其后续字符。
+            // 规则：只在 IME 合成进行中（_imeComposing）才剥离"尾部"处于中文原文位置上的 ASCII 占位串。
+            // 合成中间态只会出现在文本末尾，且很快会被上屏的汉字替换。非合成态（英文直打、已上屏）
+            // 完全不剥离 → 真打错的空格/字母/数字一律逐字判错（修复"空格后字母也不判错"）。
             var rawInput = TbxInput.Text ?? string.Empty;
             int realLen = rawInput.Length;
-            while (realLen > 0)
+            while (_imeComposing && realLen > 0)
             {
                 int i = realLen - 1;
                 char inp = rawInput[i];
