@@ -275,12 +275,12 @@ namespace newgdq.Views
                 IsRandom       = RbnOutOrder.IsChecked == true,
                 RandomNoRepeat = ChkNoRepeat.IsChecked == true,
                 OneSentenceEnd = ChkOneEnd.IsChecked == true,
+                AutoAdvance    = ChkAutoAdvance.IsChecked == true,
                 CountPerSeg    = countPerSeg,
                 Mark           = mark,
                 StartSeg       = startSeg,
                 SourceName     = GetCurrentSourceName(),
             };
-
             ResultState = state;
             OnStartSending?.Invoke(state);
             this.Close();

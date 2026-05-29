@@ -41,6 +41,10 @@
                         <CheckBox x:Name="ChkNoRepeat" Content="乱序全段不重复" Margin="0,0,12,0" Foreground="{DynamicResource ValueFG}"/>
                         <CheckBox x:Name="ChkTickOut" Content="自动剔除空格" IsChecked="True" Foreground="{DynamicResource ValueFG}"/>
                     </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                        <CheckBox x:Name="ChkAutoAdvance" Content="打完自动发下一段" Margin="0,0,12,0" Foreground="{DynamicResource ValueFG}"
+                                  ToolTip="每打完一段，约 0.7 秒后自动载入下一段，连续不间断练习（发完最后一段自动停止）"/>
+                    </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="发送字数" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{DynamicResource LabelFG}"/>
                         <TextBox x:Name="TbxSendCount" Width="50" Text="25" Margin="0,0,8,0" PreviewTextInput="DigitOnly_PreviewTextInput"/>

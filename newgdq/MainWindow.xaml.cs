@@ -38,6 +38,10 @@ namespace newgdq
 
         // 发文
         private readonly SendingService _sending = new SendingService();
+        // 自动续发：打完一段后延迟一小段再发下一段，给用户看一眼成绩；可被任何手动操作取消
+        private readonly System.Windows.Threading.DispatcherTimer _autoAdvanceTimer =
+            new System.Windows.Threading.DispatcherTimer
+            { Interval = TimeSpan.FromMilliseconds(700) };
 
         // 速度曲线窗口
         // 嵌入式速度曲线（TogChart 切换可见性）
@@ -167,8 +171,10 @@ namespace newgdq
             _hgFlashTimer.Tick += HgFlashTimer_Tick;
             _autoRepeatTimer.Tick += AutoRepeatTimer_Tick;
             _autoRepeatTimer.Start();
-
+            _autoAdvanceTimer.Tick += AutoAdvanceTimer_Tick;
             DgvHistory.ItemsSource = History;
+            // 列宽可拖拽：让汇总行（FootGrid）跟随 DataGrid 各列实际宽度同步
+            DgvHistory.LayoutUpdated += (s, e) => SyncFooterColumns();
 
             _timerTime.Tick  += TimerTime_Tick;
             _timerStats.Tick += TimerStats_Tick;
@@ -971,6 +977,27 @@ namespace newgdq
 
         private void BtnScoreFilter_Click(object sender, RoutedEventArgs e) => ToggleScoreFilter();
 
+        /// <summary>
+        /// 让底部汇总行的列宽实时跟随 DataGrid 各列的实际宽度，
+        /// 这样用户拖拽任意一列时表头(DataGrid原生列头)、数据、汇总行三者始终对齐。
+        /// </summary>
+        private void SyncFooterColumns()
+        {
+            if (FootGrid == null || DgvHistory == null) return;
+            var cols = DgvHistory.Columns;
+            var defs = FootGrid.ColumnDefinitions;
+            if (cols.Count == 0 || defs.Count != cols.Count) return;
+            for (int i = 0; i < cols.Count; i++)
+            {
+                double w = cols[i].ActualWidth;
+                if (double.IsNaN(w) || w <= 0) continue;
+                // 仅在宽度确有变化时更新，避免 LayoutUpdated 反复触发布局
+                if (System.Math.Abs(defs[i].Width.Value - w) > 0.5 || defs[i].Width.GridUnitType != GridUnitType.Pixel)
+                    defs[i].Width = new GridLength(w, GridUnitType.Pixel);
+            }
+        }
+
+
         // ===== 加载文章 =====
 
         private void MenuItem_LoadInternal_Click(object sender, RoutedEventArgs e)
@@ -994,6 +1021,8 @@ namespace newgdq
 
         private void LoadArticle(string text, string title)
         {
+            // 载入新内容前取消任何挂起的自动续发（F4/F5/重打/跳段/手动发段都经过这里）
+            CancelAutoAdvance();
             // 如果上一段已字数打满但因末字错未 finish，载新文时强制以当前成绩入历史
             TryForceFinalizeLastSegment();
 
@@ -1251,6 +1280,7 @@ namespace newgdq
                     "已经在发文中（" + (_sending.State.Title ?? "-") + "）。\n是否重新开始一段新的发文？\n\n[ Esc 取消 ]",
                     "发文确认", System.Windows.MessageBoxButton.OKCancel, System.Windows.MessageBoxImage.Question);
                 if (r != System.Windows.MessageBoxResult.OK) return;
+                CancelAutoAdvance();
                 _sending.Stop();
                 _sendStatusWin?.Refresh();
             }
@@ -1270,12 +1300,14 @@ namespace newgdq
                 _sending.State.IsRandom       = state.IsRandom;
                 _sending.State.RandomNoRepeat = state.RandomNoRepeat;
                 _sending.State.OneSentenceEnd = state.OneSentenceEnd;
+                _sending.State.AutoAdvance    = state.AutoAdvance;
                 _sending.State.CountPerSeg    = state.CountPerSeg;
                 _sending.State.Mark           = state.Mark;
                 _sending.State.StartSeg       = state.StartSeg;
                 _sending.State.SentSeg        = 0;
                 // 来源（SendTextWindow 当前 Tab 名）
                 _sending.State.SourceName     = state.SourceName ?? "-";
+                CancelAutoAdvance();     // 新会话先清掉任何挂起的自动续发
                 SendNext();   // 立即发第一段
                 ShowSendStatusWindow();  // 自动弹发文状态窗
             };
@@ -1304,9 +1336,14 @@ namespace newgdq
 
         // 供 SendStatusWindow 调用的公共入口
         public Models.SendingState GetSendingState() => _sending.State;
-        public void StopSending() { _sending.Stop(); _sendStatusWin?.Refresh(); }
+        public void StopSending() { CancelAutoAdvance(); _sending.Stop(); _sendStatusWin?.Refresh(); }
         public void SendNextSegment() => SendNext();
-
+        /// <summary>发文状态窗里切换"打完自动发下一段"。关闭时取消任何挂起的续发。</summary>
+        public void SetAutoAdvance(bool on)
+        {
+            _sending.State.AutoAdvance = on;
+            if (!on) CancelAutoAdvance();
+        }
         /// <summary>Ctrl+← / Ctrl+→ 相对跳段：仅顺序 / 一句结束模式支持。</summary>
         private void JumpSegRelative(int delta)
         {
@@ -1359,6 +1396,28 @@ namespace newgdq
             LoadArticle(seg, title);
             _sendStatusWin?.Refresh();
         }
+
+        // ===== 自动续发（打完一段自动发下一段）=====
+        /// <summary>由"正常打完"分支调用：若发文会话开启了自动续发，安排延迟发下一段。</summary>
+        private void ScheduleAutoAdvance()
+        {
+            if (!_sending.State.Active || !_sending.State.AutoAdvance) return;
+            // 重启计时器，单次触发
+            _autoAdvanceTimer.Stop();
+            _autoAdvanceTimer.Start();
+        }
+
+        /// <summary>取消任何挂起的自动续发（手动发段 / 复位 / 重开发文 / 停发文时调用）。</summary>
+        private void CancelAutoAdvance() => _autoAdvanceTimer.Stop();
+
+        private void AutoAdvanceTimer_Tick(object sender, EventArgs e)
+        {
+            _autoAdvanceTimer.Stop();
+            // 二次校验：计时器排队期间状态可能已变（用户手动跳段/停发文/重开）
+            if (!_sending.State.Active || !_sending.State.AutoAdvance) return;
+            SendNext();
+        }
+
         private void MnuSmartCi_Click(object sender, RoutedEventArgs e)
         {
             if (MnuSmartCi.IsChecked != true)
@@ -1415,6 +1474,8 @@ namespace newgdq
                 "—— 主窗激活时的快捷键 ——\n" +
                 "F9         复制最新一段成绩\n" +
                 "Ctrl+R     发下一段（同 F6）\n" +
+                "Ctrl+U     重打当前段（同 F3）\n" +
+                "Ctrl+J     乱序重抽（发下一段）\n" +
                 "Ctrl+F2    打开发文状态窗\n" +
                 "Ctrl+←/→   上一段 / 下一段（跳段）\n" +
                 "Ctrl+T     发送图片成绩\n" +
@@ -1721,6 +1782,12 @@ namespace newgdq
                     case 0x52: // Ctrl+R 发下一段（对齐老版菜单快捷键）
                         Dispatcher.BeginInvoke(new Action(SendNext));
                         return;
+                    case 0x55: // Ctrl+U 重打当前段
+                        Dispatcher.BeginInvoke(new Action(Repeat));
+                        return;
+                    case 0x4A: // Ctrl+J 乱序重抽（发下一段）
+                        Dispatcher.BeginInvoke(new Action(SendShuffle));
+                        return;
                     case 0x25: // Ctrl+← 上一段
                         Dispatcher.BeginInvoke(new Action(() => JumpSegRelative(-1)));
                         return;
@@ -1864,27 +1931,8 @@ namespace newgdq
             System.Diagnostics.Debug.WriteLine(
                 $"[TextChanged] InputLen={input.Length} Composing={_ime.IsComposing} Text=[{input}]");
 
-            // 通用 IME 漏字符防护：
-            // 拼音输入法（搜狗/QQ/微软）选字时常把空格 / 字母 / 数字漏进 TextBox。
-            // 当文章原文是中文（CJK）但输入是 ASCII 控制字符时，截断到该位置（视为未输入）。
-            int realLen = len;
-            for (int i = 0; i < len; i++)
-            {
-                char src = _session.TypeText[i];
-                char inp = input[i];
-                bool srcIsCjk = src > 127;                    // 原文中文
-                bool inpIsAscii = inp < 128;                  // 输入是 ASCII
-                bool inpIsImeJunk = inp == ' ' || inp == '\u3000'
-                                    || (inp >= 'a' && inp <= 'z')
-                                    || (inp >= 'A' && inp <= 'Z')
-                                    || (inp >= '0' && inp <= '9');
-                if (srcIsCjk && inpIsAscii && inpIsImeJunk)
-                {
-                    realLen = i;
-                    break;
-                }
-            }
-            len = realLen;
+            // 对照逻辑与老版本（D:\old1）保持一致：逐字直接比较，不匹配即错字（含空格/字母/数字）。
+            // 旧的"IME 漏字符防护"会把中文位置的空格当成未输入而截断，导致真打的空格既不显红也不计错，已移除。
 
             int cz = 0;
             // 差异染色：每次都对已输入区域整段重写背景，避免 RichTextBox 内部布局变化时
@@ -1970,6 +2018,8 @@ namespace newgdq
                 {
                     _session.Finished = true;
                     FinishTyping();
+                    // 正常打完才自动续发（强制结算 TryForceFinalizeLastSegment 走的不是这条路径，不会误触发）
+                    ScheduleAutoAdvance();
                 }
                 // 末字有错 → 不结束，允许用户回改纠正
                 // 用户也可以选择不回改，直接载入新文（载入时 _session.Reset()）

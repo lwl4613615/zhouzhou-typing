@@ -205,7 +205,15 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Button x:Name="BtnStop" Grid.Column="0" Style="{StaticResource GlowBtn}"
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <CheckBox x:Name="ChkAutoAdvance" Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,8"
+                      Content="打完自动发下一段" Foreground="{DynamicResource ValueFG}"
+                      ToolTip="勾选后每打完一段约 0.7 秒自动载入下一段（发完最后一段自动停止）"
+                      Click="ChkAutoAdvance_Click"/>
+            <Button x:Name="BtnStop" Grid.Row="1" Grid.Column="0" Style="{StaticResource GlowBtn}"
                     Content="■ 停止发文" Margin="0,0,4,0" Click="BtnStop_Click"
                     BorderBrush="#7E2828">
                 <Button.Background>
@@ -215,7 +223,7 @@
                     </LinearGradientBrush>
                 </Button.Background>
             </Button>
-            <Button x:Name="BtnSendNext" Grid.Column="1" Style="{StaticResource GlowBtn}"
+            <Button x:Name="BtnSendNext" Grid.Row="1" Grid.Column="1" Style="{StaticResource GlowBtn}"
                     Content="▶ 发下一段 (F6)" Margin="4,0,0,0" Click="BtnSendNext_Click"
                     BorderBrush="#2A6FB8">
                 <Button.Background>

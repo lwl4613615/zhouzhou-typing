@@ -46,6 +46,7 @@ namespace newgdq.Models
         public bool IsRandom;            // 是否乱序
         public bool RandomNoRepeat;      // 乱序全段不重复
         public bool OneSentenceEnd;      // 文章模式：以一句结束
+        public bool AutoAdvance;         // 打完一段自动发下一段
 
         // 进度
         public int StartSeg = 1;         // 起始段号

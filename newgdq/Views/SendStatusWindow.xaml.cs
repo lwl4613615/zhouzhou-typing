@@ -67,6 +67,7 @@ namespace newgdq.Views
                 TxtPct.Text = "0%";
                 BtnStop.IsEnabled = false;
                 BtnSendNext.IsEnabled = false;
+                ChkAutoAdvance.IsEnabled = false;
                 return;
             }
             int totalLen = st.FullText?.Length ?? 0;
@@ -92,6 +93,14 @@ namespace newgdq.Views
             TxtPct.Text = pct.ToString("0.0") + "%";
             BtnStop.IsEnabled = true;
             BtnSendNext.IsEnabled = true;
+            ChkAutoAdvance.IsEnabled = true;
+            // 反向同步开关状态（避免 Click 处理在赋值时被重入触发）
+            if (ChkAutoAdvance.IsChecked != st.AutoAdvance)
+            {
+                _suppressAutoChk = true;
+                ChkAutoAdvance.IsChecked = st.AutoAdvance;
+                _suppressAutoChk = false;
+            }
         }
 
         private void BtnStop_Click(object sender, RoutedEventArgs e)
@@ -104,6 +113,13 @@ namespace newgdq.Views
         {
             _owner?.SendNextSegment();
             Refresh();
+        }
+
+        private bool _suppressAutoChk;
+        private void ChkAutoAdvance_Click(object sender, RoutedEventArgs e)
+        {
+            if (_suppressAutoChk) return;
+            _owner?.SetAutoAdvance(ChkAutoAdvance.IsChecked == true);
         }
     }
 }

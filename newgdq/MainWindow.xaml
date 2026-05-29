@@ -14,7 +14,7 @@
         Background="{DynamicResource RegionBrush}"
         Foreground="{DynamicResource PrimaryTextBrush}"
         NonClientAreaBackground="{StaticResource PanelBG}"
-        NonClientAreaForeground="#DDD"
+        NonClientAreaForeground="{DynamicResource AccentFG}"
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <!-- 信息条标签 -->
@@ -396,46 +396,13 @@
                 <!-- 右：历史表头 + DataGrid + 汇总行 -->
                 <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="22"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="22"/>
                 </Grid.RowDefinitions>
-                <!-- 表头带 -->
+                <!-- 顶部工具条：本次/全部 切换按钮 -->
                 <Grid Grid.Row="0" Background="{StaticResource CellBG}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="40"/>
-                        <ColumnDefinition Width="80"/>
-                        <ColumnDefinition Width="40"/>
-                        <ColumnDefinition Width="70"/>
-                        <ColumnDefinition Width="70"/>
-                        <ColumnDefinition Width="70"/>
-                        <ColumnDefinition Width="60"/>
-                        <ColumnDefinition Width="60"/>
-                        <ColumnDefinition Width="60"/>
-                        <ColumnDefinition Width="60"/>
-                        <ColumnDefinition Width="60"/>
-                        <ColumnDefinition Width="50"/>
-                        <ColumnDefinition Width="50"/>
-                        <ColumnDefinition Width="70"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0"  Text="序"   Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Column="1"  Text="时间" Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Column="2"  Text="段"   Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Column="3"  Text="速度" Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Column="4"  Text="击键" Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Column="5"  Text="码长" Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Column="6"  Text="回改" Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Column="7"  Text="错字" Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Column="8"  Text="键数" Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Column="9"  Text="字数" Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Column="10" Text="打词" Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Column="11" Text="选重" Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Column="12" Text="拼回" Style="{StaticResource LblValue}"
-                               ToolTip="拼音候选框里按退格删拼音的次数(不同于跟打区回改)"/>
-                    <TextBlock Grid.Column="13" Text="左:右" Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Column="14" Text="用时" Style="{StaticResource LblValue}"/>
-                    <Button Grid.Column="14" x:Name="BtnScoreFilter" Content="本次"
+                    <Button x:Name="BtnScoreFilter" Content="本次"
                             HorizontalAlignment="Right" VerticalAlignment="Center"
                             Margin="0,0,4,0" Padding="6,1" FontSize="11"
                             Click="BtnScoreFilter_Click"/>
@@ -443,11 +410,15 @@
                 <DataGrid Grid.Row="1" x:Name="DgvHistory"
                           AutoGenerateColumns="False"
                           CanUserAddRows="False" CanUserDeleteRows="False"
+                          CanUserResizeColumns="True"
+                          CanUserReorderColumns="False"
+                          CanUserSortColumns="False"
+                          CanUserResizeRows="False"
                           IsReadOnly="True"
                           GridLinesVisibility="All"
                           HorizontalGridLinesBrush="{StaticResource GridLine}"
                           VerticalGridLinesBrush="{StaticResource GridLine}"
-                          HeadersVisibility="None"
+                          HeadersVisibility="Column"
                           Background="{StaticResource PanelBG}"
                           RowBackground="{StaticResource PanelBG}"
                           AlternatingRowBackground="{DynamicResource AltRowBG}"
@@ -456,28 +427,43 @@
                           ScrollViewer.HorizontalScrollBarVisibility="Auto"
                           ScrollViewer.CanContentScroll="True"
                           RowHeight="24" FontSize="12" FontFamily="微软雅黑">
+                    <DataGrid.Resources>
+                        <!-- 列头样式：贴主题色 + 居中加粗，保留默认右侧拖拽手柄（resize gripper） -->
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="{DynamicResource CellBG}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource ValueFG}"/>
+                            <Setter Property="FontWeight" Value="Bold"/>
+                            <Setter Property="FontSize" Value="12"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            <Setter Property="BorderBrush" Value="{DynamicResource GridLine}"/>
+                            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                            <Setter Property="Height" Value="20"/>
+                        </Style>
+                    </DataGrid.Resources>
                     <DataGrid.Columns>
-                        <DataGridTextColumn Width="40" Binding="{Binding Index}"/>
-                        <DataGridTextColumn Width="80" Binding="{Binding Time}"/>
-                        <DataGridTextColumn Width="40" Binding="{Binding Seg}"/>
-                        <DataGridTextColumn Width="70" Binding="{Binding Speed, StringFormat=0.00}"/>
-                        <DataGridTextColumn Width="70" Binding="{Binding Jj, StringFormat=0.00}"/>
-                        <DataGridTextColumn Width="70" Binding="{Binding Mc, StringFormat=0.00}"/>
-                        <DataGridTextColumn Width="60" Binding="{Binding Hg}"/>
-                        <DataGridTextColumn Width="60" Binding="{Binding Cz}"/>
-                        <DataGridTextColumn Width="60" Binding="{Binding Js}"/>
-                        <DataGridTextColumn Width="60" Binding="{Binding Words}"/>
-                        <DataGridTextColumn Width="60" Binding="{Binding DaCi}"/>
-                        <DataGridTextColumn Width="50" Binding="{Binding Reselect}"/>
-                        <DataGridTextColumn Width="50" Binding="{Binding Enter}"/>
-                        <DataGridTextColumn Width="70" Binding="{Binding LeftRight}"/>
-                        <DataGridTextColumn Width="*"  Binding="{Binding UseTime, StringFormat=0.00}"/>
+                        <DataGridTextColumn Header="序"    Width="40" Binding="{Binding Index}"/>
+                        <DataGridTextColumn Header="时间"  Width="80" Binding="{Binding Time}"/>
+                        <DataGridTextColumn Header="段"    Width="55" Binding="{Binding Seg}"/>
+                        <DataGridTextColumn Header="速度"  Width="70" Binding="{Binding Speed, StringFormat=0.00}"/>
+                        <DataGridTextColumn Header="击键"  Width="70" Binding="{Binding Jj, StringFormat=0.00}"/>
+                        <DataGridTextColumn Header="码长"  Width="70" Binding="{Binding Mc, StringFormat=0.00}"/>
+                        <DataGridTextColumn Header="回改"  Width="60" Binding="{Binding Hg}"/>
+                        <DataGridTextColumn Header="错字"  Width="60" Binding="{Binding Cz}"/>
+                        <DataGridTextColumn Header="键数"  Width="60" Binding="{Binding Js}"/>
+                        <DataGridTextColumn Header="字数"  Width="60" Binding="{Binding Words}"/>
+                        <DataGridTextColumn Header="打词"  Width="60" Binding="{Binding DaCi}"/>
+                        <DataGridTextColumn Header="选重"  Width="50" Binding="{Binding Reselect}"/>
+                        <DataGridTextColumn Header="拼回"  Width="50" Binding="{Binding Enter}"/>
+                        <DataGridTextColumn Header="左:右" Width="70" Binding="{Binding LeftRight}"/>
+                        <DataGridTextColumn Header="用时"  Width="*"  Binding="{Binding UseTime, StringFormat=0.00}"/>
                     </DataGrid.Columns>
                 </DataGrid>
 
-                <!-- 汇总行：今日训练时长 / 段数 / 平均速度 / 平均击键 / 平均码长 ... 末尾累计均速 -->
+                <!-- 汇总行：今日训练时长 / 段数 / 平均速度 / 平均击键 / 平均码长 ... 末尾累计均速
+                     列宽由 SyncFooterColumns() 在代码里跟随 DataGrid 列宽实时同步 -->
                 <Border Grid.Row="2" Background="{StaticResource CellBG}" BorderBrush="{StaticResource GridLine}" BorderThickness="0,1,0,0">
-                    <Grid>
+                    <Grid x:Name="FootGrid">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="40"/>
                             <ColumnDefinition Width="80"/>
