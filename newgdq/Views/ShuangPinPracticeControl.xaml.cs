@@ -37,6 +37,25 @@ namespace newgdq.Views
         private int _ok, _bad, _streak;
         private bool _suppressEvents;  // 初始化期间避免 SelectionChanged 重入
 
+        // 自适应加权：每个键的累计尝试 / 错误次数（内存统计，不持久化）
+        private readonly Dictionary<char, int> _attempts = new Dictionary<char, int>();
+        private readonly Dictionary<char, int> _errors   = new Dictionary<char, int>();
+
+        // 固定难度权重：小指/边角键先天别扭，权重高（无实战数据时的兜底）
+        private static readonly Dictionary<char, int> DifficultyWeight = BuildDifficulty();
+
+        private static Dictionary<char, int> BuildDifficulty()
+        {
+            var m = new Dictionary<char, int>();
+            void Set(string keys, int w) { foreach (var c in keys) m[c] = w; }
+            foreach (var c in "abcdefghijklmnopqrstuvwxyz") m[c] = 1; // 默认
+            Set("pqz", 3);  // 小指 + 边角，最别扭
+            Set("ml", 3);   // 右小指/右无名边角
+            Set("awx", 2);  // 无名指上下伸
+            Set("o", 2);    // 右无名上排
+            return m;
+        }
+
         private readonly DispatcherTimer _flash = new DispatcherTimer
         { Interval = TimeSpan.FromMilliseconds(170) };
         private char _flashKey;
@@ -172,19 +191,42 @@ namespace newgdq.Views
         private void RefillBag()
         {
             if (_pool.Count == 0) return;
-            var shuffled = _pool.ToList();
-            for (int i = shuffled.Count - 1; i > 0; i--)
+
+            // 加权填充：每个练习项按 最终权重 放入多份，再整体打乱。
+            // 最终权重 = 固定难度权重 × (1 + 实时错误率因子)，保证别扭键/易错键多练，
+            // 同时每项至少 1 份 → 全键位仍然全覆盖。
+            var bagList = new List<DrillItem>();
+            foreach (var d in _pool)
+            {
+                int w = FinalWeight(d.Key);
+                for (int i = 0; i < w; i++) bagList.Add(d);
+            }
+            for (int i = bagList.Count - 1; i > 0; i--)
             {
                 int j = _rng.Next(i + 1);
-                var t = shuffled[i]; shuffled[i] = shuffled[j]; shuffled[j] = t;
+                var t = bagList[i]; bagList[i] = bagList[j]; bagList[j] = t;
             }
-            // 池子>1 时，若新一轮首项与刚出的题相同，把它和后面某项交换，避免连续重复
-            if (shuffled.Count > 1 && _current != null && ReferenceEquals(shuffled[0], _current))
+            // 若新一轮首项与刚出的题相同，和后面某项交换，避免连续重复
+            if (bagList.Count > 1 && _current != null && ReferenceEquals(bagList[0], _current))
             {
-                int swap = 1 + _rng.Next(shuffled.Count - 1);
-                var t = shuffled[0]; shuffled[0] = shuffled[swap]; shuffled[swap] = t;
+                int swap = 1 + _rng.Next(bagList.Count - 1);
+                var t = bagList[0]; bagList[0] = bagList[swap]; bagList[swap] = t;
             }
-            foreach (var d in shuffled) _bag.Enqueue(d);
+            foreach (var d in bagList) _bag.Enqueue(d);
+        }
+
+        /// <summary>最终权重 = 固定难度 × (1 + 错误率因子)，范围约 1~15。</summary>
+        private int FinalWeight(char key)
+        {
+            int diff = DifficultyWeight.TryGetValue(key, out var d) ? d : 1;
+            _attempts.TryGetValue(key, out int a);
+            _errors.TryGetValue(key, out int e);
+            // 没练过 → 错误率因子取中性 0.5；练过 → 用真实错误率
+            double rate = a == 0 ? 0.5 : (double)e / a;
+            // 因子 0~4：错误率越高加得越多
+            double factor = 1.0 + rate * 4.0;
+            int w = (int)Math.Round(diff * factor);
+            return w < 1 ? 1 : w;
         }
 
         private void CmbScheme_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -287,6 +329,9 @@ namespace newgdq.Views
         private void Judge(char pressed)
         {
             bool correct = pressed == _current.Key;
+            // 自适应统计：尝试/错误都记在"目标键"上（错误率驱动该键的加权）
+            char target = _current.Key;
+            _attempts[target] = (_attempts.TryGetValue(target, out var a) ? a : 0) + 1;
             if (correct)
             {
                 _ok++; _streak++;
@@ -295,6 +340,7 @@ namespace newgdq.Views
             else
             {
                 _bad++; _streak = 0;
+                _errors[target] = (_errors.TryGetValue(target, out var er) ? er : 0) + 1;
                 FlashKey(pressed, false);
             }
             UpdateStats();
@@ -327,11 +373,28 @@ namespace newgdq.Views
             TxtStreak.Text = _streak.ToString();
             int total = _ok + _bad;
             TxtAcc.Text = total == 0 ? "100%" : ($"{_ok * 100 / total}%");
+            UpdateWeakKeys();
+        }
+
+        /// <summary>显示当前错误率最高的前 3 个键（至少练过 1 次）。</summary>
+        private void UpdateWeakKeys()
+        {
+            var weak = _attempts.Keys
+                .Where(k => _attempts[k] > 0 && _errors.TryGetValue(k, out var e) && e > 0)
+                .OrderByDescending(k => (double)_errors[k] / _attempts[k])
+                .ThenByDescending(k => _errors[k])
+                .Take(3)
+                .Select(k => char.ToUpper(k).ToString())
+                .ToList();
+            TxtWeak.Text = weak.Count == 0 ? "—" : string.Join(" ", weak);
         }
 
         private void BtnReset_Click(object sender, RoutedEventArgs e)
         {
             _ok = _bad = _streak = 0;
+            _attempts.Clear();
+            _errors.Clear();
+            _bag.Clear();   // 清空牌堆，按重置后的权重重新发牌
             UpdateStats();
             NextItem();
             FocusForInput();

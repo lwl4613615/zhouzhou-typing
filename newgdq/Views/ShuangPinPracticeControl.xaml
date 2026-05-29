@@ -58,7 +58,9 @@
                 <TextBlock Text="正确率 " Foreground="{DynamicResource LabelFG}" VerticalAlignment="Center"/>
                 <TextBlock x:Name="TxtAcc" Text="100%" Foreground="{DynamicResource ValueFG}" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,16,0"/>
                 <TextBlock Text="连对 " Foreground="{DynamicResource LabelFG}" VerticalAlignment="Center"/>
-                <TextBlock x:Name="TxtStreak" Text="0" Foreground="{DynamicResource AccentFG}" FontWeight="Bold" VerticalAlignment="Center"/>
+                <TextBlock x:Name="TxtStreak" Text="0" Foreground="{DynamicResource AccentFG}" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,16,0"/>
+                <TextBlock Text="弱点键 " Foreground="{DynamicResource LabelFG}" VerticalAlignment="Center"/>
+                <TextBlock x:Name="TxtWeak" Text="—" Foreground="#E57373" FontWeight="Bold" VerticalAlignment="Center"/>
             </StackPanel>
         </Border>
 
