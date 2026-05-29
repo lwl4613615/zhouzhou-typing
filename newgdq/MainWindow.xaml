@@ -396,18 +396,14 @@
                 <!-- 右：历史表头 + DataGrid + 汇总行 -->
                 <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="22"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="22"/>
                 </Grid.RowDefinitions>
-                <!-- 顶部工具条：本次/全部 切换按钮 -->
-                <Grid Grid.Row="0" Background="{StaticResource CellBG}">
-                    <Button x:Name="BtnScoreFilter" Content="本次"
-                            HorizontalAlignment="Right" VerticalAlignment="Center"
-                            Margin="0,0,4,0" Padding="6,1" FontSize="11"
-                            Click="BtnScoreFilter_Click"/>
-                </Grid>
-                <DataGrid Grid.Row="1" x:Name="DgvHistory"
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <DataGrid Grid.Row="0" Grid.Column="0" x:Name="DgvHistory"
                           AutoGenerateColumns="False"
                           CanUserAddRows="False" CanUserDeleteRows="False"
                           CanUserResizeColumns="True"
@@ -460,9 +456,15 @@
                     </DataGrid.Columns>
                 </DataGrid>
 
+                <!-- 本次/全部 切换按钮：位于表格右侧独立列，与表头同行、不遮挡"用时" -->
+                <Button x:Name="BtnScoreFilter" Grid.Row="0" Grid.Column="1" Content="本次"
+                        VerticalAlignment="Top"
+                        Margin="2,0,2,0" Padding="6,0" FontSize="11" Height="20"
+                        Click="BtnScoreFilter_Click"/>
+
                 <!-- 汇总行：今日训练时长 / 段数 / 平均速度 / 平均击键 / 平均码长 ... 末尾累计均速
                      列宽由 SyncFooterColumns() 在代码里跟随 DataGrid 列宽实时同步 -->
-                <Border Grid.Row="2" Background="{StaticResource CellBG}" BorderBrush="{StaticResource GridLine}" BorderThickness="0,1,0,0">
+                <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Background="{StaticResource CellBG}" BorderBrush="{StaticResource GridLine}" BorderThickness="0,1,0,0">
                     <Grid x:Name="FootGrid">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="40"/>
