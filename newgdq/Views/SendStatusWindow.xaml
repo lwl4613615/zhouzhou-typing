@@ -13,6 +13,16 @@
         <SolidColorBrush x:Key="Cyan"  Color="#4FC3F7"/>
         <SolidColorBrush x:Key="Amber" Color="#FFD24C"/>
 
+        <!-- 停止 / 继续按钮的红、绿渐变（停止后按钮变身继续，颜色随之切换）-->
+        <LinearGradientBrush x:Key="StopBg" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Offset="0" Color="#C0392B"/>
+            <GradientStop Offset="1" Color="#7E2828"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="ResumeBg" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Offset="0" Color="#2FAF6A"/>
+            <GradientStop Offset="1" Color="#1C7C49"/>
+        </LinearGradientBrush>
+
         <Style x:Key="Lbl" TargetType="TextBlock">
             <Setter Property="Foreground" Value="{DynamicResource LabelFG}"/>
             <Setter Property="FontSize" Value="11"/>
@@ -215,14 +225,7 @@
                       Click="ChkAutoAdvance_Click"/>
             <Button x:Name="BtnStop" Grid.Row="1" Grid.Column="0" Style="{StaticResource GlowBtn}"
                     Content="■ 停止发文" Margin="0,0,4,0" Click="BtnStop_Click"
-                    BorderBrush="#7E2828">
-                <Button.Background>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                        <GradientStop Offset="0" Color="#C0392B"/>
-                        <GradientStop Offset="1" Color="#7E2828"/>
-                    </LinearGradientBrush>
-                </Button.Background>
-            </Button>
+                    BorderBrush="#7E2828" Background="{StaticResource StopBg}"/>
             <Button x:Name="BtnSendNext" Grid.Row="1" Grid.Column="1" Style="{StaticResource GlowBtn}"
                     Content="▶ 发下一段 (F6)" Margin="4,0,0,0" Click="BtnSendNext_Click"
                     BorderBrush="#2A6FB8">

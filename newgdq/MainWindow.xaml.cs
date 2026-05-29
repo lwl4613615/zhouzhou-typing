@@ -1409,6 +1409,31 @@ namespace newgdq
         public Models.SendingState GetSendingState() => _sending.State;
         public void StopSending() { CancelAutoAdvance(); _sending.Stop(); _sendStatusWin?.Refresh(); }
         public void SendNextSegment() => SendNext();
+
+        /// <summary>停止后是否还能"继续发文"：有文本且仍有未发内容（乱序无限池视为始终可继续）。</summary>
+        public bool CanResumeSending()
+        {
+            var s = _sending.State;
+            if (s.Active) return false;                       // 仍在发文中，无需继续
+            if (string.IsNullOrEmpty(s.FullText)) return false; // 从未开过发文
+            // 乱序（含不重复但池非空）始终可继续；顺序 / 一句结束按 Mark 是否到底判断
+            if (s.IsRandom) return true;
+            return s.Mark < s.FullText.Length;
+        }
+
+        /// <summary>继续发文：仅把会话重新激活，不自动发段、不安排自动续发（避免与自动发文冲突）。
+        /// 恢复后由用户继续打当前段或手动点"发下一段"。</summary>
+        public void ResumeSending()
+        {
+            if (!CanResumeSending())
+            {
+                HandyControl.Controls.Growl.Info("没有可继续的发文（已发完或尚未开始）");
+                return;
+            }
+            CancelAutoAdvance();          // 双保险：清掉任何残留的挂起续发
+            _sending.State.Active = true; // 进度（Mark/SentSeg/PoolText 等）原样保留，天然接续
+            _sendStatusWin?.Refresh();
+        }
         /// <summary>发文状态窗里切换"打完自动发下一段"。关闭时取消任何挂起的续发。</summary>
         public void SetAutoAdvance(bool on)
         {
