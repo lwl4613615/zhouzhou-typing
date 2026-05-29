@@ -126,7 +126,7 @@
                 <MenuItem Header="速度分析..." InputGestureText="Ctrl+E" Click="MenuItem_OpenSpeedAnalysis_Click"/>
                 <MenuItem Header="跟打报告..." InputGestureText="Ctrl+G" Click="MenuItem_OpenReport_Click"/>
                 <Separator/>
-                <MenuItem Header="双拼键位练习" Click="MenuItem_OpenShuangPin_Click"
+                <MenuItem Header="键位练习" Click="MenuItem_OpenShuangPin_Click"
                           ToolTip="小鹤双拼 / 自然码 声母韵母键位练习（内嵌面板）"/>
                 <MenuItem Header="自然码辅助码说明..." Click="MenuItem_AuxCodeHelp_Click"
                           ToolTip="讲清自然码「声+韵+形」辅助码怎么打（偏旁声母）"/>
@@ -268,7 +268,9 @@
                          Padding="0">
                 <FlowDocument PagePadding="0">
                     <Paragraph Margin="0">
-                        <Run Text="州州跟打器 · 快捷键 F3 重打 · 菜单 → 功能 → 内部测速 选一篇开始跟打。点“菜单 → 暂停”可暂停计时（输入框失焦也会自动暂停）。"/>
+                        <Run Text="欢迎使用州州跟打器！打开「菜单 → 功能 → 内部测速」选一篇文章，即可开始跟打。"/>
+                        <LineBreak/>
+                        <Run Text="跟打时按 F3 可随时重打本篇；点「菜单 → 暂停」或让输入框失去焦点，计时会自动暂停。"/>
                     </Paragraph>
                 </FlowDocument>
             </RichTextBox>

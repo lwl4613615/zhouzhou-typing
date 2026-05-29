@@ -99,6 +99,7 @@
     <Compile Include="Services\HistoryRepository.cs" />
     <Compile Include="Services\ShuangPinScheme.cs" />
     <Compile Include="Services\SimpleCharTable.cs" />
+    <Compile Include="Services\WubiRadicalTable.cs" />
     <Compile Include="Models\HistoryRow.cs" />
     <Compile Include="Models\TypeDate.cs" />
     <Compile Include="Models\TypingSession.cs" />

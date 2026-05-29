@@ -14,7 +14,7 @@
         <Border DockPanel.Dock="Top" Background="{DynamicResource CellBG}"
                 BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,0,1" Padding="10,6">
             <DockPanel LastChildFill="False">
-                <TextBlock DockPanel.Dock="Left" Text="双拼键位练习"
+                <TextBlock DockPanel.Dock="Left" Text="键位练习"
                            Foreground="{DynamicResource AccentFG}" FontWeight="Bold" FontSize="15"
                            VerticalAlignment="Center" Margin="0,0,16,0"/>
 
@@ -24,6 +24,7 @@
                           SelectionChanged="CmbScheme_SelectionChanged" Margin="0,0,16,0">
                     <ComboBoxItem Content="小鹤双拼"/>
                     <ComboBoxItem Content="自然码"/>
+                    <ComboBoxItem Content="五笔字根"/>
                 </ComboBox>
 
                 <TextBlock DockPanel.Dock="Left" Text="范围" Foreground="{DynamicResource LabelFG}"
@@ -82,12 +83,16 @@
                            Foreground="{DynamicResource AccentFG}" FontSize="14" Margin="0,2,0,0"/>
             </StackPanel>
 
-            <!-- 虚拟键盘 + 矢量双手 -->
-            <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
-                <StackPanel x:Name="KeyboardHost" HorizontalAlignment="Center"/>
-                <views:FingerHandsControl x:Name="Hands" Width="380" Height="170"
-                                          Margin="0,14,0,0" HorizontalAlignment="Center"/>
-            </StackPanel>
+            <!-- 虚拟键盘 + 矢量双手（可滚动，避免窗口偏矮时第一行键被裁） -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+                <StackPanel VerticalAlignment="Top" HorizontalAlignment="Center"
+                            Margin="0,4,0,12">
+                    <StackPanel x:Name="KeyboardHost" HorizontalAlignment="Center"/>
+                    <views:FingerHandsControl x:Name="Hands" Width="380" Height="170"
+                                              Margin="0,14,0,0" HorizontalAlignment="Center"/>
+                </StackPanel>
+            </ScrollViewer>
         </Grid>
     </DockPanel>
 </UserControl>

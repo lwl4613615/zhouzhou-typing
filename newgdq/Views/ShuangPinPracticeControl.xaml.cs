@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -29,6 +30,7 @@ namespace newgdq.Views
 
         private ShuangPinScheme _scheme;
         private int _mode;            // 0=混合 1=仅声母 2=仅韵母
+        private bool _wubi;           // true=五笔字根模式（不走双拼方案）
         private List<DrillItem> _pool = new List<DrillItem>();
         private readonly Queue<DrillItem> _bag = new Queue<DrillItem>();  // 洗牌发牌队列，保证均匀覆盖
         private DrillItem _current;
@@ -78,9 +80,17 @@ namespace newgdq.Views
             // 恢复上次方案
             var saved = SettingsService.Instance.ShuangPinScheme;
             _suppressEvents = true;
-            CmbScheme.SelectedIndex = saved == "Ziranma" ? 1 : 0;
+            CmbScheme.SelectedIndex = saved == "Wubi" ? 2 : (saved == "Ziranma" ? 1 : 0);
             _suppressEvents = false;
-            ApplyScheme(CmbScheme.SelectedIndex == 1 ? ShuangPinKind.Ziranma : ShuangPinKind.Xiaohe);
+            if (CmbScheme.SelectedIndex == 2)
+            {
+                _scheme = ShuangPinScheme.Create(ShuangPinKind.Xiaohe); // 占位，五笔不使用
+                ApplyWubi();
+            }
+            else
+            {
+                ApplyScheme(CmbScheme.SelectedIndex == 1 ? ShuangPinKind.Ziranma : ShuangPinKind.Xiaohe);
+            }
 
             this.Loaded += (s, e) => FocusForInput();
         }
@@ -130,13 +140,16 @@ namespace newgdq.Views
             var label = new TextBlock
             {
                 Text = string.Empty,
-                FontSize = 12,
+                FontSize = 11,
                 FontWeight = FontWeights.Bold,
                 Foreground = (Brush)FindResource("ValueFG"),
                 TextWrapping = TextWrapping.Wrap,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center,
-                TextAlignment = TextAlignment.Center
+                TextAlignment = TextAlignment.Center,
+                LineHeight = 13,
+                LineStackingStrategy = LineStackingStrategy.BlockLineHeight,
+                Margin = new Thickness(2, 9, 2, 2)
             };
             var grid = new Grid();
             grid.Children.Add(label);
@@ -153,8 +166,8 @@ namespace newgdq.Views
 
             var border = new Border
             {
-                Width = 62,
-                Height = 54,
+                Width = 66,
+                Height = 60,
                 Margin = new Thickness(3),
                 CornerRadius = new CornerRadius(5),
                 Background = (Brush)FindResource("CellBG"),
@@ -172,13 +185,41 @@ namespace newgdq.Views
         private void RefreshKeyLabels()
         {
             foreach (var kv in _keyLabels)
-                kv.Value.Text = _scheme.LabelFor(kv.Key);
+            {
+                var tb = kv.Value;
+                if (_wubi)
+                {
+                    tb.Inlines.Clear();
+                    var wk = WubiRadicalTable.Get(kv.Key);
+                    if (wk == null) { tb.Text = string.Empty; continue; }
+                    var nameBrush = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50)); // 键名=绿
+                    var spBrush = (Brush)FindResource("AccentFG");                        // 特殊=强调色
+                    var normal = (Brush)FindResource("ValueFG");
+                    bool first = true;
+                    foreach (var r in wk.Radicals)
+                    {
+                        if (!first) tb.Inlines.Add(new Run(" "));
+                        first = false;
+                        var run = new Run(r);
+                        if (r == wk.Name) run.Foreground = nameBrush;
+                        else if (wk.IsSpecial(r)) { run.Foreground = spBrush; run.FontWeight = FontWeights.Bold; }
+                        else run.Foreground = normal;
+                        tb.Inlines.Add(run);
+                    }
+                }
+                else
+                {
+                    tb.Text = _scheme.LabelFor(kv.Key);
+                }
+            }
         }
 
         // ===== 方案 / 范围 =====
 
         private void ApplyScheme(ShuangPinKind kind)
         {
+            _wubi = false;
+            CmbMode.IsEnabled = true;
             _scheme = ShuangPinScheme.Create(kind);
             SettingsService.Instance.ShuangPinScheme = kind == ShuangPinKind.Ziranma ? "Ziranma" : "Xiaohe";
             try { SettingsService.Save(); } catch { }
@@ -187,8 +228,29 @@ namespace newgdq.Views
             NextItem();
         }
 
+        /// <summary>切换到五笔字根练习：键面显示字根，出题=字根，按其所在键。</summary>
+        private void ApplyWubi()
+        {
+            _wubi = true;
+            _mode = 0;                 // 五笔不使用双拼范围
+            CmbMode.IsEnabled = false; // 混合/仅声母/仅韵母/简单字 对五笔无意义
+            SettingsService.Instance.ShuangPinScheme = "Wubi";
+            try { SettingsService.Save(); } catch { }
+            RefreshKeyLabels();
+            RebuildPool();
+            NextItem();
+        }
+
         private void RebuildPool()
         {
+            if (_wubi)
+            {
+                _pool = WubiRadicalTable.BuildDrills().ToList();
+                _bag.Clear();
+                _charPool = new List<SimpleChar>();
+                _charBag.Clear();
+                return;
+            }
             if (_mode == ModeSimple)
             {
                 // 简单字：取本方案能换算的字（含 ü 等无法换算的已自动剔除）
@@ -252,7 +314,8 @@ namespace newgdq.Views
         private void CmbScheme_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (_suppressEvents) return;
-            ApplyScheme(CmbScheme.SelectedIndex == 1 ? ShuangPinKind.Ziranma : ShuangPinKind.Xiaohe);
+            if (CmbScheme.SelectedIndex == 2) ApplyWubi();
+            else ApplyScheme(CmbScheme.SelectedIndex == 1 ? ShuangPinKind.Ziranma : ShuangPinKind.Xiaohe);
             FocusForInput();
         }
 
@@ -276,12 +339,12 @@ namespace newgdq.Views
 
         private void NextItem()
         {
-            if (_mode == ModeSimple) { NextChar(); return; }
+            if (!_wubi && _mode == ModeSimple) { NextChar(); return; }
             ClearKeyHighlights();
             if (_pool.Count == 0) { _current = null; TxtPrompt.Text = "—"; return; }
             if (_bag.Count == 0) RefillBag();
             _current = _bag.Dequeue();
-            TxtPromptKind.Text = _current.IsInitial ? "声母" : "韵母";
+            TxtPromptKind.Text = _wubi ? "五笔字根" : (_current.IsInitial ? "声母" : "韵母");
             TxtPrompt.Text = _current.Token;
             UpdateHint();
         }
@@ -387,11 +450,33 @@ namespace newgdq.Views
             if (_current == null) { TxtHint.Text = " "; Hands.Point(null); return; }
             bool hasFinger = FingerHandsControl.TryGetFinger(_current.Key, out var finger);
             bool showHint = ChkHint.IsChecked == true;
+
+            // 五笔：标记特殊字根（题面变强调色 + 类别提示）
+            bool special = false;
+            if (_wubi)
+            {
+                special = WubiRadicalTable.IsSpecial(_current.Key, _current.Token);
+                TxtPrompt.Foreground = special ? (Brush)FindResource("AccentFG") : (Brush)FindResource("ValueFG");
+                TxtPromptKind.Text = special ? "五笔字根 · 特殊字根" : "五笔字根";
+            }
+            else
+            {
+                TxtPrompt.Foreground = (Brush)FindResource("ValueFG");
+            }
+
             if (showHint)
             {
                 TxtHint.Text = hasFinger
                     ? $"按下  {char.ToUpper(_current.Key)}   ·   {FingerHandsControl.FingerName(finger)}"
                     : "按下  " + char.ToUpper(_current.Key);
+                if (_wubi)
+                {
+                    if (special) TxtHint.Text += "    ★ 特殊字根";
+                    var note = WubiRadicalTable.NoteFor(_current.Token);
+                    if (note != null) TxtHint.Text += "    （" + note + "）";
+                    var wk = WubiRadicalTable.Get(_current.Key);
+                    if (wk != null) TxtHint.Text += "    口诀：" + wk.Mnemonic;
+                }
                 HighlightTarget(_current.Key);
                 Hands.Point(hasFinger ? finger : (Finger?)null);
             }
@@ -427,7 +512,7 @@ namespace newgdq.Views
         {
             base.OnPreviewKeyDown(e);
             if (!TryMapKey(e.Key, out char c)) return;
-            if (_mode == ModeSimple)
+            if (!_wubi && _mode == ModeSimple)
             {
                 if (_curChar == null) return;
                 e.Handled = true;
