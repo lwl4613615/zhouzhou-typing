@@ -18,7 +18,8 @@ namespace newgdq.Services
 
     /// <summary>
     /// 内置常用简单字 → 拼音 表（自行整理，不含任何第三方词库代码）。
-    /// 韵母一律存"双拼规范形式"：y/w 介音已折算（如 我 wo→uo、也 ye→ie、有 you→iu），
+    /// 韵母一律存"双拼字面形式"：零声母 y/w 音节按拼音字面去掉首字母取韵母
+    /// （如 我 wo→o、也 ye→e、有 you→ou、文 wen→en），与双拼方案对零声母的拆分一致；
     /// 因此与小鹤 / 自然码 两套韵母键表均可直接换算。
     /// 含 ü 的音节（女/鱼/雨等）暂不收录，避免不同方案歧义。
     /// </summary>
@@ -131,13 +132,13 @@ namespace newgdq.Services
             new SimpleChar("四", "si",  "s", "i"),
 
             // —— y w 介音 ——
-            new SimpleChar("我", "wo",  "w", "uo"),
+            new SimpleChar("我", "wo",  "w", "o"),
             new SimpleChar("五", "wu",  "w", "u"),
-            new SimpleChar("文", "wen", "w", "un"),
-            new SimpleChar("也", "ye",  "y", "ie"),
-            new SimpleChar("有", "you", "y", "iu"),
-            new SimpleChar("要", "yao", "y", "iao"),
-            new SimpleChar("用", "yong","y", "iong"),
+            new SimpleChar("文", "wen", "w", "en"),
+            new SimpleChar("也", "ye",  "y", "e"),
+            new SimpleChar("有", "you", "y", "ou"),
+            new SimpleChar("要", "yao", "y", "ao"),
+            new SimpleChar("用", "yong","y", "ong"),
             new SimpleChar("月", "yue", "y", "ue"),
             new SimpleChar("云", "yun", "y", "un"),
             new SimpleChar("一", "yi",  "y", "i"),
