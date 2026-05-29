@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Media;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -38,6 +40,13 @@ namespace newgdq.Views
 
         private int _ok, _bad, _streak;
         private bool _suppressEvents;  // 初始化期间避免 SelectionChanged 重入
+
+        // ===== 速度 / 反应时间统计 =====
+        private readonly Stopwatch _reactSw = new Stopwatch();   // 当前目标键出现起计时
+        private readonly Stopwatch _sessionSw = new Stopwatch(); // 本次练习累计用时（首次按键开始）
+        private long _reactSumMs;     // 答对键的反应时间累计
+        private int _reactCount;      // 答对键计数（= 反应样本数）
+        private bool _soundOn = true; // 对/错系统提示音
 
         // 自适应加权：每个键的累计尝试 / 错误次数（内存统计，不持久化）
         private readonly Dictionary<char, int> _attempts = new Dictionary<char, int>();
@@ -81,6 +90,14 @@ namespace newgdq.Views
             var saved = SettingsService.Instance.ShuangPinScheme;
             _suppressEvents = true;
             CmbScheme.SelectedIndex = saved == "Wubi" ? 2 : (saved == "Ziranma" ? 1 : 0);
+            _soundOn = SettingsService.Instance.PracticeSoundOn ?? true;
+            ChkSound.IsChecked = _soundOn;
+            // 恢复范围 + 提示键开关
+            int savedMode = SettingsService.Instance.PracticeMode ?? 0;
+            if (savedMode < 0 || savedMode > 3) savedMode = 0;
+            _mode = savedMode;
+            CmbMode.SelectedIndex = savedMode;
+            ChkHint.IsChecked = SettingsService.Instance.PracticeHint ?? true;
             _suppressEvents = false;
             if (CmbScheme.SelectedIndex == 2)
             {
@@ -274,9 +291,9 @@ namespace newgdq.Views
         {
             if (_pool.Count == 0) return;
 
-            // 加权填充：每个练习项按 最终权重 放入多份，再整体打乱。
-            // 最终权重 = 固定难度权重 × (1 + 实时错误率因子)，保证别扭键/易错键多练，
-            // 同时每项至少 1 份 → 全键位仍然全覆盖。
+            // 加权填充：每个练习项按 最终权重(1~3) 放入多份，再整体打乱。
+            // 每项至少 1 份 → 全键位每轮都覆盖；最高:最低 ≤ 3:1 → 频率温和，
+            // 不会出现某键刷屏、其它键久久不出现。
             var bagList = new List<DrillItem>();
             foreach (var d in _pool)
             {
@@ -297,18 +314,23 @@ namespace newgdq.Views
             foreach (var d in bagList) _bag.Enqueue(d);
         }
 
-        /// <summary>最终权重 = 固定难度 × (1 + 错误率因子)，范围约 1~15。</summary>
+        /// <summary>
+        /// 出题权重（1~3）。在"每轮每键至少一次"的全覆盖基础上，对别扭键 / 已练够且易错的键
+        /// 最多各多给 1 份；最高:最低 ≤ 3:1，避免个别键刷屏、其它键久久不出现。
+        /// </summary>
         private int FinalWeight(char key)
         {
+            // 难度：原 1~3 → 附加分 0 / 0.5 / 1（别扭键略多练）
             int diff = DifficultyWeight.TryGetValue(key, out var d) ? d : 1;
+            double diffBonus = (diff - 1) * 0.5;
+
+            // 错误率：练满 3 次才计，最多再加 1 份（避免单次早期手误就被狂推）
             _attempts.TryGetValue(key, out int a);
             _errors.TryGetValue(key, out int e);
-            // 没练过 → 错误率因子取中性 0.5；练过 → 用真实错误率
-            double rate = a == 0 ? 0.5 : (double)e / a;
-            // 因子 0~4：错误率越高加得越多
-            double factor = 1.0 + rate * 4.0;
-            int w = (int)Math.Round(diff * factor);
-            return w < 1 ? 1 : w;
+            double errBonus = a >= 3 ? Math.Min(1.0, (double)e / a * 2.0) : 0.0;
+
+            int w = 1 + (int)Math.Round(diffBonus + errBonus);  // 1~3
+            return w < 1 ? 1 : (w > 3 ? 3 : w);
         }
 
         private void CmbScheme_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -335,6 +357,15 @@ namespace newgdq.Views
             FocusForInput();
         }
 
+        private void ChkSound_Changed(object sender, RoutedEventArgs e)
+        {
+            if (_suppressEvents) return;
+            _soundOn = ChkSound.IsChecked == true;
+            SettingsService.Instance.PracticeSoundOn = _soundOn;
+            try { SettingsService.Save(); } catch { }
+            FocusForInput();
+        }
+
         // ===== 出题 / 判定 =====
 
         private void NextItem()
@@ -342,11 +373,23 @@ namespace newgdq.Views
             if (!_wubi && _mode == ModeSimple) { NextChar(); return; }
             ClearKeyHighlights();
             if (_pool.Count == 0) { _current = null; TxtPrompt.Text = "—"; return; }
-            if (_bag.Count == 0) RefillBag();
-            _current = _bag.Dequeue();
+            var prev = _current;
+            DrillItem next = null;
+            // 取下一张牌；若与上一题相同则跳过（牌堆内同键有多份，避免相邻重复）。
+            // 池中不止一种时最多尝试几次，保证一定能拿到不同的题。
+            for (int guard = 0; guard < 8; guard++)
+            {
+                if (_bag.Count == 0) RefillBag();
+                if (_bag.Count == 0) break;
+                next = _bag.Dequeue();
+                if (prev == null || _pool.Count < 2 || !ReferenceEquals(next, prev)) break;
+            }
+            _current = next;
+            if (_current == null) { TxtPrompt.Text = "—"; return; }
             TxtPromptKind.Text = _wubi ? "五笔字根" : (_current.IsInitial ? "声母" : "韵母");
             TxtPrompt.Text = _current.Token;
             UpdateHint();
+            _reactSw.Restart();
         }
 
         // ===== 简单字出题 / 判定 =====
@@ -370,6 +413,7 @@ namespace newgdq.Views
             _curCode = new[] { k1, k2 };
             _step = 0;
             UpdateCharHint();
+            _reactSw.Restart();
         }
 
         private void RefillCharBag()
@@ -420,11 +464,14 @@ namespace newgdq.Views
             _attempts[target] = (_attempts.TryGetValue(target, out var a) ? a : 0) + 1;
             if (pressed == target)
             {
+                RecordReaction();
+                PlaySound(true);
                 if (_step == 0)
                 {
                     // 立即推进到第二键，避免按得太快时仍按第一键判定
                     _step = 1;
                     UpdateCharHint();
+                    _reactSw.Restart();
                     FlashKey(target, true, null);   // 视觉反馈放在刷新之后，绿闪可见
                 }
                 else
@@ -440,6 +487,7 @@ namespace newgdq.Views
                 _errors[target] = (_errors.TryGetValue(target, out var er) ? er : 0) + 1;
                 _step = 0;                          // 答错回到第一键
                 UpdateCharHint();
+                PlaySound(false);
                 FlashKey(pressed, false, null);
             }
             UpdateStats();
@@ -511,7 +559,20 @@ namespace newgdq.Views
         protected override void OnPreviewKeyDown(KeyEventArgs e)
         {
             base.OnPreviewKeyDown(e);
+            if (e.IsRepeat) return;            // 按住不放只判定一次
+            // 小结卡片展示时：回车/空格关闭，其余按键忽略（不计入练习）
+            if (SummaryOverlay.Visibility == Visibility.Visible)
+            {
+                if (e.Key == Key.Enter || e.Key == Key.Space || e.Key == Key.Escape)
+                {
+                    e.Handled = true;
+                    BtnSummaryClose_Click(this, new RoutedEventArgs());
+                }
+                else e.Handled = true;
+                return;
+            }
             if (!TryMapKey(e.Key, out char c)) return;
+            if (!_sessionSw.IsRunning) _sessionSw.Start();   // 首次按键开始计时
             if (!_wubi && _mode == ModeSimple)
             {
                 if (_curChar == null) return;
@@ -544,12 +605,15 @@ namespace newgdq.Views
             if (correct)
             {
                 _ok++; _streak++;
+                RecordReaction();
+                PlaySound(true);
                 FlashKey(_current.Key, true, NextItem);
             }
             else
             {
                 _bad++; _streak = 0;
                 _errors[target] = (_errors.TryGetValue(target, out var er) ? er : 0) + 1;
+                PlaySound(false);
                 FlashKey(pressed, false, null);
             }
             UpdateStats();
@@ -581,8 +645,32 @@ namespace newgdq.Views
             TxtBad.Text = _bad.ToString();
             TxtStreak.Text = _streak.ToString();
             int total = _ok + _bad;
-            TxtAcc.Text = total == 0 ? "100%" : ($"{_ok * 100 / total}%");
+            TxtAcc.Text = total == 0 ? "100%" : ($"{(double)_ok * 100.0 / total:0.0}%");
+            // 速度：答对键数 / 累计用时（分）
+            double min = _sessionSw.Elapsed.TotalMinutes;
+            TxtKpm.Text = (min > 0.001 && _reactCount > 0) ? Math.Round(_reactCount / min).ToString() : "0";
+            // 平均反应
+            TxtReact.Text = _reactCount > 0 ? Math.Round((double)_reactSumMs / _reactCount).ToString() : "—";
             UpdateWeakKeys();
+        }
+
+        /// <summary>记录当前目标键的反应时间（仅答对时调用）。</summary>
+        private void RecordReaction()
+        {
+            if (!_reactSw.IsRunning) return;
+            long ms = _reactSw.ElapsedMilliseconds;
+            _reactSw.Stop();
+            if (ms <= 0 || ms > 10000) return;   // 过滤离开/异常样本
+            _reactSumMs += ms;
+            _reactCount++;
+        }
+
+        /// <summary>对/错系统提示音（可在工具条关闭）。</summary>
+        private void PlaySound(bool ok)
+        {
+            if (!_soundOn) return;
+            try { if (ok) SystemSounds.Asterisk.Play(); else SystemSounds.Hand.Play(); }
+            catch { /* 无音频设备时忽略 */ }
         }
 
         /// <summary>显示当前错误率最高的前 3 个键（至少练过 1 次）。</summary>
@@ -600,17 +688,79 @@ namespace newgdq.Views
 
         private void BtnReset_Click(object sender, RoutedEventArgs e)
         {
+            if (ShowSummary("本次练习小结", DoReset)) return;  // 有数据→先展示小结，关闭后再重置
+            DoReset();
+            FocusForInput();
+        }
+
+        private void DoReset()
+        {
             _ok = _bad = _streak = 0;
             _attempts.Clear();
             _errors.Clear();
             _bag.Clear();      // 清空牌堆，按重置后的权重重新发牌
             _charBag.Clear();
+            _reactSumMs = 0; _reactCount = 0;
+            _reactSw.Reset(); _sessionSw.Reset();
             UpdateStats();
             NextItem();
             FocusForInput();
         }
 
         private void BtnBack_Click(object sender, RoutedEventArgs e)
-            => BackRequested?.Invoke(this, EventArgs.Empty);
+        {
+            if (ShowSummary("练习小结", () => BackRequested?.Invoke(this, EventArgs.Empty))) return;
+            BackRequested?.Invoke(this, EventArgs.Empty);
+        }
+
+        /// <summary>填充并淡入展示本次练习小结卡片。无练习记录返回 false（调用方直接执行后续动作）。</summary>
+        private bool ShowSummary(string title, Action onClose)
+        {
+            int total = _ok + _bad;
+            if (total == 0) return false;   // 没练过，不打扰
+
+            var span = _sessionSw.Elapsed;
+            TxtSummaryTitle.Text = title;
+            TxtSumDur.Text = span.TotalHours >= 1
+                ? $"{(int)span.TotalHours}:{span.Minutes:00}:{span.Seconds:00}"
+                : $"{span.Minutes:00}:{span.Seconds:00}";
+            double min = span.TotalMinutes;
+            TxtSumKpm.Text = (min > 0.001 && _reactCount > 0) ? Math.Round(_reactCount / min).ToString() : "0";
+            TxtSumReact.Text = _reactCount > 0 ? Math.Round((double)_reactSumMs / _reactCount).ToString() : "—";
+            TxtSumOk.Text = _ok.ToString();
+            TxtSumBad.Text = _bad.ToString();
+            TxtSumAcc.Text = $"{(double)_ok * 100.0 / total:0.0}%";
+
+            var weak = _attempts.Keys
+                .Where(k => _attempts[k] > 0 && _errors.TryGetValue(k, out var er) && er > 0)
+                .OrderByDescending(k => (double)_errors[k] / _attempts[k])
+                .ThenByDescending(k => _errors[k])
+                .Take(5)
+                .Select(k => char.ToUpper(k).ToString())
+                .ToList();
+            TxtSumWeak.Text = weak.Count > 0 ? string.Join(" ", weak) : "无";
+
+            _summaryOnClose = onClose;
+            SummaryOverlay.Visibility = Visibility.Visible;
+            var fade = new System.Windows.Media.Animation.DoubleAnimation(0, 1,
+                new Duration(TimeSpan.FromMilliseconds(160)));
+            SummaryOverlay.BeginAnimation(OpacityProperty, fade);
+            return true;
+        }
+
+        private Action _summaryOnClose;
+
+        private void BtnSummaryClose_Click(object sender, RoutedEventArgs e)
+        {
+            var fade = new System.Windows.Media.Animation.DoubleAnimation(1, 0,
+                new Duration(TimeSpan.FromMilliseconds(140)));
+            fade.Completed += (s2, e2) =>
+            {
+                SummaryOverlay.Visibility = Visibility.Collapsed;
+                var act = _summaryOnClose; _summaryOnClose = null;
+                act?.Invoke();
+            };
+            SummaryOverlay.BeginAnimation(OpacityProperty, fade);
+        }
     }
 }

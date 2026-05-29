@@ -67,6 +67,15 @@ namespace newgdq.Models
         // 双拼键位练习所选方案："Xiaohe" / "Ziranma"。默认 Xiaohe。
         [DataMember(EmitDefaultValue = false)] public string ShuangPinScheme { get; set; }
 
+        // 键位练习：对/错系统提示音开关。默认开启。
+        [DataMember(EmitDefaultValue = false)] public bool? PracticeSoundOn { get; set; }
+
+        // 键位练习：范围（0=混合 1=仅声母 2=仅韵母 3=简单字）。默认 0。
+        [DataMember(EmitDefaultValue = false)] public int? PracticeMode { get; set; }
+
+        // 键位练习：是否显示提示键。默认 true。
+        [DataMember(EmitDefaultValue = false)] public bool? PracticeHint { get; set; }
+
         // 发文参数预设（命名保存）
         [DataMember(EmitDefaultValue = false)] public System.Collections.Generic.List<SendPreset> SendPresets { get; set; }
     }

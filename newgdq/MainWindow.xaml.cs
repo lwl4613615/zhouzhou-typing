@@ -147,7 +147,6 @@ namespace newgdq
 
         // 跟打地图：嵌入式 Canvas + Polyline，横轴=用时，纵轴=已打字数占比
         private readonly System.Collections.Generic.List<System.Windows.Point> _mapPoints = new System.Collections.Generic.List<System.Windows.Point>();
-        private System.Windows.Shapes.Polyline _mapLine;
         private double _mapW, _mapH;
 
         // 长时间未跟打自动重打（对齐老版 timer5）
@@ -587,7 +586,6 @@ namespace newgdq
             if (MapPanel.Visibility != Visibility.Visible) return;
             RedrawMap();
         }
-        private int _mapDrawCounter;
 
         private void MapReset()
         {

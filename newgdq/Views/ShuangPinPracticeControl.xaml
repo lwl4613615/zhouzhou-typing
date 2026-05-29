@@ -8,6 +8,7 @@
              Focusable="True"
              Background="{DynamicResource PanelBG}"
              d:DesignWidth="900" d:DesignHeight="500">
+    <Grid>
     <DockPanel LastChildFill="True">
 
         <!-- 顶部工具条 -->
@@ -42,6 +43,11 @@
                           IsChecked="True" Margin="0,0,16,0"
                           Checked="ChkHint_Changed" Unchecked="ChkHint_Changed"/>
 
+                <CheckBox DockPanel.Dock="Left" x:Name="ChkSound" Content="声音"
+                          Foreground="{DynamicResource ValueFG}" VerticalAlignment="Center"
+                          IsChecked="True" Margin="0,0,16,0"
+                          Checked="ChkSound_Changed" Unchecked="ChkSound_Changed"/>
+
                 <Button DockPanel.Dock="Right" Content="返回跟打" Padding="12,3"
                         Click="BtnBack_Click" VerticalAlignment="Center"/>
                 <Button DockPanel.Dock="Right" Content="重置统计" Padding="12,3" Margin="0,0,8,0"
@@ -61,6 +67,12 @@
                 <TextBlock x:Name="TxtAcc" Text="100%" Foreground="{DynamicResource ValueFG}" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,16,0"/>
                 <TextBlock Text="连对 " Foreground="{DynamicResource LabelFG}" VerticalAlignment="Center"/>
                 <TextBlock x:Name="TxtStreak" Text="0" Foreground="{DynamicResource AccentFG}" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,16,0"/>
+                <TextBlock Text="速度 " Foreground="{DynamicResource LabelFG}" VerticalAlignment="Center"/>
+                <TextBlock x:Name="TxtKpm" Text="0" Foreground="{DynamicResource ValueFG}" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,2,0"/>
+                <TextBlock Text="键/分 " Foreground="{DynamicResource LabelFG}" VerticalAlignment="Center" Margin="0,0,16,0"/>
+                <TextBlock Text="反应 " Foreground="{DynamicResource LabelFG}" VerticalAlignment="Center"/>
+                <TextBlock x:Name="TxtReact" Text="—" Foreground="{DynamicResource ValueFG}" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,2,0"/>
+                <TextBlock Text="ms " Foreground="{DynamicResource LabelFG}" VerticalAlignment="Center" Margin="0,0,16,0"/>
                 <TextBlock Text="弱点键 " Foreground="{DynamicResource LabelFG}" VerticalAlignment="Center"/>
                 <TextBlock x:Name="TxtWeak" Text="—" Foreground="#E57373" FontWeight="Bold" VerticalAlignment="Center"/>
             </StackPanel>
@@ -95,4 +107,74 @@
             </ScrollViewer>
         </Grid>
     </DockPanel>
+
+    <!-- 练习小结：面板内淡入卡片（覆盖整个控件，半透明遮罩 + 居中卡片） -->
+    <Grid x:Name="SummaryOverlay" Visibility="Collapsed"
+          Background="#B0000000" Opacity="0">
+        <Border Width="360" HorizontalAlignment="Center" VerticalAlignment="Center"
+                CornerRadius="12" Background="{DynamicResource PanelBG}"
+                BorderBrush="{DynamicResource AccentFG}" BorderThickness="1"
+                Padding="0" SnapsToDevicePixels="True">
+            <Border.Effect>
+                <DropShadowEffect Color="#000000" BlurRadius="24" ShadowDepth="0" Opacity="0.5"/>
+            </Border.Effect>
+            <StackPanel>
+                <!-- 标题条 -->
+                <Border CornerRadius="12,12,0,0" Background="{DynamicResource AccentFG}" Padding="18,12">
+                    <TextBlock x:Name="TxtSummaryTitle" Text="本次练习小结"
+                               Foreground="White" FontSize="17" FontWeight="Bold"
+                               HorizontalAlignment="Center"/>
+                </Border>
+
+                <!-- 主数字：速度 + 反应 -->
+                <Grid Margin="18,18,18,6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                        <TextBlock x:Name="TxtSumKpm" Text="0" HorizontalAlignment="Center"
+                                   Foreground="{DynamicResource AccentFG}" FontSize="38" FontWeight="Bold"/>
+                        <TextBlock Text="键/分" HorizontalAlignment="Center"
+                                   Foreground="{DynamicResource LabelFG}" FontSize="12"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                        <TextBlock x:Name="TxtSumReact" Text="—" HorizontalAlignment="Center"
+                                   Foreground="{DynamicResource ValueFG}" FontSize="38" FontWeight="Bold"/>
+                        <TextBlock Text="平均反应 ms" HorizontalAlignment="Center"
+                                   Foreground="{DynamicResource LabelFG}" FontSize="12"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- 明细行 -->
+                <StackPanel Margin="22,8,22,4">
+                    <Grid Margin="0,3">
+                        <TextBlock Text="用时" Foreground="{DynamicResource LabelFG}" HorizontalAlignment="Left"/>
+                        <TextBlock x:Name="TxtSumDur" Text="00:00" Foreground="{DynamicResource ValueFG}" FontWeight="Bold" HorizontalAlignment="Right"/>
+                    </Grid>
+                    <Grid Margin="0,3">
+                        <TextBlock Text="答对 / 答错" Foreground="{DynamicResource LabelFG}" HorizontalAlignment="Left"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <TextBlock x:Name="TxtSumOk" Text="0" Foreground="#4CAF50" FontWeight="Bold"/>
+                            <TextBlock Text=" / " Foreground="{DynamicResource LabelFG}"/>
+                            <TextBlock x:Name="TxtSumBad" Text="0" Foreground="#E53935" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Margin="0,3">
+                        <TextBlock Text="正确率" Foreground="{DynamicResource LabelFG}" HorizontalAlignment="Left"/>
+                        <TextBlock x:Name="TxtSumAcc" Text="100%" Foreground="{DynamicResource ValueFG}" FontWeight="Bold" HorizontalAlignment="Right"/>
+                    </Grid>
+                    <Grid Margin="0,3">
+                        <TextBlock Text="弱点键" Foreground="{DynamicResource LabelFG}" HorizontalAlignment="Left"/>
+                        <TextBlock x:Name="TxtSumWeak" Text="无" Foreground="#E57373" FontWeight="Bold" HorizontalAlignment="Right"/>
+                    </Grid>
+                </StackPanel>
+
+                <Button x:Name="BtnSummaryClose" Content="继续" Click="BtnSummaryClose_Click"
+                        Margin="22,12,22,18" Padding="0,7" FontSize="14"
+                        Background="{DynamicResource AccentFG}" Foreground="White" BorderThickness="0"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+    </Grid>
 </UserControl>
