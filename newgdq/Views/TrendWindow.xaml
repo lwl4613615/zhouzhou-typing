@@ -1,0 +1,74 @@
+<hc:Window x:Class="newgdq.Views.TrendWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
+        xmlns:oxy="http://oxyplot.org/wpf"
+        Title="成绩趋势" Height="600" Width="780" MinHeight="480" MinWidth="640"
+        Icon="pack://application:,,,/Resources/myicon.ico"
+        FontFamily="微软雅黑" FontSize="12"
+        Background="{DynamicResource RegionBrush}"
+        WindowStartupLocation="CenterOwner">
+    <DockPanel Margin="16" LastChildFill="True">
+
+        <!-- 顶部工具栏：粒度 + 目标速度 -->
+        <Border DockPanel.Dock="Top" Background="{DynamicResource RegionBrush}" Padding="0,0,0,10">
+            <DockPanel LastChildFill="False">
+                <TextBlock Text="周期" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <ComboBox x:Name="CmbGranularity" Width="120" DockPanel.Dock="Left"
+                          SelectionChanged="CmbGranularity_SelectionChanged">
+                    <ComboBoxItem Content="按天（近 14 天）"/>
+                    <ComboBoxItem Content="按周（近 12 周）" IsSelected="True"/>
+                    <ComboBoxItem Content="按月（近 12 月）"/>
+                </ComboBox>
+
+                <Button DockPanel.Dock="Right" Content="关闭" Width="72" Margin="6,0,0,0" Click="BtnClose_Click"/>
+                <Button DockPanel.Dock="Right" Content="复制趋势" Width="84" Margin="6,0,0,0" Click="BtnCopy_Click"
+                        ToolTip="把各周期均速复制为文本"/>
+                <hc:NumericUpDown x:Name="NumGoal" DockPanel.Dock="Right" Width="100" Minimum="0" Maximum="600"
+                                  Increment="5" DecimalPlaces="0" Margin="6,0,0,0"
+                                  ValueChanged="NumGoal_ValueChanged"
+                                  ToolTip="目标速度（字/分），0 = 不设目标。仅作参考线，达不到不会有任何惩罚提示。"/>
+                <TextBlock DockPanel.Dock="Right" Text="目标速度" VerticalAlignment="Center" Margin="16,0,8,0"/>
+            </DockPanel>
+        </Border>
+
+        <!-- 顶部激励卡片 -->
+        <Border DockPanel.Dock="Top" CornerRadius="8" Padding="16,12" Margin="0,0,0,10"
+                Background="{DynamicResource RegionBrush}" BorderBrush="{DynamicResource FootSubFG}" BorderThickness="1">
+            <StackPanel>
+                <TextBlock x:Name="TxtHeadline" FontSize="16" FontWeight="Bold"
+                           Foreground="{DynamicResource ValueFG}" TextWrapping="Wrap"/>
+                <TextBlock x:Name="TxtSub" FontSize="12" Margin="0,6,0,0"
+                           Foreground="{DynamicResource FootSubFG}" TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+
+        <!-- 底部明细表 -->
+        <DataGrid x:Name="Grid" DockPanel.Dock="Bottom" Height="200" Margin="0,10,0,0"
+                  AutoGenerateColumns="False" IsReadOnly="True"
+                  HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                  CanUserAddRows="False" CanUserDeleteRows="False"
+                  Background="Transparent" RowBackground="Transparent">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="周期"   Binding="{Binding Label}"    Width="90"/>
+                <DataGridTextColumn Header="段数"   Binding="{Binding Segs}"     Width="55"/>
+                <DataGridTextColumn Header="字数"   Binding="{Binding Words}"    Width="70"/>
+                <DataGridTextColumn Header="均速"   Binding="{Binding SpeedShow}" Width="70"/>
+                <DataGridTextColumn Header="较上期" Binding="{Binding DeltaShow}" Width="70">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{Binding DeltaBrush}"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="罚五"   Binding="{Binding Speed2Show}" Width="60"/>
+                <DataGridTextColumn Header="击键"   Binding="{Binding JjShow}"   Width="60"/>
+                <DataGridTextColumn Header="错字率" Binding="{Binding ErrShow}"  Width="70"/>
+                <DataGridTextColumn Header="达成"   Binding="{Binding GoalShow}" Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- 中间折线图 -->
+        <oxy:PlotView x:Name="Chart" Background="Transparent"/>
+    </DockPanel>
+</hc:Window>

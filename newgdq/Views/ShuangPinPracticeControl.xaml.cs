@@ -436,7 +436,11 @@ namespace newgdq.Views
         private void UpdateCharHint()
         {
             if (_curChar == null) return;
-            TxtPromptKind.Text = "简单字 · " + _curChar.Pinyin;
+            // 题面突出读音：多音字额外标注"按此音"，避免用户按另一读音拆键
+            bool poly = SimpleCharTable.IsPolyphonic(_curChar.Char);
+            TxtPromptKind.Text = poly
+                ? $"简单字 · 读音 {_curChar.Pinyin} · 多音字（按此音）"
+                : $"简单字 · 读音 {_curChar.Pinyin}";
             TxtPrompt.Text = _curChar.Char;
             char cur = _curCode[_step];
             if (ChkHint.IsChecked == true)
@@ -487,10 +491,21 @@ namespace newgdq.Views
                 _errors[target] = (_errors.TryGetValue(target, out var er) ? er : 0) + 1;
                 _step = 0;                          // 答错回到第一键
                 UpdateCharHint();
+                ShowCharError(pressed);             // 覆盖提示行：给出正解读音 + 应打键，区分"指法错/读音错"
                 PlaySound(false);
                 FlashKey(pressed, false, null);
             }
             UpdateStats();
+        }
+
+        /// <summary>简单字答错时，把提示行替换为"正解"：读音 + 整字应打的两键 + 实际按键，
+        /// 让用户一眼分清是"手指按错"还是"按了另一个读音"。</summary>
+        private void ShowCharError(char pressed)
+        {
+            if (_curChar == null) return;
+            string code = char.ToUpper(_curCode[0]).ToString() + " " + char.ToUpper(_curCode[1]);
+            string poly = SimpleCharTable.IsPolyphonic(_curChar.Char) ? "【多音字】" : "";
+            TxtHint.Text = $"{poly}本字读「{_curChar.Pinyin}」→ 应打 {code}，你按了 {char.ToUpper(pressed)}";
         }
 
         private void UpdateHint()

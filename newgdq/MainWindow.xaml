@@ -96,7 +96,6 @@
         <Menu DockPanel.Dock="Top" Background="{StaticResource PanelBG}" x:Name="MainMenu">
             <MenuItem Header="菜单">
                 <MenuItem Header="发文..."    InputGestureText="F2" Click="MenuItem_OpenSendText_Click"/>
-                <MenuItem Header="载文"       InputGestureText="F4" Click="MenuItem_LoadClipboard_Click"/>
                 <MenuItem Header="外观..." Click="MenuItem_OpenSettings_Click"/>
                 <MenuItem Header="界面缩放" x:Name="MnuUiScale">
                     <MenuItem Header="放大  (Ctrl + 滚轮上)" InputGestureText="Ctrl+加号" Click="MenuItem_ScaleUp_Click"/>
@@ -135,6 +134,10 @@
                 <Separator/>
                 <MenuItem Header="发送图片成绩" InputGestureText="Ctrl+T" Click="MenuItem_SendImageScore_Click"/>
                 <MenuItem Header="平均成绩..." Click="MenuItem_OpenAverage_Click"/>
+                <MenuItem Header="成绩趋势..." Click="MenuItem_OpenTrend_Click"
+                          ToolTip="按天/周/月看均速趋势，和过去的自己比；可设目标速度（仅参考线，达不到不责备）"/>
+                <MenuItem Header="错字本..." Click="MenuItem_OpenErrorBook_Click"
+                          ToolTip="按本次/本日/本周/本月/本年查看高频错字排行"/>
                 <MenuItem Header="击键评定..." InputGestureText="Ctrl+B" Click="MenuItem_OpenJjCheck_Click"/>
                 <MenuItem Header="速度分析..." InputGestureText="Ctrl+E" Click="MenuItem_OpenSpeedAnalysis_Click"/>
                 <MenuItem Header="跟打报告..." InputGestureText="Ctrl+G" Click="MenuItem_OpenReport_Click"/>
@@ -508,7 +511,7 @@
                             <ColumnDefinition Width="70"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" x:Name="TxtFootLabel" Text="今日"  Foreground="{DynamicResource AccentFG}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
+                        <TextBlock Grid.Column="0" x:Name="TxtFootLabel" Text="今日"  Foreground="{DynamicResource AccentFG}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" Cursor="Hand" ToolTip="点击查看成绩趋势（按天/周/月）" MouseLeftButtonUp="TxtFootLabel_Click"/>
                         <TextBlock Grid.Column="1" x:Name="TxtFootTime"   Text="00:00:00" Foreground="{DynamicResource AccentFG}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
                         <TextBlock Grid.Column="2" x:Name="TxtFootSegs"   Text="0#"     Foreground="{DynamicResource AccentFG}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
                         <TextBlock Grid.Column="3" x:Name="TxtFootSpeed"  Text="0.00"   Foreground="{DynamicResource ValueFG}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>

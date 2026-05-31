@@ -68,9 +68,6 @@ namespace newgdq
         // 双拼键位练习面板是否激活：激活期间屏蔽全局键钩/自动重打/自动进段
         private bool _practiceMode;
 
-        // 剪贴板载文自增段号（无 "第N段" 头时使用，对齐老版 Glob.AZpre）
-        private int _clipboardSegCounter;
-
         // 颜色（可通过设置窗实时更新）
         private Brush _brushDefault = new SolidColorBrush(Color.FromRgb(0x22, 0x22, 0x22));
         private Brush _brushRight   = new SolidColorBrush(Color.FromRgb(0x16, 0x6F, 0x16));
@@ -203,6 +200,7 @@ namespace newgdq
             view.Filter = o => !_showCurrentOnly || (o is HistoryRow r && r.When >= _sessionStartAt);
             // SQLite 历史持久化初始化 + 装载最近 200 条
             HistoryRepository.Init();
+            ErrorBookRepository.Init();
             foreach (var row in HistoryRepository.LoadRecent(200))
                 History.Add(row);
             _historyIndex = HistoryRepository.TotalCount();
@@ -1001,6 +999,7 @@ namespace newgdq
                     var avg = HistoryRepository.LoadAverages();
                     TxtFootAllAvg.Text = "累计 " + avg.totalSpeed.ToString("0.00");
                     TxtFootAllJj.Text  = avg.totalJj.ToString("0.00");
+                    ApplyGoalHintToFooter(avgSp);
                 }
                 else
                 {
@@ -1015,9 +1014,37 @@ namespace newgdq
                     TxtFootWords.Text = _summaryCache.todayWords.ToString();
                     TxtFootAllAvg.Text = "累计 " + avg.totalSpeed.ToString("0.00");
                     TxtFootAllJj.Text  = avg.totalJj.ToString("0.00");
+                    ApplyGoalHintToFooter(avg.todaySpeed);
                 }
             }
             catch { }
+        }
+
+        /// <summary>
+        /// 把目标速度的达成情况体现在 footer 均速上：达标变绿，未达标只在 tooltip 里
+        /// 显示"已完成 X%"（鼓励式，不做红叉责备）。未设目标则恢复默认样式。
+        /// </summary>
+        private void ApplyGoalHintToFooter(double currentSpeed)
+        {
+            if (TxtFootSpeed == null) return;
+            double goal = SettingsService.Instance.GoalSpeed ?? 0;
+            if (goal <= 0)
+            {
+                TxtFootSpeed.SetResourceReference(TextBlock.ForegroundProperty, "ValueFG");
+                TxtFootSpeed.ToolTip = null;
+                return;
+            }
+            if (currentSpeed >= goal)
+            {
+                TxtFootSpeed.Foreground = new SolidColorBrush(Color.FromRgb(0x66, 0xBB, 0x6A));
+                TxtFootSpeed.ToolTip = $"已达到目标 {goal:0} 字/分 🎉";
+            }
+            else
+            {
+                TxtFootSpeed.SetResourceReference(TextBlock.ForegroundProperty, "ValueFG");
+                double pct = currentSpeed / goal * 100;
+                TxtFootSpeed.ToolTip = $"目标 {goal:0} 字/分 · 已完成 {pct:0}%（还差 {goal - currentSpeed:0.0}）";
+            }
         }
 
         /// <summary>切换"本次/全部"视图模式</summary>
@@ -1096,7 +1123,7 @@ namespace newgdq
 
         private void LoadArticle(string text, string title)
         {
-            // 载入新内容前取消任何挂起的自动续发（F4/F5/重打/跳段/手动发段都经过这里）
+            // 载入新内容前取消任何挂起的自动续发（F5/重打/跳段/手动发段都经过这里）
             CancelAutoAdvance();
             // 如果上一段已字数打满但因末字错未 finish，载新文时强制以当前成绩入历史
             TryForceFinalizeLastSegment();
@@ -1286,65 +1313,6 @@ namespace newgdq
         // ===== 复位 =====清空当前文章、输入区、历史不动
         // ===== 发文 =====
         private void MenuItem_OpenSendText_Click(object sender, RoutedEventArgs e) => OpenSendTextWindowWithConfirm();
-
-        private void MenuItem_LoadClipboard_Click(object sender, RoutedEventArgs e) => LoadFromClipboard();
-
-        /// <summary>F4 载文：从剪贴板拉一段文字直接载入对照区（不走发文窗口）。
-        /// - 跟打中（已开始且未完成）→ 改为重打当前段，不覆盖（与原版一致）
-        /// - 识别原版 "-----第N段 标题" 发文格式：自动剥发文头取正文 + 段号 + 标题
-        /// - 否则整段作为正文载入</summary>
-        private void LoadFromClipboard()
-        {
-            // 跟打中按 F4：重打当前段，不覆盖
-            if (_session.Started && !_session.Finished && _session.TypeText.Length > 0)
-            {
-                Repeat();
-                HandyControl.Controls.Growl.Info("跟打中，已重打当前段（如需载入新文请先按 F5 复位）");
-                return;
-            }
-            _currentSegNo = 0;
-            try
-            {
-                string raw = System.Windows.Clipboard.GetText();
-                if (string.IsNullOrWhiteSpace(raw))
-                {
-                    HandyControl.Controls.Growl.Warning("剪贴板为空");
-                    return;
-                }
-
-                // 尝试识别原版"-----第N段 标题\n正文\n-----"格式：只剥头取正文/标题，
-                // 段号一律忽略剪贴板里写的数字，统一用本进程载入次数（对齐老版 Glob.AZpre）
-                string title = "来自剪切板";
-                string body  = raw;
-                var m = System.Text.RegularExpressions.Regex.Match(
-                    raw,
-                    @"-{3,}\s*第(\d+)段\s*([^\r\n]*)\r?\n([\s\S]+?)(?:\r?\n-{3,}|$)");
-                if (m.Success)
-                {
-                    string titlePart = m.Groups[2].Value.Trim();
-                    body  = m.Groups[3].Value;
-                    title = string.IsNullOrEmpty(titlePart) ? "来自剪切板" : titlePart;
-                }
-
-                // 段号本进程内自增，每按一次 F4 / 菜单载入剪贴板都 +1
-                _clipboardSegCounter++;
-                _currentSegNo = _clipboardSegCounter;
-                title = $"{title} · 第 {_currentSegNo} 段";
-
-                string text = TextProcessor.TickBlock(body);
-                if (text.Length == 0)
-                {
-                    HandyControl.Controls.Growl.Warning("剪贴板内容剔除空格后为空");
-                    return;
-                }
-                LoadArticle(text, title);
-                HandyControl.Controls.Growl.Info($"已载入 {text.Length} 字 · {title}");
-            }
-            catch (Exception ex)
-            {
-                HandyControl.Controls.Growl.Error("载文失败：" + ex.Message);
-            }
-        }
 
         /// <summary>F2 入口：已在发文中则先弹确认。</summary>
         private void OpenSendTextWindowWithConfirm()
@@ -1569,7 +1537,6 @@ namespace newgdq
                 "—— 全局热键（任何窗口都生效）——\n" +
                 "F2   打开发文窗口\n" +
                 "F3   重打当前段\n" +
-                "F4   载文（剪贴板 → 对照区）\n" +
                 "F6   发下一段\n" +
                 "F8   暂停 / 继续\n\n" +
                 "—— 主窗激活时的快捷键 ——\n" +
@@ -1647,6 +1614,20 @@ namespace newgdq
             new Views.AverageWindow(this).Show();
         }
 
+        private void MenuItem_OpenErrorBook_Click(object sender, RoutedEventArgs e)
+        {
+            new Views.ErrorBookWindow(this).Show();
+        }
+
+        private void MenuItem_OpenTrend_Click(object sender, RoutedEventArgs e)
+        {
+            new Views.TrendWindow(this).Show();
+        }
+
+        private void TxtFootLabel_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            new Views.TrendWindow(this).Show();
+        }
         private void MenuItem_SendImageScore_Click(object sender, RoutedEventArgs e)
         {
             if (History.Count == 0)
@@ -1886,9 +1867,6 @@ namespace newgdq
                     return;
                 case 0x72: // F3 重打
                     Dispatcher.BeginInvoke(new Action(Repeat));
-                    return;
-                case 0x73: // F4 载文（拉剪贴板直接进对照区）
-                    Dispatcher.BeginInvoke(new Action(LoadFromClipboard));
                     return;
                 case 0x75: // F6 发下一段
                     Dispatcher.BeginInvoke(new Action(SendNext));
@@ -2270,6 +2248,9 @@ namespace newgdq
             Services.KeyHook.LogLine($"==== FINISH 字数={total} Keys={_session.Keys} Hg={_session.Hg} Cz={_session.Cz} "
                 + $"用时={sec:0.00}s 速度={speed:0.00} 击键={jj:0.00} 码长={mc:0.00} ====");
 
+            // 错字本：逐字比对原文与最终输入，采集"正确字→打成字"明细（独立 errorbook.db）
+            CollectErrorsToBook(total);
+
             // 速度门槛：底部"限制"按钮启用 + 设置中阈值 > 0 + 当前速度低于阈值 → 不入历史
             bool blockedByLimit = false;
             if (TogLimit != null && TogLimit.IsChecked == true)
@@ -2329,6 +2310,27 @@ namespace newgdq
             }
 
             InlineChartMarkFinish();
+        }
+
+        /// <summary>逐字比对原文与最终输入，把所有"打错的字"(正确字→打成字)写入错字本独立库。
+        /// 末位多打/少打不算（只比对原文长度内的对应位）。</summary>
+        private void CollectErrorsToBook(int total)
+        {
+            string input = TbxInput.Text ?? string.Empty;
+            int len = Math.Min(total, Math.Min(input.Length, _session.TypeText.Length));
+            var errs = new System.Collections.Generic.List<(string correct, string typed)>();
+            var chars = new System.Collections.Generic.List<(string correct, bool wrong)>();
+            for (int i = 0; i < len; i++)
+            {
+                char correct = _session.TypeText[i];
+                char typed = input[i];
+                bool wrong = typed != correct;
+                chars.Add((correct.ToString(), wrong));
+                if (wrong)
+                    errs.Add((correct.ToString(), typed.ToString()));
+            }
+            Services.ErrorBookRepository.InsertBatch(errs, _session.Title);
+            Services.ErrorBookRepository.UpsertBatch(chars);
         }
 
         /// <summary>完成时若"图片"开启，渲染 ScoreCard UserControl 复制到剪贴板。</summary>

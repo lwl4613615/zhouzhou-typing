@@ -185,5 +185,16 @@ namespace newgdq.Services
             new SimpleChar("主", "zhu", "zh","u"),
             new SimpleChar("准", "zhun","zh","un"),
         };
+
+        /// <summary>表内"常用读音 ≠ 唯一读音"的多音字：练习时按表中给定读音打，
+        /// 题面需特别标注，避免用户按另一个读音拆键被误判。</summary>
+        private static readonly HashSet<string> PolyChars = new HashSet<string>
+        {
+            "了", "和", "还", "都", "会", "长", "行", "中",
+            "上", "少", "要", "为", "地", "的", "应", "正",
+        };
+
+        /// <summary>该字是否为需提醒的多音字。</summary>
+        public static bool IsPolyphonic(string ch) => ch != null && PolyChars.Contains(ch);
     }
 }

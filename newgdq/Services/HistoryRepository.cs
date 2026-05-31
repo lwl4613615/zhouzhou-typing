@@ -314,5 +314,114 @@ FROM type_record ORDER BY id DESC LIMIT @lim;";
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine("[HistoryRepository.LoadAggregate] " + ex.Message); }
             return (0, 0, 0, 0, 0, 0, 0);
         }
+
+        /// <summary>趋势周期粒度。</summary>
+        public enum TrendGranularity { Day, Week, Month }
+
+        /// <summary>趋势里一个周期桶（一天/一周/一月）的聚合成绩。</summary>
+        public sealed class TrendBucket
+        {
+            public string Key { get; set; }       // 分组键（排序用）
+            public string Label { get; set; }     // 显示标签（如 05-31 / 第22周 / 2026-05）
+            public int Segs { get; set; }          // 段数
+            public int Words { get; set; }         // 总字数
+            public double AvgSpeed { get; set; }   // 平均速度（字/分）
+            public double AvgSpeed2 { get; set; }  // 平均错一罚五
+            public double MaxSpeed { get; set; }   // 最高速度
+            public double AvgJj { get; set; }      // 平均击键
+            public double AvgMc { get; set; }      // 平均码长
+            public double ErrRate { get; set; }    // 错字率 = 错字 / 字数（0~1）
+        }
+
+        /// <summary>
+        /// 按周期粒度聚合成绩趋势，返回最近 <paramref name="limitBuckets"/> 个非空周期（时间升序，最新在末尾）。
+        /// Day=按本地日期；Week=按 ISO 周（周一起）；Month=按本地年月。空库返回空列表。
+        /// </summary>
+        public static List<TrendBucket> LoadTrend(TrendGranularity g, int limitBuckets = 12)
+        {
+            var list = new List<TrendBucket>();
+            if (!_initialized) return list;
+
+            // 分组键 / 标签的 SQL 表达式（均按本地时区换算）
+            string keyExpr, labelExpr;
+            switch (g)
+            {
+                case TrendGranularity.Week:
+                    // %Y-%W：以周一为一周起点（SQLite %W 周一为 0..53）
+                    keyExpr   = "strftime('%Y-%W', when_utc, 'localtime')";
+                    labelExpr = "MIN(date(when_utc,'localtime'))"; // 标签用该周最早日期
+                    break;
+                case TrendGranularity.Month:
+                    keyExpr   = "strftime('%Y-%m', when_utc, 'localtime')";
+                    labelExpr = "strftime('%Y-%m', when_utc, 'localtime')";
+                    break;
+                default: // Day
+                    keyExpr   = "date(when_utc,'localtime')";
+                    labelExpr = "date(when_utc,'localtime')";
+                    break;
+            }
+
+            try
+            {
+                using (var conn = new SQLiteConnection(ConnStr))
+                {
+                    conn.Open();
+                    using (var cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText =
+$@"SELECT {keyExpr} AS k, {labelExpr} AS lbl,
+       COUNT(*) AS segs, COALESCE(SUM(words),0) AS wds,
+       AVG(speed) AS asp, AVG(speed2) AS asp2, MAX(speed) AS msp,
+       AVG(jj) AS ajj, AVG(mc) AS amc, COALESCE(SUM(cz),0) AS czs
+FROM type_record
+GROUP BY k
+ORDER BY k ASC;";
+                        using (var rd = cmd.ExecuteReader())
+                        {
+                            while (rd.Read())
+                            {
+                                int wds = (int)rd.GetInt64(3);
+                                int czs = (int)rd.GetInt64(9);
+                                list.Add(new TrendBucket
+                                {
+                                    Key       = rd.IsDBNull(0) ? "" : rd.GetString(0),
+                                    Label     = FormatTrendLabel(g, rd.IsDBNull(1) ? "" : rd.GetString(1)),
+                                    Segs      = (int)rd.GetInt64(2),
+                                    Words     = wds,
+                                    AvgSpeed  = rd.IsDBNull(4) ? 0 : rd.GetDouble(4),
+                                    AvgSpeed2 = rd.IsDBNull(5) ? 0 : rd.GetDouble(5),
+                                    MaxSpeed  = rd.IsDBNull(6) ? 0 : rd.GetDouble(6),
+                                    AvgJj     = rd.IsDBNull(7) ? 0 : rd.GetDouble(7),
+                                    AvgMc     = rd.IsDBNull(8) ? 0 : rd.GetDouble(8),
+                                    ErrRate   = wds > 0 ? (double)czs / wds : 0,
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine("[HistoryRepository.LoadTrend] " + ex.Message); }
+
+            // 只保留最近 N 个周期
+            if (limitBuckets > 0 && list.Count > limitBuckets)
+                list = list.GetRange(list.Count - limitBuckets, limitBuckets);
+            return list;
+        }
+
+        /// <summary>把原始标签格式化成友好显示（按天→MM-dd，按周→MM-dd 那周，按月→YYYY-MM）。</summary>
+        private static string FormatTrendLabel(TrendGranularity g, string raw)
+        {
+            if (string.IsNullOrEmpty(raw)) return raw;
+            DateTime d;
+            switch (g)
+            {
+                case TrendGranularity.Day:
+                    return DateTime.TryParse(raw, out d) ? d.ToString("MM-dd") : raw;
+                case TrendGranularity.Week:
+                    return DateTime.TryParse(raw, out d) ? d.ToString("MM-dd") + " 周" : raw;
+                default:
+                    return raw; // YYYY-MM
+            }
+        }
     }
 }
