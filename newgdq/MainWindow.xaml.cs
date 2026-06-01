@@ -323,8 +323,10 @@ namespace newgdq
         {
             try
             {
-                System.Windows.Clipboard.SetText(WECHAT_ID);
-                HandyControl.Controls.Growl.Success("已复制微信号：" + WECHAT_ID);
+                if (newgdq.Services.ClipboardHelper.TrySetText(WECHAT_ID))
+                    HandyControl.Controls.Growl.Success("已复制微信号：" + WECHAT_ID);
+                else
+                    HandyControl.Controls.Growl.Warning("剪贴板被其他程序占用，请稍后再试");
             }
             catch (Exception ex) { HandyControl.Controls.Growl.Error(ex.Message); }
         }
@@ -1603,7 +1605,13 @@ namespace newgdq
             var r = History[0];
             string s = $"第{r.Seg}段 速度{r.Speed:0.00} 罚五{r.Speed2:0.00} 击键{r.Jj:0.00} 码长{r.Mc:0.00} " +
                        $"回改{r.Hg} 错字{r.Cz} 键数{r.Js} 打词{r.DaCi} 用时{r.UseTime:0.00}s · {r.Title}";
-            try { System.Windows.Clipboard.SetText(s); HandyControl.Controls.Growl.Success("最新成绩已复制"); }
+            try
+            {
+                if (newgdq.Services.ClipboardHelper.TrySetText(s))
+                    HandyControl.Controls.Growl.Success("最新成绩已复制");
+                else
+                    HandyControl.Controls.Growl.Warning("剪贴板被其他程序占用，请稍后再试");
+            }
             catch (Exception ex) { HandyControl.Controls.Growl.Error(ex.Message); }
         }
 

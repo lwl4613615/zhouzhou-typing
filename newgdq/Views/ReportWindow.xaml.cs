@@ -76,8 +76,10 @@ namespace newgdq.Views
                 $"【跟打报告】{TxtTitle.Text}\n" +
                 $"速度 {TxtSpeed.Text} | 错一罚五 {TxtSpeed2.Text} | 击键 {TxtJj.Text} | 码长 {TxtMc.Text}\n" +
                 $"用时 {TxtSec.Text}s | {TxtCounts.Text}";
-            try { Clipboard.SetText(s); HandyControl.Controls.Growl.Success("已复制到剪贴板"); }
-            catch (Exception ex) { HandyControl.Controls.Growl.Error(ex.Message); }
+            if (newgdq.Services.ClipboardHelper.TrySetText(s))
+                HandyControl.Controls.Growl.Success("已复制到剪贴板");
+            else
+                HandyControl.Controls.Growl.Warning("剪贴板被其他程序占用，请稍后再试");
         }
 
         private System.Windows.Media.Imaging.BitmapSource RenderWindowImage()

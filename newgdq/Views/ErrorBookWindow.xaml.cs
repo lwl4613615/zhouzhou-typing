@@ -133,8 +133,10 @@ namespace newgdq.Views
                 HandyControl.Controls.Growl.Info("当前范围没有错字可复制");
                 return;
             }
-            try { Clipboard.SetText(text); HandyControl.Controls.Growl.Success($"已复制 {text.Length} 个错字"); }
-            catch (Exception ex) { HandyControl.Controls.Growl.Error(ex.Message); }
+            if (newgdq.Services.ClipboardHelper.TrySetText(text))
+                HandyControl.Controls.Growl.Success($"已复制 {text.Length} 个错字");
+            else
+                HandyControl.Controls.Growl.Warning("剪贴板被其他程序占用，请稍后再试");
         }
 
         private void BtnClear_Click(object sender, RoutedEventArgs e)

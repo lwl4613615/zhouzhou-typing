@@ -269,8 +269,10 @@ namespace newgdq.Views
             sb.AppendLine($"【成绩趋势 · {GranularityWord()}】");
             foreach (var b in buckets)
                 sb.AppendLine($"{b.Label}  均速 {b.AvgSpeed:0.0}  罚五 {b.AvgSpeed2:0.0}  击键 {b.AvgJj:0.00}  错字率 {b.ErrRate * 100:0.0}%  ({b.Segs}段)");
-            try { Clipboard.SetText(sb.ToString()); HandyControl.Controls.Growl.Success("趋势已复制"); }
-            catch (Exception ex) { HandyControl.Controls.Growl.Error(ex.Message); }
+            if (newgdq.Services.ClipboardHelper.TrySetText(sb.ToString()))
+                HandyControl.Controls.Growl.Success("趋势已复制");
+            else
+                HandyControl.Controls.Growl.Warning("剪贴板被其他程序占用，请稍后再试");
         }
 
         private void BtnClose_Click(object sender, RoutedEventArgs e) => Close();

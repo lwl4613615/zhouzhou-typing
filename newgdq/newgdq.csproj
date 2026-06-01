@@ -91,6 +91,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Services\KeyHook.cs" />
+    <Compile Include="Services\ClipboardHelper.cs" />
     <Compile Include="Services\UiScaleManager.cs" />
     <Compile Include="Services\ArticleLoader.cs" />
     <Compile Include="Services\DictionaryService.cs" />

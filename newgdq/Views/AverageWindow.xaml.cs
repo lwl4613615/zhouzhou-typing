@@ -35,8 +35,10 @@ namespace newgdq.Views
             string s = $"【平均成绩】{TxtTitle.Text}\n" +
                        $"速度 {TxtAvgSpeed.Text} | 罚五 {TxtAvgSpeed2.Text} | 击键 {TxtAvgJj.Text} | 码长 {TxtAvgMc.Text}\n" +
                        $"最高速度 / 总用时：{TxtMisc.Text}";
-            try { Clipboard.SetText(s); HandyControl.Controls.Growl.Success("已复制"); }
-            catch (Exception ex) { HandyControl.Controls.Growl.Error(ex.Message); }
+            if (newgdq.Services.ClipboardHelper.TrySetText(s))
+                HandyControl.Controls.Growl.Success("已复制");
+            else
+                HandyControl.Controls.Growl.Warning("剪贴板被其他程序占用，请稍后再试");
         }
 
         private void BtnClose_Click(object sender, RoutedEventArgs e) => Close();

@@ -44,8 +44,10 @@ namespace newgdq.Views
         {
             try
             {
-                Clipboard.SetText(WECHAT_ID);
-                HandyControl.Controls.Growl.Success("已复制微信号：" + WECHAT_ID);
+                if (newgdq.Services.ClipboardHelper.TrySetText(WECHAT_ID))
+                    HandyControl.Controls.Growl.Success("已复制微信号：" + WECHAT_ID);
+                else
+                    HandyControl.Controls.Growl.Warning("剪贴板被其他程序占用，请稍后再试");
             }
             catch (Exception ex) { HandyControl.Controls.Growl.Error(ex.Message); }
         }
