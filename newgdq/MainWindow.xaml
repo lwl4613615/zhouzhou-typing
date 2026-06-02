@@ -130,6 +130,7 @@
         <!-- 1. 顶部菜单栏 -->
         <Menu DockPanel.Dock="Top" Background="{DynamicResource PanelBG}" x:Name="MainMenu">
             <MenuItem Header="菜单">
+                <MenuItem.Icon><ui:SymbolIcon Symbol="Navigation24" FontSize="16"/></MenuItem.Icon>
                 <MenuItem Header="发文..."    InputGestureText="F2" Click="MenuItem_OpenSendText_Click"/>
                 <MenuItem Header="外观..." Click="MenuItem_OpenSettings_Click"/>
                 <MenuItem Header="界面缩放" x:Name="MnuUiScale">
@@ -144,12 +145,17 @@
                     <MenuItem Header="225%" Tag="2.25" IsCheckable="True" Click="MenuItem_ScaleSet_Click"/>
                     <MenuItem Header="250%" Tag="2.5"  IsCheckable="True" Click="MenuItem_ScaleSet_Click"/>
                 </MenuItem>
-                <MenuItem Header="暂停"   InputGestureText="F8" x:Name="MnuPause" Click="MenuItem_Pause_Click"/>
+                <MenuItem Header="暂停"   InputGestureText="F8" x:Name="MnuPause" Click="MenuItem_Pause_Click">
+                    <MenuItem.Icon><ui:SymbolIcon Symbol="Pause24" FontSize="16"/></MenuItem.Icon>
+                </MenuItem>
                 <Separator/>
-                <MenuItem Header="复制成绩" InputGestureText="F9"     Click="MenuItem_CopyResult_Click"/>
+                <MenuItem Header="复制成绩" InputGestureText="F9"     Click="MenuItem_CopyResult_Click">
+                    <MenuItem.Icon><ui:SymbolIcon Symbol="Copy24" FontSize="16"/></MenuItem.Icon>
+                </MenuItem>
                 <MenuItem Header="退出"     Click="MenuItem_Exit_Click"/>
             </MenuItem>
             <MenuItem Header="功能">
+                <MenuItem.Icon><ui:SymbolIcon Symbol="Apps24" FontSize="16"/></MenuItem.Icon>
                 <MenuItem Header="文章处理">
                     <MenuItem Header="将目前文章乱序"     InputGestureText="Ctrl+Q" Click="MenuItem_ShuffleArticle_Click"/>
                     <MenuItem Header="英文标点换中文标点" InputGestureText="Ctrl+W" Click="MenuItem_En2CnPunct_Click"/>
@@ -167,15 +173,29 @@
                     <MenuItem Header="前1500单字"     Tag="前1500单字.txt"     Click="MenuItem_LoadInternal_Click"/>
                 </MenuItem>
                 <Separator/>
-                <MenuItem Header="发送图片成绩" InputGestureText="Ctrl+T" Click="MenuItem_SendImageScore_Click"/>
-                <MenuItem Header="平均成绩..." Click="MenuItem_OpenAverage_Click"/>
+                <MenuItem Header="发送图片成绩" InputGestureText="Ctrl+T" Click="MenuItem_SendImageScore_Click">
+                    <MenuItem.Icon><ui:SymbolIcon Symbol="Image24" FontSize="16"/></MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="平均成绩..." Click="MenuItem_OpenAverage_Click">
+                    <MenuItem.Icon><ui:SymbolIcon Symbol="DataHistogram24" FontSize="16"/></MenuItem.Icon>
+                </MenuItem>
                 <MenuItem Header="成绩趋势..." Click="MenuItem_OpenTrend_Click"
-                          ToolTip="按天/周/月看均速趋势，和过去的自己比；可设目标速度（仅参考线，达不到不责备）"/>
+                          ToolTip="按天/周/月看均速趋势，和过去的自己比；可设目标速度（仅参考线，达不到不责备）">
+                    <MenuItem.Icon><ui:SymbolIcon Symbol="DataTrending24" FontSize="16"/></MenuItem.Icon>
+                </MenuItem>
                 <MenuItem Header="错字本..." Click="MenuItem_OpenErrorBook_Click"
-                          ToolTip="按本次/本日/本周/本月/本年查看高频错字排行"/>
-                <MenuItem Header="击键评定..." InputGestureText="Ctrl+B" Click="MenuItem_OpenJjCheck_Click"/>
-                <MenuItem Header="速度分析..." InputGestureText="Ctrl+E" Click="MenuItem_OpenSpeedAnalysis_Click"/>
-                <MenuItem Header="跟打报告..." InputGestureText="Ctrl+G" Click="MenuItem_OpenReport_Click"/>
+                          ToolTip="按本次/本日/本周/本月/本年查看高频错字排行">
+                    <MenuItem.Icon><ui:SymbolIcon Symbol="ErrorCircle24" FontSize="16"/></MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="击键评定..." InputGestureText="Ctrl+B" Click="MenuItem_OpenJjCheck_Click">
+                    <MenuItem.Icon><ui:SymbolIcon Symbol="Keyboard24" FontSize="16"/></MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="速度分析..." InputGestureText="Ctrl+E" Click="MenuItem_OpenSpeedAnalysis_Click">
+                    <MenuItem.Icon><ui:SymbolIcon Symbol="TopSpeed24" FontSize="16"/></MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="跟打报告..." InputGestureText="Ctrl+G" Click="MenuItem_OpenReport_Click">
+                    <MenuItem.Icon><ui:SymbolIcon Symbol="Document24" FontSize="16"/></MenuItem.Icon>
+                </MenuItem>
                 <Separator/>
                 <MenuItem Header="键位练习" Click="MenuItem_OpenShuangPin_Click"
                           ToolTip="小鹤双拼 / 自然码 声母韵母键位练习（内嵌面板）"/>
@@ -191,18 +211,22 @@
                           Click="MnuSmartCi_Click"/>
             </MenuItem>
             <MenuItem Header="发文">
+                <MenuItem.Icon><ui:SymbolIcon Symbol="Send24" FontSize="16"/></MenuItem.Icon>
                 <MenuItem Header="发文状态" InputGestureText="Ctrl+F2" Click="MenuItem_SendStatus_Click"/>
                 <MenuItem Header="发下一段" InputGestureText="F6 / Ctrl+R" Click="MenuItem_SendNext_Click"/>
                 <MenuItem Header="乱序重抽" Click="MenuItem_SendShuffle_Click"/>
             </MenuItem>
             <MenuItem Header="帮助">
+                <MenuItem.Icon><ui:SymbolIcon Symbol="QuestionCircle24" FontSize="16"/></MenuItem.Icon>
                 <MenuItem Header="快捷键列表" Click="MenuItem_Hotkeys_Click"/>
                 <Separator/>
                 <MenuItem Header="访问 项目主页" Click="MenuItem_Homepage_Click"/>
                 <MenuItem Header="加入 QQ 交流群" Click="MenuItem_JoinQQ_Click"/>
                 <MenuItem Header="关于 州州跟打器..." Click="MenuItem_About_Click"/>
             </MenuItem>
-            <MenuItem Header="复位" Click="MenuItem_Reset_Click"/>
+            <MenuItem Header="复位" Click="MenuItem_Reset_Click">
+                <MenuItem.Icon><ui:SymbolIcon Symbol="ArrowReset24" FontSize="16"/></MenuItem.Icon>
+            </MenuItem>
         </Menu>
 
         <!-- 2. 段号刻度尺已废弃（用户反馈无用） -->
