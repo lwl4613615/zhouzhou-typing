@@ -12,6 +12,59 @@
         WindowBackdropType="None"
         Background="{DynamicResource RegionBrush}"
         Foreground="{DynamicResource PrimaryTextBrush}">
+    <ui:FluentWindow.Resources>
+        <!-- 确定按钮：强调底+白字，自控 hover/pressed，随主题走 -->
+        <Style x:Key="DialogPrimaryButton" TargetType="Button">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="{DynamicResource AccentFG}"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" CornerRadius="6" Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.85"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.70"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!-- 取消按钮：次要底+正文色，自控 hover -->
+        <Style x:Key="DialogSecondaryButton" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource ValueFG}"/>
+            <Setter Property="Background" Value="{DynamicResource CellBG}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource GridLine}"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" CornerRadius="6" BorderThickness="1"
+                                Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.80"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.65"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </ui:FluentWindow.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -149,12 +202,8 @@
 
             <!-- 按钮 -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
-                <ui:Button Content="取消" MinWidth="84" Height="34" Margin="0,0,10,0" Click="BtnCancel_Click"
-                           Background="{DynamicResource CellBG}" Foreground="{DynamicResource ValueFG}"
-                           BorderBrush="{DynamicResource GridLine}" BorderThickness="1" FontSize="14"/>
-                <ui:Button Content="确定" MinWidth="84" Height="34" Click="BtnOk_Click"
-                           Background="{DynamicResource AccentFG}" Foreground="White"
-                           BorderThickness="0" FontSize="14" FontWeight="SemiBold"/>
+                <Button Content="取消" Style="{StaticResource DialogSecondaryButton}" MinWidth="84" Height="34" Margin="0,0,10,0" Click="BtnCancel_Click"/>
+                <Button Content="确定" Style="{StaticResource DialogPrimaryButton}" MinWidth="84" Height="34" Click="BtnOk_Click"/>
             </StackPanel>
         </StackPanel>
     </Grid>
