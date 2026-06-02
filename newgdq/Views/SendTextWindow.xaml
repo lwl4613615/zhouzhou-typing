@@ -69,13 +69,13 @@
 
                 <!-- 右：动作按钮 -->
                 <StackPanel Grid.Column="1" Orientation="Vertical" VerticalAlignment="Bottom">
-                    <ui:Button x:Name="BtnGoSend"  Content="开启发文"   Width="150" Height="38"
+                    <ui:Button x:Name="BtnGoSend"  Content="开启发文"   Width="150" Padding="0,8"
                             Appearance="Success" FontSize="14" FontWeight="Bold"
                             Click="BtnGoSend_Click"/>
-                    <ui:Button x:Name="BtnSendAll" Content="发全文（不分段）" Width="150" Height="26" Margin="0,4,0,0"
+                    <ui:Button x:Name="BtnSendAll" Content="发全文（不分段）" Width="150" Padding="0,6" Margin="0,4,0,0"
                             ToolTip="忽略每段字数，把整篇文章作为一段一次性发出"
                             Click="BtnSendAll_Click"/>
-                    <ui:Button Content="关闭" Width="150" Height="26" Margin="0,4,0,0" Click="BtnClose_Click"/>
+                    <ui:Button Content="关闭" Width="150" Padding="0,6" Margin="0,4,0,0" Click="BtnClose_Click"/>
                 </StackPanel>
             </Grid>
         </Border>
