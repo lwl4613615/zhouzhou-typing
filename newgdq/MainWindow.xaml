@@ -99,28 +99,66 @@
         <!-- 导航分组标题 -->
         <Style x:Key="NavSection" TargetType="TextBlock">
             <Setter Property="Foreground" Value="{DynamicResource LabelFG}"/>
-            <Setter Property="Opacity" Value="0.55"/>
+            <Setter Property="Opacity" Value="0.7"/>
             <Setter Property="FontSize" Value="10"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Margin" Value="12,10,0,3"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="16,14,0,4"/>
         </Style>
-        <!-- 导航行按钮：图标 + 文字，整行可点，hover 高亮 -->
-        <Style x:Key="NavRowBtn" TargetType="Button">
-            <Setter Property="Foreground" Value="{DynamicResource ValueFG}"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="HorizontalContentAlignment" Value="Left"/>
-            <Setter Property="Height" Value="32"/>
+        <!-- 主操作 CTA 按钮：金色实心，最醒目 -->
+        <Style x:Key="NavCtaBtn" TargetType="Button">
+            <Setter Property="Foreground" Value="#1A1F2B"/>
+            <Setter Property="Background" Value="{DynamicResource AccentFG}"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="bd" CornerRadius="5" Margin="4,1" Padding="8,0"
-                                Background="{TemplateBinding Background}">
-                            <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                        <Border x:Name="bd" CornerRadius="10" Margin="10,4,10,2"
+                                Background="{TemplateBinding Background}"
+                                TextElement.Foreground="{TemplateBinding Foreground}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.88"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.72"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!-- 导航行按钮：图标 + 文字，整行可点；hover 圆润 pill + 整行变强调色 -->
+        <Style x:Key="NavRowBtn" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource ValueFG}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid Margin="8,1">
+                            <!-- 左侧强调指示条（hover 显现） -->
+                            <Border x:Name="ind" Width="3" Height="18" CornerRadius="2"
+                                    HorizontalAlignment="Left" VerticalAlignment="Center"
+                                    Background="{DynamicResource AccentFG}" Opacity="0"/>
+                            <Border x:Name="bd" CornerRadius="8" Padding="12,0"
+                                    Background="{TemplateBinding Background}"
+                                    TextElement.Foreground="{TemplateBinding Foreground}">
+                                <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="bd" Property="Background" Value="{DynamicResource MarkerHoverBG}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource AccentFG}"/>
+                                <Setter TargetName="ind" Property="Opacity" Value="1"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter TargetName="bd" Property="Opacity" Value="0.7"/>
@@ -165,19 +203,55 @@
         </tb:TaskbarIcon>
 
         <!-- 1. 左侧导航栏（D/E 现代化重构：顶部菜单 → 左侧导航；复用全部原 Click 处理器） -->
-        <Border DockPanel.Dock="Left" x:Name="NavRail" Width="162"
+        <Border DockPanel.Dock="Left" x:Name="NavRail" Width="178"
                 Background="{DynamicResource PanelBG}"
                 BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,1,0">
-            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                <StackPanel Margin="0,4,0,8">
-                    <!-- 操作 -->
-                    <TextBlock Text="操作" Style="{StaticResource NavSection}"/>
-                    <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_OpenSendText_Click" ToolTip="F2">
+            <DockPanel LastChildFill="True">
+                <!-- 顶部品牌头 -->
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="14,12,12,6">
+                    <Border Width="32" Height="32" CornerRadius="8" Background="{DynamicResource AccentFG}">
+                        <ui:SymbolIcon Symbol="Keyboard24" FontSize="18" Foreground="#1A1F2B"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="州州跟打器" FontSize="13" FontWeight="Bold"
+                                   Foreground="{DynamicResource ValueFG}"/>
+                        <TextBlock Text="中文跟打练习" FontSize="10" Opacity="0.6"
+                                   Foreground="{DynamicResource LabelFG}"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- 底部固定区：外观 + 退出 -->
+                <Border DockPanel.Dock="Bottom" BorderBrush="{DynamicResource GridLine}"
+                        BorderThickness="0,1,0,0" Padding="0,6,0,8">
+                    <StackPanel>
+                        <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_OpenSettings_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <ui:SymbolIcon Symbol="Color24" FontSize="16" Margin="0,0,10,0"/>
+                                <TextBlock Text="外观" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_Exit_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <ui:SymbolIcon Symbol="ArrowExit20" FontSize="16" Margin="0,0,10,0"/>
+                                <TextBlock Text="退出" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Border>
+
+                <!-- 中间滚动区 -->
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <StackPanel Margin="0,2,0,8">
+                    <!-- 主操作 CTA -->
+                    <Button Style="{StaticResource NavCtaBtn}" Click="MenuItem_OpenSendText_Click" ToolTip="F2">
                         <StackPanel Orientation="Horizontal">
-                            <ui:SymbolIcon Symbol="DocumentAdd24" FontSize="16" Margin="0,0,10,0"/>
+                            <ui:SymbolIcon Symbol="DocumentAdd24" FontSize="17" Margin="0,0,8,0"/>
                             <TextBlock Text="发文" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
+                    <!-- 操作 -->
+                    <TextBlock Text="操作" Style="{StaticResource NavSection}"/>
                     <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_SendNext_Click" ToolTip="F6 / Ctrl+R">
                         <StackPanel Orientation="Horizontal">
                             <ui:SymbolIcon Symbol="ArrowNext24" FontSize="16" Margin="0,0,10,0"/>
@@ -350,12 +424,6 @@
 
                     <!-- 设置 / 帮助 -->
                     <TextBlock Text="设置 / 帮助" Style="{StaticResource NavSection}"/>
-                    <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_OpenSettings_Click">
-                        <StackPanel Orientation="Horizontal">
-                            <ui:SymbolIcon Symbol="Color24" FontSize="16" Margin="0,0,10,0"/>
-                            <TextBlock Text="外观" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
                     <Button Style="{StaticResource NavRowBtn}" Click="NavDropdown_Click">
                         <Grid>
                             <StackPanel Orientation="Horizontal">
@@ -405,14 +473,9 @@
                             </ContextMenu>
                         </Button.ContextMenu>
                     </Button>
-                    <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_Exit_Click">
-                        <StackPanel Orientation="Horizontal">
-                            <ui:SymbolIcon Symbol="ArrowExit20" FontSize="16" Margin="0,0,10,0"/>
-                            <TextBlock Text="退出" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
                 </StackPanel>
             </ScrollViewer>
+            </DockPanel>
         </Border>
 
         <!-- 2. 段号刻度尺已废弃（用户反馈无用） -->
