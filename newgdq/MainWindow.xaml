@@ -9,7 +9,7 @@
         xmlns:local="clr-namespace:newgdq"
         xmlns:views="clr-namespace:newgdq.Views"
         mc:Ignorable="d"
-        Title="州州跟打器" Height="680" Width="940" MinHeight="560" MinWidth="820"
+        Title="州州跟打器" Height="680" Width="940" MinHeight="480" MinWidth="640"
         FontFamily="微软雅黑" FontSize="12"
         Icon="pack://application:,,,/Resources/myicon.ico"
         Background="{DynamicResource RegionBrush}"
@@ -199,21 +199,20 @@
         <Border DockPanel.Dock="Top" x:Name="InfoBar" Background="{DynamicResource PanelBG}"
                 CornerRadius="6" Margin="6,6,6,2" Padding="2,0" ClipToBounds="True"
                 BorderBrush="{DynamicResource GridLine}" BorderThickness="1">
-            <Viewbox Stretch="Uniform" MaxHeight="40" HorizontalAlignment="Stretch">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="18"/>
                     <RowDefinition Height="22"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="60"/>   <!-- 段号 -->
-                    <ColumnDefinition Width="260"/>  <!-- 标题 -->
-                    <ColumnDefinition Width="80"/>   <!-- 字数 -->
-                    <ColumnDefinition Width="140"/>  <!-- 状态：重打/发呆/键准 -->
-                    <ColumnDefinition Width="80"/>   <!-- 速度 -->
-                    <ColumnDefinition Width="80"/>   <!-- 击键 -->
-                    <ColumnDefinition Width="80"/>   <!-- 码长 -->
-                    <ColumnDefinition Width="110"/>   <!-- 联系州州 -->
+                    <ColumnDefinition Width="Auto" MinWidth="48"/>   <!-- 段号 -->
+                    <ColumnDefinition Width="*"    MinWidth="120"/>  <!-- 标题 -->
+                    <ColumnDefinition Width="Auto" MinWidth="56"/>   <!-- 字数 -->
+                    <ColumnDefinition Width="Auto" MinWidth="120"/>  <!-- 状态：重打/发呆/键准 -->
+                    <ColumnDefinition Width="Auto" MinWidth="56"/>   <!-- 速度 -->
+                    <ColumnDefinition Width="Auto" MinWidth="56"/>   <!-- 击键 -->
+                    <ColumnDefinition Width="Auto" MinWidth="56"/>   <!-- 码长 -->
+                    <ColumnDefinition Width="Auto" MinWidth="80"/>   <!-- 联系州州 -->
                 </Grid.ColumnDefinitions>
 
                 <!-- 上行：标签 -->
@@ -253,7 +252,6 @@
                 <!-- 上下两行之间横线 -->
                 <Border Grid.Row="0" Grid.ColumnSpan="8" BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,0,1" VerticalAlignment="Bottom"/>
             </Grid>
-            </Viewbox>
         </Border>
 
         <!-- 5. 底部：标记栏（贴底） -->
@@ -339,22 +337,21 @@
             <Border Grid.Row="0" Background="{DynamicResource CellBG}"
                     CornerRadius="6" Margin="6,2,6,2" ClipToBounds="True"
                     BorderBrush="{DynamicResource StatusBarBorder}" BorderThickness="1">
-                <Viewbox Stretch="Uniform" MaxHeight="32" HorizontalAlignment="Stretch">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="18"/>
                         <RowDefinition Height="14"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="100"/>  <!-- 时间 -->
-                        <ColumnDefinition Width="80"/>   <!-- 字数 -->
-                        <ColumnDefinition Width="240"/>  <!-- 编码提示 / 进度条 -->
-                        <ColumnDefinition Width="60"/>   <!-- 击键 -->
-                        <ColumnDefinition Width="60"/>   <!-- 回改 -->
-                        <ColumnDefinition Width="60"/>   <!-- 错字 -->
-                        <ColumnDefinition Width="70"/>   <!-- 左:右 -->
-                        <ColumnDefinition Width="80"/>   <!-- 理论码长 -->
-                        <ColumnDefinition Width="200"/>  <!-- 累计 -->
+                        <ColumnDefinition Width="Auto" MinWidth="80"/>   <!-- 时间 -->
+                        <ColumnDefinition Width="Auto" MinWidth="56"/>   <!-- 字数 -->
+                        <ColumnDefinition Width="*"    MinWidth="160"/>  <!-- 编码提示 / 进度条 -->
+                        <ColumnDefinition Width="Auto" MinWidth="48"/>   <!-- 击键 -->
+                        <ColumnDefinition Width="Auto" MinWidth="48"/>   <!-- 回改 -->
+                        <ColumnDefinition Width="Auto" MinWidth="48"/>   <!-- 错字 -->
+                        <ColumnDefinition Width="Auto" MinWidth="56"/>   <!-- 左:右 -->
+                        <ColumnDefinition Width="Auto" MinWidth="64"/>   <!-- 理论码长 -->
+                        <ColumnDefinition Width="Auto" MinWidth="150"/>  <!-- 累计 -->
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Row="0" Grid.Column="0" x:Name="TxtTime"      Text="00:00.00" Style="{StaticResource LblValue}"/>
                     <TextBlock Grid.Row="0" Grid.Column="1" x:Name="TxtCount1"    Text="0/0"      Style="{StaticResource LblValue}"/>
@@ -410,7 +407,6 @@
                     <Border Grid.RowSpan="2" Grid.Column="7" BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,1,0"/>
                     <Border Grid.Row="0" Grid.ColumnSpan="9" BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,0,1" VerticalAlignment="Bottom"/>
                 </Grid>
-                </Viewbox>
             </Border>
 
             <!-- 输入区（卡片化：圆角 + 强调色描边 + 内边距，仅视觉，输入逻辑不变） -->
