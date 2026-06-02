@@ -516,7 +516,7 @@
                         <DataGridTextColumn Header="用时" Width="58*" Binding="{Binding UseTime, StringFormat=0.00}"/>
                         <!-- 独立的"本次/全部"切换列：用原生 DataGridColumnHeader（本身就是 ButtonBase），
                              普通字符串表头 → 与其它列头字体/颜色/对齐完全一致；HeaderStyle 挂 Click 事件 -->
-                        <DataGridTemplateColumn Width="52*" Header="本次">
+                        <DataGridTemplateColumn Width="SizeToHeader" Header="本次">
                             <DataGridTemplateColumn.HeaderStyle>
                                 <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
                                     <Setter Property="Cursor" Value="Hand"/>
