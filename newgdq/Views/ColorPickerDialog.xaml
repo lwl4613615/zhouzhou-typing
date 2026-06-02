@@ -149,8 +149,12 @@
 
             <!-- 按钮 -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
-                <ui:Button Content="取消" Appearance="Secondary" MinWidth="80" Height="34" Margin="0,0,10,0" Click="BtnCancel_Click"/>
-                <ui:Button Content="确定" Appearance="Primary" MinWidth="80" Height="34" Click="BtnOk_Click"/>
+                <ui:Button Content="取消" MinWidth="84" Height="34" Margin="0,0,10,0" Click="BtnCancel_Click"
+                           Background="{DynamicResource CellBG}" Foreground="{DynamicResource ValueFG}"
+                           BorderBrush="{DynamicResource GridLine}" BorderThickness="1" FontSize="14"/>
+                <ui:Button Content="确定" MinWidth="84" Height="34" Click="BtnOk_Click"
+                           Background="{DynamicResource AccentFG}" Foreground="White"
+                           BorderThickness="0" FontSize="14" FontWeight="SemiBold"/>
             </StackPanel>
         </StackPanel>
     </Grid>
