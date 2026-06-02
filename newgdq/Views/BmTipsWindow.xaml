@@ -7,7 +7,7 @@
         AllowsTransparency="True"
         ShowInTaskbar="False"
         Topmost="True"
-        Background="#E62D2D30"
+        Background="{DynamicResource GlassBG}"
         Foreground="{DynamicResource ValueFG}">
     <Border BorderBrush="{DynamicResource GridLine}" BorderThickness="1" CornerRadius="4" Padding="6">
         <StackPanel Orientation="Vertical">

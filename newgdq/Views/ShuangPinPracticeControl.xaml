@@ -66,9 +66,9 @@
                 BorderBrush="{DynamicResource GridLine}" BorderThickness="0,1,0,0" Padding="10,6">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <TextBlock Text="正确 " Foreground="{DynamicResource LabelFG}" VerticalAlignment="Center"/>
-                <TextBlock x:Name="TxtOk" Text="0" Foreground="#4CAF50" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,16,0"/>
+                <TextBlock x:Name="TxtOk" Text="0" Foreground="{DynamicResource SuccessFG}" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,16,0"/>
                 <TextBlock Text="错误 " Foreground="{DynamicResource LabelFG}" VerticalAlignment="Center"/>
-                <TextBlock x:Name="TxtBad" Text="0" Foreground="#E53935" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,16,0"/>
+                <TextBlock x:Name="TxtBad" Text="0" Foreground="{DynamicResource ErrorFG}" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,16,0"/>
                 <TextBlock Text="正确率 " Foreground="{DynamicResource LabelFG}" VerticalAlignment="Center"/>
                 <TextBlock x:Name="TxtAcc" Text="100%" Foreground="{DynamicResource ValueFG}" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,16,0"/>
                 <TextBlock Text="连对 " Foreground="{DynamicResource LabelFG}" VerticalAlignment="Center"/>
@@ -80,7 +80,7 @@
                 <TextBlock x:Name="TxtReact" Text="—" Foreground="{DynamicResource ValueFG}" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,2,0"/>
                 <TextBlock Text="ms " Foreground="{DynamicResource LabelFG}" VerticalAlignment="Center" Margin="0,0,16,0"/>
                 <TextBlock Text="弱点键 " Foreground="{DynamicResource LabelFG}" VerticalAlignment="Center"/>
-                <TextBlock x:Name="TxtWeak" Text="—" Foreground="#E57373" FontWeight="Bold" VerticalAlignment="Center"/>
+                <TextBlock x:Name="TxtWeak" Text="—" Foreground="{DynamicResource ErrorFG}" FontWeight="Bold" VerticalAlignment="Center"/>
             </StackPanel>
         </Border>
 
@@ -161,9 +161,9 @@
                     <Grid Margin="0,3">
                         <TextBlock Text="答对 / 答错" Foreground="{DynamicResource LabelFG}" HorizontalAlignment="Left"/>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <TextBlock x:Name="TxtSumOk" Text="0" Foreground="#4CAF50" FontWeight="Bold"/>
+                            <TextBlock x:Name="TxtSumOk" Text="0" Foreground="{DynamicResource SuccessFG}" FontWeight="Bold"/>
                             <TextBlock Text=" / " Foreground="{DynamicResource LabelFG}"/>
-                            <TextBlock x:Name="TxtSumBad" Text="0" Foreground="#E53935" FontWeight="Bold"/>
+                            <TextBlock x:Name="TxtSumBad" Text="0" Foreground="{DynamicResource ErrorFG}" FontWeight="Bold"/>
                         </StackPanel>
                     </Grid>
                     <Grid Margin="0,3">
@@ -172,7 +172,7 @@
                     </Grid>
                     <Grid Margin="0,3">
                         <TextBlock Text="弱点键" Foreground="{DynamicResource LabelFG}" HorizontalAlignment="Left"/>
-                        <TextBlock x:Name="TxtSumWeak" Text="无" Foreground="#E57373" FontWeight="Bold" HorizontalAlignment="Right"/>
+                        <TextBlock x:Name="TxtSumWeak" Text="无" Foreground="{DynamicResource ErrorFG}" FontWeight="Bold" HorizontalAlignment="Right"/>
                     </Grid>
                 </StackPanel>
 

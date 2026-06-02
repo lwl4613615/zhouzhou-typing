@@ -26,11 +26,11 @@
             <StackPanel>
                 <TextBlock x:Name="TxtTitle" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ValueFG}"/>
                 <UniformGrid Columns="6" Margin="0,8,0,0" x:Name="StatGrid">
-                    <StackPanel><TextBlock Text="速度"    Foreground="{DynamicResource LabelFG}"/><TextBlock x:Name="TxtSpeed"  Foreground="#FFE082" FontSize="16" FontWeight="Bold"/></StackPanel>
-                    <StackPanel><TextBlock Text="罚五"    Foreground="{DynamicResource LabelFG}"/><TextBlock x:Name="TxtSpeed2" Foreground="#FFE082" FontSize="16" FontWeight="Bold"/></StackPanel>
-                    <StackPanel><TextBlock Text="击键"    Foreground="{DynamicResource LabelFG}"/><TextBlock x:Name="TxtJj"     Foreground="#81C784" FontSize="16" FontWeight="Bold"/></StackPanel>
-                    <StackPanel><TextBlock Text="码长"    Foreground="{DynamicResource LabelFG}"/><TextBlock x:Name="TxtMc"     Foreground="#81C784" FontSize="16" FontWeight="Bold"/></StackPanel>
-                    <StackPanel><TextBlock Text="用时(s)" Foreground="{DynamicResource LabelFG}"/><TextBlock x:Name="TxtSec"    Foreground="#90CAF9" FontSize="16" FontWeight="Bold"/></StackPanel>
+                    <StackPanel><TextBlock Text="速度"    Foreground="{DynamicResource LabelFG}"/><TextBlock x:Name="TxtSpeed"  Foreground="{DynamicResource SpeedFG}" FontSize="16" FontWeight="Bold"/></StackPanel>
+                    <StackPanel><TextBlock Text="罚五"    Foreground="{DynamicResource LabelFG}"/><TextBlock x:Name="TxtSpeed2" Foreground="{DynamicResource SpeedFG}" FontSize="16" FontWeight="Bold"/></StackPanel>
+                    <StackPanel><TextBlock Text="击键"    Foreground="{DynamicResource LabelFG}"/><TextBlock x:Name="TxtJj"     Foreground="{DynamicResource KpmFG}" FontSize="16" FontWeight="Bold"/></StackPanel>
+                    <StackPanel><TextBlock Text="码长"    Foreground="{DynamicResource LabelFG}"/><TextBlock x:Name="TxtMc"     Foreground="{DynamicResource KpmFG}" FontSize="16" FontWeight="Bold"/></StackPanel>
+                    <StackPanel><TextBlock Text="用时(s)" Foreground="{DynamicResource LabelFG}"/><TextBlock x:Name="TxtSec"    Foreground="{DynamicResource TimeFG}" FontSize="16" FontWeight="Bold"/></StackPanel>
                     <StackPanel><TextBlock Text="键/字/错/回改" Foreground="{DynamicResource LabelFG}"/><TextBlock x:Name="TxtCounts" Foreground="{DynamicResource ValueFG}" FontSize="14"/></StackPanel>
                 </UniformGrid>
             </StackPanel>

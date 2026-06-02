@@ -34,7 +34,7 @@
                 <StackPanel Grid.Column="0" Orientation="Vertical">
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                         <TextBlock Text="标题:" Width="40" VerticalAlignment="Center" Foreground="{DynamicResource LabelFG}"/>
-                        <TextBlock x:Name="LblTitle" Text="-" Width="160" Foreground="#FFD24C" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock x:Name="LblTitle" Text="-" Width="160" Foreground="{DynamicResource AccentFG}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="字数:" Width="40" VerticalAlignment="Center" Foreground="{DynamicResource LabelFG}"/>
                         <TextBlock x:Name="LblTextCount" Text="0" Width="60" Foreground="{DynamicResource ValueFG}" VerticalAlignment="Center"/>
                         <TextBlock Text="类型:" Width="40" VerticalAlignment="Center" Foreground="{DynamicResource LabelFG}"/>
@@ -44,7 +44,7 @@
                             <ComboBoxItem>文章</ComboBoxItem>
                             <ComboBoxItem>单字</ComboBoxItem>
                         </ComboBox>
-                        <TextBlock x:Name="LblStyle" Text="-" Width="60" Foreground="#4FC3F7" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                        <TextBlock x:Name="LblStyle" Text="-" Width="60" Foreground="{DynamicResource TimeFG}" VerticalAlignment="Center" Margin="4,0,0,0"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                         <RadioButton x:Name="RbnInOrder"  Content="顺序" GroupName="Order" IsChecked="True" Margin="0,0,12,0" Foreground="{DynamicResource ValueFG}"/>
@@ -93,7 +93,7 @@
                              Background="{DynamicResource AltRowBG}" Foreground="{DynamicResource ValueFG}" BorderBrush="{DynamicResource GridLine}"/>
                     <Border Grid.Column="1" Margin="6,0,0,0" Background="{DynamicResource AltRowBG}" BorderBrush="{DynamicResource GridLine}" BorderThickness="1">
                         <TextBlock x:Name="TxtBuiltinPreview" Text="选择左侧文章查看预览" TextWrapping="Wrap"
-                                   Padding="6" Foreground="#CCC" VerticalAlignment="Top"/>
+                                   Padding="6" Foreground="{DynamicResource LabelFG}" VerticalAlignment="Top"/>
                     </Border>
                 </Grid>
             </TabItem>

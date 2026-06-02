@@ -43,15 +43,15 @@
             <TextBlock Grid.Row="0" Grid.Column="0" Text="总段数"          VerticalAlignment="Center"/>
             <TextBlock Grid.Row="0" Grid.Column="1" x:Name="TxtCount"      VerticalAlignment="Center" FontWeight="Bold"/>
             <TextBlock Grid.Row="1" Grid.Column="0" Text="平均速度（字/分）" VerticalAlignment="Center"/>
-            <TextBlock Grid.Row="1" Grid.Column="1" x:Name="TxtAvgSpeed"   VerticalAlignment="Center" FontWeight="Bold" Foreground="#FFE082"/>
+            <TextBlock Grid.Row="1" Grid.Column="1" x:Name="TxtAvgSpeed"   VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource SpeedFG}"/>
             <TextBlock Grid.Row="2" Grid.Column="0" Text="平均错一罚五"    VerticalAlignment="Center"/>
-            <TextBlock Grid.Row="2" Grid.Column="1" x:Name="TxtAvgSpeed2"  VerticalAlignment="Center" FontWeight="Bold" Foreground="#FFE082"/>
+            <TextBlock Grid.Row="2" Grid.Column="1" x:Name="TxtAvgSpeed2"  VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource SpeedFG}"/>
             <TextBlock Grid.Row="3" Grid.Column="0" Text="平均击键（键/秒）" VerticalAlignment="Center"/>
-            <TextBlock Grid.Row="3" Grid.Column="1" x:Name="TxtAvgJj"      VerticalAlignment="Center" FontWeight="Bold" Foreground="#81C784"/>
+            <TextBlock Grid.Row="3" Grid.Column="1" x:Name="TxtAvgJj"      VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource KpmFG}"/>
             <TextBlock Grid.Row="4" Grid.Column="0" Text="平均码长"        VerticalAlignment="Center"/>
-            <TextBlock Grid.Row="4" Grid.Column="1" x:Name="TxtAvgMc"      VerticalAlignment="Center" FontWeight="Bold" Foreground="#81C784"/>
+            <TextBlock Grid.Row="4" Grid.Column="1" x:Name="TxtAvgMc"      VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource KpmFG}"/>
             <TextBlock Grid.Row="5" Grid.Column="0" Text="最高速度 / 总用时" VerticalAlignment="Center"/>
-            <TextBlock Grid.Row="5" Grid.Column="1" x:Name="TxtMisc"       VerticalAlignment="Center" Foreground="#90CAF9"/>
+            <TextBlock Grid.Row="5" Grid.Column="1" x:Name="TxtMisc"       VerticalAlignment="Center" Foreground="{DynamicResource TimeFG}"/>
         </Grid>
     </DockPanel>
     </Grid>

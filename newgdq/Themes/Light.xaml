@@ -11,16 +11,39 @@
     <SolidColorBrush x:Key="PrimaryTextBrush" Color="#0F172A"/>
 
     <!-- 浅色主题（薄雾灰 + 琥珀强调） -->
-    <SolidColorBrush x:Key="PanelBG"   Color="#F7F9FC"/>
+    <SolidColorBrush x:Key="PanelBG"   Color="#EEF2F8"/>
     <SolidColorBrush x:Key="CellBG"    Color="#FFFFFF"/>
     <SolidColorBrush x:Key="DarkBG"    Color="#FAFBFE"/>
     <SolidColorBrush x:Key="TickBG"    Color="#E4E8EF"/>
-    <SolidColorBrush x:Key="GridLine"  Color="#C0C8D2"/>
-    <SolidColorBrush x:Key="LabelFG"   Color="#374151"/>
+    <SolidColorBrush x:Key="GridLine"  Color="#CDD5E0"/>
+    <SolidColorBrush x:Key="LabelFG"   Color="#5A6472"/>
     <SolidColorBrush x:Key="ValueFG"   Color="#0F172A"/>
-    <SolidColorBrush x:Key="AccentFG"  Color="#D35400"/>
-    <SolidColorBrush x:Key="AltRowBG"  Color="#EEF2F7"/>
+    <SolidColorBrush x:Key="AccentFG"  Color="#D97706"/>
+    <SolidColorBrush x:Key="AltRowBG"  Color="#E6ECF4"/>
     <SolidColorBrush x:Key="FootSubFG" Color="#1E40AF"/>
+
+    <!-- 新增：UI 细节键（替换原硬编码，支持运行时主题切换） -->
+    <SolidColorBrush x:Key="TickNumFG"       Color="#5A6472"/>
+    <SolidColorBrush x:Key="MarkerDefaultFG" Color="#6B7280"/>
+    <SolidColorBrush x:Key="MarkerHoverBG"   Color="#DCE3EC"/>
+    <SolidColorBrush x:Key="SplitterBG"      Color="#CDD5E0"/>
+    <SolidColorBrush x:Key="StatusBarBorder" Color="#C2CCD8"/>
+    <SolidColorBrush x:Key="CompareBG"       Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="CompareFG"       Color="#222222"/>
+    <SolidColorBrush x:Key="InputBG"         Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="InputFG"         Color="#222222"/>
+    <SolidColorBrush x:Key="InputCaretBG"    Color="#222222"/>
+    <SolidColorBrush x:Key="InputBorderBG"   Color="#0EA5E9"/>
+    <SolidColorBrush x:Key="BmRankBG"        Color="#2563EB"/>
+    <SolidColorBrush x:Key="ProgFillBG"      Color="#0EA5E9"/>
+    <SolidColorBrush x:Key="GlassBG"         Color="#F2FFFFFF"/>
+
+    <!-- 新增：数据指标语义色（速度/击键/用时/错误/成功），子窗口统一引用 -->
+    <SolidColorBrush x:Key="SpeedFG"   Color="#D97706"/>
+    <SolidColorBrush x:Key="KpmFG"     Color="#059669"/>
+    <SolidColorBrush x:Key="TimeFG"    Color="#0284C7"/>
+    <SolidColorBrush x:Key="ErrorFG"   Color="#DC2626"/>
+    <SolidColorBrush x:Key="SuccessFG" Color="#16A34A"/>
 
     <!-- 覆盖 HandyControl RegionBrush，营造柔和渐变 -->
     <LinearGradientBrush x:Key="RegionBrush" StartPoint="0,0" EndPoint="0,1">
