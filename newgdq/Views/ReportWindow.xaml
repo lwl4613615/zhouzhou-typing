@@ -10,6 +10,15 @@
         ExtendsContentIntoTitleBar="True"
         WindowBackdropType="None"
         WindowStartupLocation="CenterOwner">
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.18"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </Window.Triggers>
     <Grid Background="{DynamicResource RegionBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

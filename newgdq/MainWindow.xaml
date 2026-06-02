@@ -17,6 +17,16 @@
         ExtendsContentIntoTitleBar="True"
         WindowBackdropType="None"
         WindowStartupLocation="CenterScreen">
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                     From="0" To="1" Duration="0:0:0.20"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </Window.Triggers>
     <Window.Resources>
         <!-- 信息条标签 -->
         <Style x:Key="LblText" TargetType="TextBlock">
