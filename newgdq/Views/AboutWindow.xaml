@@ -53,7 +53,7 @@
         </Border>
 
         <!-- 中部：联系州州（按钮 + 折叠的二维码图） -->
-        <Border Grid.Row="2" Background="{DynamicResource AltRowBG}" BorderBrush="#444" BorderThickness="1" CornerRadius="3" Padding="12">
+        <Border Grid.Row="2" Background="{DynamicResource AltRowBG}" BorderBrush="{DynamicResource GridLine}" BorderThickness="1" CornerRadius="3" Padding="12">
             <DockPanel>
                 <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
                     <TextBlock Text="联系州州" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,12,0"/>

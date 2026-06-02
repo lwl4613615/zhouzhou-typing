@@ -6,6 +6,7 @@
         Icon="pack://application:,,,/Resources/myicon.ico"
         FontFamily="微软雅黑" FontSize="12"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource RegionBrush}"
         ExtendsContentIntoTitleBar="True"
         WindowBackdropType="None"
         ResizeMode="NoResize">
@@ -25,7 +26,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TabControl Grid.Row="0">
+        <TabControl Grid.Row="0" Background="Transparent" BorderThickness="0">
 
             <TabItem Header="字体">
                 <Grid Margin="12">
@@ -71,27 +72,27 @@
 
                     <TextBlock Grid.Row="0" Grid.Column="0" Text="正确字 前景"   VerticalAlignment="Center"/>
                     <ui:TextBox Grid.Row="0" Grid.Column="1" x:Name="TxtColorRight"   Margin="0,4" VerticalContentAlignment="Center"/>
-                    <Border  Grid.Row="0" Grid.Column="2" x:Name="PvwColorRight"   Margin="6,4,0,4" BorderBrush="#666" BorderThickness="1" Cursor="Hand" MouseLeftButtonUp="Pvw_Click" Tag="TxtColorRight"/>
+                    <Border  Grid.Row="0" Grid.Column="2" x:Name="PvwColorRight"   Margin="6,4,0,4" BorderBrush="{DynamicResource GridLine}" BorderThickness="1" Cursor="Hand" MouseLeftButtonUp="Pvw_Click" Tag="TxtColorRight"/>
 
                     <TextBlock Grid.Row="1" Grid.Column="0" Text="正确字 背景"   VerticalAlignment="Center"/>
                     <ui:TextBox Grid.Row="1" Grid.Column="1" x:Name="TxtColorRightBg" Margin="0,4" VerticalContentAlignment="Center"/>
-                    <Border  Grid.Row="1" Grid.Column="2" x:Name="PvwColorRightBg" Margin="6,4,0,4" BorderBrush="#666" BorderThickness="1" Cursor="Hand" MouseLeftButtonUp="Pvw_Click" Tag="TxtColorRightBg"/>
+                    <Border  Grid.Row="1" Grid.Column="2" x:Name="PvwColorRightBg" Margin="6,4,0,4" BorderBrush="{DynamicResource GridLine}" BorderThickness="1" Cursor="Hand" MouseLeftButtonUp="Pvw_Click" Tag="TxtColorRightBg"/>
 
                     <TextBlock Grid.Row="2" Grid.Column="0" Text="错误字 前景"   VerticalAlignment="Center"/>
                     <ui:TextBox Grid.Row="2" Grid.Column="1" x:Name="TxtColorWrong"   Margin="0,4" VerticalContentAlignment="Center"/>
-                    <Border  Grid.Row="2" Grid.Column="2" x:Name="PvwColorWrong"   Margin="6,4,0,4" BorderBrush="#666" BorderThickness="1" Cursor="Hand" MouseLeftButtonUp="Pvw_Click" Tag="TxtColorWrong"/>
+                    <Border  Grid.Row="2" Grid.Column="2" x:Name="PvwColorWrong"   Margin="6,4,0,4" BorderBrush="{DynamicResource GridLine}" BorderThickness="1" Cursor="Hand" MouseLeftButtonUp="Pvw_Click" Tag="TxtColorWrong"/>
 
                     <TextBlock Grid.Row="3" Grid.Column="0" Text="错误字 背景"   VerticalAlignment="Center"/>
                     <ui:TextBox Grid.Row="3" Grid.Column="1" x:Name="TxtColorWrongBg" Margin="0,4" VerticalContentAlignment="Center"/>
-                    <Border  Grid.Row="3" Grid.Column="2" x:Name="PvwColorWrongBg" Margin="6,4,0,4" BorderBrush="#666" BorderThickness="1" Cursor="Hand" MouseLeftButtonUp="Pvw_Click" Tag="TxtColorWrongBg"/>
+                    <Border  Grid.Row="3" Grid.Column="2" x:Name="PvwColorWrongBg" Margin="6,4,0,4" BorderBrush="{DynamicResource GridLine}" BorderThickness="1" Cursor="Hand" MouseLeftButtonUp="Pvw_Click" Tag="TxtColorWrongBg"/>
 
                     <TextBlock Grid.Row="4" Grid.Column="0" Text="对照区 背景"   VerticalAlignment="Center"/>
                     <ui:TextBox Grid.Row="4" Grid.Column="1" x:Name="TxtColorCompareBg" Margin="0,4" VerticalContentAlignment="Center"/>
-                    <Border  Grid.Row="4" Grid.Column="2" x:Name="PvwColorCompareBg" Margin="6,4,0,4" BorderBrush="#666" BorderThickness="1" Cursor="Hand" MouseLeftButtonUp="Pvw_Click" Tag="TxtColorCompareBg"/>
+                    <Border  Grid.Row="4" Grid.Column="2" x:Name="PvwColorCompareBg" Margin="6,4,0,4" BorderBrush="{DynamicResource GridLine}" BorderThickness="1" Cursor="Hand" MouseLeftButtonUp="Pvw_Click" Tag="TxtColorCompareBg"/>
 
                     <TextBlock Grid.Row="5" Grid.Column="0" Text="输入区 背景"   VerticalAlignment="Center"/>
                     <ui:TextBox Grid.Row="5" Grid.Column="1" x:Name="TxtColorInputBg" Margin="0,4" VerticalContentAlignment="Center"/>
-                    <Border  Grid.Row="5" Grid.Column="2" x:Name="PvwColorInputBg" Margin="6,4,0,4" BorderBrush="#666" BorderThickness="1" Cursor="Hand" MouseLeftButtonUp="Pvw_Click" Tag="TxtColorInputBg"/>
+                    <Border  Grid.Row="5" Grid.Column="2" x:Name="PvwColorInputBg" Margin="6,4,0,4" BorderBrush="{DynamicResource GridLine}" BorderThickness="1" Cursor="Hand" MouseLeftButtonUp="Pvw_Click" Tag="TxtColorInputBg"/>
 
                     <StackPanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="一键预设：" VerticalAlignment="Center" Margin="0,0,4,0"/>
