@@ -298,21 +298,24 @@
                 <RowDefinition Height="3*" MinHeight="220"/>
             </Grid.RowDefinitions>
 
-            <!-- 对照区 -->
-            <RichTextBox Grid.Row="0" x:Name="RtbCompare" IsReadOnly="True"
-                         Style="{x:Null}"
-                         BorderThickness="0" Background="{DynamicResource CompareBG}" Foreground="{DynamicResource CompareFG}"
-                         FontSize="22" FontFamily="宋体"
-                         VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled"
-                         Padding="0">
-                <FlowDocument PagePadding="0">
-                    <Paragraph Margin="0">
-                        <Run Text="欢迎使用州州跟打器！打开「菜单 → 功能 → 内部测速」选一篇文章，即可开始跟打。"/>
-                        <LineBreak/>
-                        <Run Text="跟打时按 F3 可随时重打本篇；点「菜单 → 暂停」或让输入框失去焦点，计时会自动暂停。"/>
-                    </Paragraph>
-                </FlowDocument>
-            </RichTextBox>
+            <!-- 对照区（卡片化：圆角纸面 + 内边距 + 四周留白，仅视觉，阅读逻辑不变） -->
+            <Border Grid.Row="0" CornerRadius="6" Background="{DynamicResource CompareBG}"
+                    Margin="6,4,6,2" ClipToBounds="True">
+                <RichTextBox x:Name="RtbCompare" IsReadOnly="True"
+                             Style="{x:Null}"
+                             BorderThickness="0" Background="Transparent" Foreground="{DynamicResource CompareFG}"
+                             FontSize="22" FontFamily="宋体"
+                             VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled"
+                             Padding="10,8">
+                    <FlowDocument PagePadding="0">
+                        <Paragraph Margin="0">
+                            <Run Text="欢迎使用州州跟打器！打开「菜单 → 功能 → 内部测速」选一篇文章，即可开始跟打。"/>
+                            <LineBreak/>
+                            <Run Text="跟打时按 F3 可随时重打本篇；点「菜单 → 暂停」或让输入框失去焦点，计时会自动暂停。"/>
+                        </Paragraph>
+                    </FlowDocument>
+                </RichTextBox>
+            </Border>
 
             <GridSplitter Grid.Row="1" Height="4" HorizontalAlignment="Stretch"
                           ResizeDirection="Rows" ResizeBehavior="PreviousAndNext" ShowsPreview="True"
@@ -403,17 +406,19 @@
                 </Grid>
             </Border>
 
-            <!-- 输入区（去 HC 样式以消除内置 padding） -->
-            <Border Grid.Row="1" BorderBrush="{DynamicResource InputBorderBG}" BorderThickness="0,2,0,2">
+            <!-- 输入区（卡片化：圆角 + 强调色描边 + 内边距，仅视觉，输入逻辑不变） -->
+            <Border Grid.Row="1" CornerRadius="6" Background="{DynamicResource InputBG}"
+                    BorderBrush="{DynamicResource InputBorderBG}" BorderThickness="1.5"
+                    Margin="6,2,6,4" ClipToBounds="True">
                 <TextBox x:Name="TbxInput"
                          Style="{x:Null}"
                          IsReadOnly="True"
-                         BorderThickness="0" Background="{DynamicResource InputBG}" Foreground="{DynamicResource InputFG}"
+                         BorderThickness="0" Background="Transparent" Foreground="{DynamicResource InputFG}"
                          CaretBrush="{DynamicResource InputCaretBG}"
                          FontSize="18" FontFamily="宋体"
                          AcceptsReturn="False" TextWrapping="Wrap"
                          VerticalScrollBarVisibility="Visible"
-                         Padding="0"/>
+                         Padding="10,6"/>
             </Border>
 
             <!-- 历史 Grid：原版无表头，第 0 行作为表头加粗显示 -->
