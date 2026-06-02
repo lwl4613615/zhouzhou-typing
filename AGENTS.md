@@ -37,21 +37,30 @@ $msbuild = "C:\Program Files\Microsoft Visual Studio\18\Enterprise\MSBuild\Curre
 
 ## 发布 / 部署约定
 
-部署目录：`D:\gdq\exe`。每次部署用以下命令（排除用户数据，避免覆盖历史/设置）：
+> 路径按机器而异，不要写死。下面用变量表示，换机器只改这两行：
+> - `$repo`   = 仓库根（本机当前克隆位置，如 `git rev-parse --show-toplevel`）
+> - `$deploy` = 部署目录（本机自定，示例机为 `D:\gdq\exe`）
+
+部署命令（排除用户数据，避免覆盖历史/设置）：
 
 ```powershell
+$repo   = (git rev-parse --show-toplevel)        # 仓库根
+$deploy = 'D:\gdq\exe'                            # 部署目录（换机器改这里）
+
 Get-Process newgdq -ErrorAction SilentlyContinue | Stop-Process -Force
 Start-Sleep -Milliseconds 300
-Copy-Item 'D:\gdq\zhouzhou-typing\newgdq\bin\Release\*' 'D:\gdq\exe' -Recurse -Force -Exclude 'history.db','settings.json','settings.json.bak','newgdq.log'
-Start-Process 'D:\gdq\exe\newgdq.exe'
+Copy-Item "$repo\newgdq\bin\Release\*" $deploy -Recurse -Force -Exclude 'history.db','settings.json','settings.json.bak','newgdq.log'
+Copy-Item "$repo\更新说明.txt" $deploy -Force     # 更新说明随程序一起发布
+Start-Process "$deploy\newgdq.exe"
 ```
 
-**默认约定：每次发布更新，都要在部署目录 `D:\gdq\exe` 生成 / 更新 `更新说明.txt`。**
+**默认约定：更新说明随程序版本一起走。**
 
+- 仓库根维护一份 `更新说明.txt`，**纳入 Git 仓库**，每次发布更新时同步刷新内容
+- 部署时把它一并复制进部署目录（上面的命令已含这一步）
 - 内容含：版本号 + 日期、本次更新分组要点（新功能 / 修复 / 其他）、常用快捷键速查
 - 面向最终用户，用中文白话，不写代码细节
 - 版本号与 `AssemblyInfo.cs` 保持一致
-- 该文件只放在部署目录，不纳入 Git 仓库
 
 ---
 
