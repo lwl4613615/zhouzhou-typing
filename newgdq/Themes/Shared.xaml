@@ -15,6 +15,8 @@
     <!-- 卡片容器：圆角 + 主题面板底色 + 内边距 -->
     <Style x:Key="CardStyle" TargetType="Border">
         <Setter Property="Background" Value="{DynamicResource CellBG}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource GridLine}"/>
+        <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="8"/>
         <Setter Property="Padding" Value="14,12"/>
         <Setter Property="Margin" Value="0,0,0,10"/>
@@ -82,6 +84,14 @@
         <Setter Property="Foreground" Value="{DynamicResource ValueFG}"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="RowHeight" Value="26"/>
+    </Style>
+
+    <!-- 全局 DataGrid 网格线：子窗体的 DataGrid 多数只设了 GridLinesVisibility 却没指定
+         线刷，WPF-UI 主题下默认线刷不可见导致"线条消失"。此处统一补上主题网格线色。
+         只设网格线刷，不动其它外观；窗口内联显式设置仍会覆盖本隐式样式。 -->
+    <Style TargetType="DataGrid">
+        <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource GridLine}"/>
+        <Setter Property="VerticalGridLinesBrush" Value="{DynamicResource GridLine}"/>
     </Style>
 
 </ResourceDictionary>
