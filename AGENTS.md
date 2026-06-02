@@ -64,6 +64,45 @@ Start-Process "$deploy\newgdq.exe"
 
 ---
 
+## 双轨发布（4.8 与 net10 并行维护）
+
+项目有两条长期并行的发布线，分歧只在 **UI 外壳 + 工程文件**，**业务逻辑层共享**：
+
+| 线 | 分支 | 工程 | UI 框架 | tag 前缀 | 本地部署目录 |
+|---|---|---|---|---|---|
+| 稳定线（老机器兼容） | `main` | 老式 csproj + packages.config | HandyControl（`Growl`） | `v0.*` | `D:\gdq\48EXE` |
+| 主力线（现代 UI） | `net10` | SDK 式 + PackageReference | WPF-UI（`Toast` / `FluentWindow`） | `v1.*` | `D:\gdq\net10exe` |
+
+### 维护工作流（单向流动：net10 → main）
+
+- **新功能/修复一律先在 `net10` 做**，验证、提交后再按需挑回 `main`。
+- **纯逻辑改动**（`Services/` `Models/` 判错/计时/统计/IME 剥离）→ `git cherry-pick <hash>`，冲突一般只落在 UI 控件名/窗口基类那几行。
+- **涉及 UI 的改动**（窗口、XAML、提示控件）→ **不要 cherry-pick**，两边各写各的（一边 `Growl`、一边 `Toast`）。
+- 想让 cherry-pick 命中率更高：把纯逻辑尽量下沉到 `Services/`，UI 事件里只调用 Service。
+- **绝不反向 merge**（main → net10），避免工程文件互相污染。
+
+### CI 自动发布（GitHub Actions，`.github/workflows/build.yml`）
+
+- **两分支各有一份适配自己的 `build.yml`**：CI 跑 tag 时 checkout 的是 **tag 所指 commit 的 workflow**，所以互不干扰。
+  - `main` 版：`microsoft/setup-msbuild` + `nuget restore packages.config` + `msbuild`，触发 `v0.*`。
+  - `net10` 版：`actions/setup-dotnet`（10.0.x）+ `dotnet restore/build`，触发 `v1.*`。
+- 推送 `v*` tag → CI 自动编译、打包 zip（含 README/LICENSE/NOTICE，剔除 pdb/xml）、创建 Release 并上传附件、`generate_release_notes` 自动生成说明。
+
+### 发版步骤（每条线相同，只是 tag 前缀不同）
+
+1. bump `newgdq/Properties/AssemblyInfo.cs` 的 `AssemblyVersion` / `AssemblyFileVersion`（main 走 `0.x`、net10 走 `1.x`）。
+2. 本地编 Release 验证（见上方各自构建命令）+ 部署到对应目录。
+   > ⚠️ **切分支后先清 `newgdq/obj`**：net10 的 SDK restore 产物（`project.assets.json`）会让 4.8 的 MSBuild 报 *"does not reference .NETFramework v4.8"*。切到 main 编译前先 `Remove-Item newgdq\obj -Recurse -Force`，再 `msbuild /t:Restore,Rebuild`。
+3. 提交 → `git push origin <branch>` → 打 tag（`git tag -a v1.0.0 -m "..."`）→ `git push origin <tag>`。
+4. CI 自动出 Release。核对：`gh release list`、`gh release view <tag> --json assets,url`。
+
+### 运行时说明
+
+- net10 包是**框架依赖发布**，用户机器需自行安装 **.NET 10 Desktop Runtime**（程序启动时系统会给安装提示）。**不打包 self-contained**，保持 zip 体积小。
+- 4.8 包面向无 .NET Core 运行时的老机器（Win7/旧 Win10），开箱即用。
+
+---
+
 ## 已知技术坑
 
 ### 1. IME 中文判错（WPF/TSF 合成串污染 TextBox.Text）
