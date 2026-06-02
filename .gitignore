@@ -29,3 +29,5 @@ Thumbs.db
 # Memory tool（个人笔记，不发开源）
 /memories/
 *.zip
+
+shot_*.png

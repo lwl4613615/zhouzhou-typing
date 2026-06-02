@@ -194,7 +194,7 @@
                             <CheckBox  Grid.Row="6" Grid.Column="1" x:Name="ChkPresetOneEnd"     Content="一句结束（文章模式遇标点提前断段）" VerticalAlignment="Center"/>
                             <CheckBox  Grid.Row="7" Grid.Column="1" x:Name="ChkPresetTickOut"    Content="自动去空格"  VerticalAlignment="Center"/>
 
-                            <TextBlock Grid.Row="8" Grid.ColumnSpan="2" Foreground="#888" TextWrapping="Wrap" Margin="0,12,0,0"
+                            <TextBlock Grid.Row="8" Grid.ColumnSpan="2" Foreground="{DynamicResource LabelFG}" TextWrapping="Wrap" Margin="0,12,0,0"
                                        Text="预设保存在 settings.json 内，整个程序文件夹拷哪都跟着走。&#10;选中左侧列表后可点 应用到当前 → 当前面板（前 3 个 Tab）的参数会被本预设覆盖，然后开启发文即可。"/>
                         </Grid>
                     </DockPanel>
