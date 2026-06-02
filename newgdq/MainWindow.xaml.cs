@@ -271,6 +271,14 @@ namespace newgdq
             NavScroll?.ScrollToVerticalOffset(e.NewValue);
         }
 
+        // 左侧导航：收起 / 展开
+        private void NavToggle_Click(object sender, RoutedEventArgs e)
+        {
+            bool collapsed = NavRail.Visibility != Visibility.Visible;
+            NavRail.Visibility = collapsed ? Visibility.Visible : Visibility.Collapsed;
+            NavExpandStrip.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
+        }
+
         // ===== 界面缩放菜单（实际缩放逻辑在 Services.UiScaleManager） =====
 
         private void UpdateScaleMenuChecks()
@@ -1514,7 +1522,6 @@ namespace newgdq
                 TxtTheoryMc.Text = "-";
                 ClearPhraseUnderlines();
                 RefreshBmTips();
-                Services.Toast.Info("单字模式");
                 return;
             }
             ApplyPhraseUnderlines();

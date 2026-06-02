@@ -205,6 +205,34 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <!-- 紧凑图标按钮（导航折叠/展开） -->
+        <Style x:Key="NavIconBtn" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource LabelFG}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" CornerRadius="6"
+                                Background="{TemplateBinding Background}"
+                                TextElement.Foreground="{TemplateBinding Foreground}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="{DynamicResource MarkerHoverBG}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource AccentFG}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.7"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
 
@@ -239,13 +267,27 @@
             </tb:TaskbarIcon.ContextMenu>
         </tb:TaskbarIcon>
 
+        <!-- 1a. 折叠态展开条：导航隐藏时显示，点击重新展开 -->
+        <Border DockPanel.Dock="Left" x:Name="NavExpandStrip" Width="36" Visibility="Collapsed"
+                Background="{DynamicResource PanelBG}"
+                BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,1,0">
+            <Button Style="{StaticResource NavIconBtn}" VerticalAlignment="Top" Margin="0,12,0,0"
+                    Click="NavToggle_Click" ToolTip="展开导航栏">
+                <ui:SymbolIcon Symbol="PanelLeftExpand24" FontSize="18"/>
+            </Button>
+        </Border>
+
         <!-- 1. 左侧导航栏（D/E 现代化重构：顶部菜单 → 左侧导航；复用全部原 Click 处理器） -->
         <Border DockPanel.Dock="Left" x:Name="NavRail" Width="168"
                 Background="{DynamicResource PanelBG}"
                 BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,1,0">
             <DockPanel LastChildFill="True">
                 <!-- 顶部品牌头 -->
-                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="14,12,12,6">
+                <DockPanel DockPanel.Dock="Top" Margin="14,12,8,6" LastChildFill="True">
+                    <Button DockPanel.Dock="Right" Style="{StaticResource NavIconBtn}"
+                            VerticalAlignment="Top" Click="NavToggle_Click" ToolTip="收起导航栏">
+                        <ui:SymbolIcon Symbol="PanelLeftContract24" FontSize="18"/>
+                    </Button>
                     <Border Width="32" Height="32" CornerRadius="8" Background="{DynamicResource AccentFG}">
                         <ui:SymbolIcon Symbol="Keyboard24" FontSize="18" Foreground="#1A1F2B"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -256,7 +298,7 @@
                         <TextBlock Text="中文跟打练习" FontSize="10" Opacity="0.6"
                                    Foreground="{DynamicResource LabelFG}"/>
                     </StackPanel>
-                </StackPanel>
+                </DockPanel>
 
                 <!-- 底部固定区：外观 + 退出 -->
                 <Border DockPanel.Dock="Bottom" BorderBrush="{DynamicResource GridLine}"
