@@ -7,10 +7,11 @@
         FontFamily="微软雅黑" FontSize="12"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         Background="{DynamicResource RegionBrush}"
+        Foreground="{DynamicResource PrimaryTextBrush}"
         ExtendsContentIntoTitleBar="True"
         WindowBackdropType="None"
         ResizeMode="NoResize">
-    <Grid>
+    <Grid Background="{DynamicResource RegionBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>

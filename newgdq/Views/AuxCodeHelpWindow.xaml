@@ -6,6 +6,7 @@
         Icon="pack://application:,,,/Resources/myicon.ico"
         FontFamily="微软雅黑" FontSize="13"
         Background="{DynamicResource RegionBrush}"
+        Foreground="{DynamicResource PrimaryTextBrush}"
         ExtendsContentIntoTitleBar="True"
         WindowBackdropType="None"
         WindowStartupLocation="CenterOwner">

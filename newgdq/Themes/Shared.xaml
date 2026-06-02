@@ -7,12 +7,10 @@
          本字典只加载一次，不随主题切换被移除（见 App.xaml.cs ApplyTheme）。
          ============================================================ -->
 
-    <!-- 全局兜底：裸 TextBlock 默认前景跟随主题（修复深色下黑字看不见）。
-         TextBlock.Foreground 默认黑且不继承父级，未显式设色的标签会糊在深底里。
-         此隐式样式只命中"未指定 Style 的 TextBlock"，显式设了 Foreground 的会覆盖它。 -->
-    <Style TargetType="TextBlock">
-        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
-    </Style>
+    <!-- 注意：不要在此放无 x:Key 的隐式 Style（如 TargetType="TextBlock"）。
+         全局隐式 TextBlock 样式会命中 WPF-UI 按钮/下拉框模板内部由 ContentPresenter
+         生成的文字，改写模板本应使用的前景色，导致按钮/可编辑下拉"幽灵化"。
+         裸 TextBlock 的默认前景应由每个窗口根节点的 Foreground（继承属性）提供。 -->
 
     <!-- 卡片容器：圆角 + 主题面板底色 + 内边距 -->
     <Style x:Key="CardStyle" TargetType="Border">
