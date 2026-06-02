@@ -537,21 +537,22 @@
                 <Border Grid.Row="1" Background="{DynamicResource CellBG}" BorderBrush="{DynamicResource GridLine}" BorderThickness="0,1,0,0">
                     <Grid x:Name="FootGrid">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="38"/>
-                            <ColumnDefinition Width="74"/>
-                            <ColumnDefinition Width="44"/>
-                            <ColumnDefinition Width="58"/>
-                            <ColumnDefinition Width="58"/>
-                            <ColumnDefinition Width="58"/>
-                            <ColumnDefinition Width="48"/>
-                            <ColumnDefinition Width="48"/>
-                            <ColumnDefinition Width="48"/>
-                            <ColumnDefinition Width="50"/>
-                            <ColumnDefinition Width="50"/>
-                            <ColumnDefinition Width="46"/>
-                            <ColumnDefinition Width="46"/>
-                            <ColumnDefinition Width="62"/>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="38*"/>
+                            <ColumnDefinition Width="74*"/>
+                            <ColumnDefinition Width="44*"/>
+                            <ColumnDefinition Width="58*"/>
+                            <ColumnDefinition Width="58*"/>
+                            <ColumnDefinition Width="58*"/>
+                            <ColumnDefinition Width="48*"/>
+                            <ColumnDefinition Width="48*"/>
+                            <ColumnDefinition Width="48*"/>
+                            <ColumnDefinition Width="50*"/>
+                            <ColumnDefinition Width="50*"/>
+                            <ColumnDefinition Width="46*"/>
+                            <ColumnDefinition Width="46*"/>
+                            <ColumnDefinition Width="62*"/>
+                            <ColumnDefinition Width="58*"/>
+                            <ColumnDefinition Width="52*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" x:Name="TxtFootLabel" Text="今日"  Foreground="{DynamicResource AccentFG}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" Cursor="Hand" ToolTip="点击查看成绩趋势（按天/周/月）" MouseLeftButtonUp="TxtFootLabel_Click"/>
                         <TextBlock Grid.Column="1" x:Name="TxtFootTime"   Text="00:00:00" Foreground="{DynamicResource AccentFG}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
