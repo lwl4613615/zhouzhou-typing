@@ -23,19 +23,21 @@
             <Setter Property="Foreground" Value="{DynamicResource LabelFG}"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Opacity" Value="0.75"/>
         </Style>
         <Style x:Key="LblValue" TargetType="TextBlock">
             <Setter Property="Foreground" Value="{DynamicResource ValueFG}"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
         </Style>
         <!-- 关键数值（速度/击键/码长）：放大 + 强调色，提升视觉层次 -->
         <Style x:Key="LblValueKey" TargetType="TextBlock" BasedOn="{StaticResource LblValue}">
             <Setter Property="Foreground" Value="{DynamicResource AccentFG}"/>
-            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontSize" Value="19"/>
+            <Setter Property="FontWeight" Value="Bold"/>
         </Style>
         <!-- 段号刻度尺数字 -->
         <Style x:Key="TickNum" TargetType="TextBlock">
@@ -241,16 +243,6 @@
                            Cursor="Hand" ToolTip="点击复制微信号"
                            MouseLeftButtonUp="TxtSign_LeftClick"/>
 
-                <!-- 列间分隔（细线） -->
-                <Border Grid.RowSpan="2" Grid.Column="0" BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,1,0"/>
-                <Border Grid.RowSpan="2" Grid.Column="1" BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,1,0"/>
-                <Border Grid.RowSpan="2" Grid.Column="2" BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,1,0"/>
-                <Border Grid.RowSpan="2" Grid.Column="3" BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,1,0"/>
-                <Border Grid.RowSpan="2" Grid.Column="4" BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,1,0"/>
-                <Border Grid.RowSpan="2" Grid.Column="5" BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,1,0"/>
-                <Border Grid.RowSpan="2" Grid.Column="6" BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,1,0"/>
-                <!-- 上下两行之间横线 -->
-                <Border Grid.Row="0" Grid.ColumnSpan="8" BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,0,1" VerticalAlignment="Bottom"/>
             </Grid>
         </Border>
 
@@ -397,15 +389,6 @@
                     <TextBlock Grid.Row="1" Grid.Column="6" Text="左:右" Style="{StaticResource LblText}" FontSize="10"/>
                     <TextBlock Grid.Row="1" Grid.Column="7" Text="理论码长" Style="{StaticResource LblText}" FontSize="10"/>
                     <TextBlock Grid.Row="1" Grid.Column="8" Text="今日/累计/天/记录" Style="{StaticResource LblText}" FontSize="10" HorizontalAlignment="Right" Margin="0,0,8,0"/>
-                    <Border Grid.RowSpan="2" Grid.Column="0" BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,1,0"/>
-                    <Border Grid.RowSpan="2" Grid.Column="1" BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,1,0"/>
-                    <Border Grid.RowSpan="2" Grid.Column="2" BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,1,0"/>
-                    <Border Grid.RowSpan="2" Grid.Column="3" BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,1,0"/>
-                    <Border Grid.RowSpan="2" Grid.Column="4" BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,1,0"/>
-                    <Border Grid.RowSpan="2" Grid.Column="5" BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,1,0"/>
-                    <Border Grid.RowSpan="2" Grid.Column="6" BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,1,0"/>
-                    <Border Grid.RowSpan="2" Grid.Column="7" BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,1,0"/>
-                    <Border Grid.Row="0" Grid.ColumnSpan="9" BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,0,1" VerticalAlignment="Bottom"/>
                 </Grid>
             </Border>
 
