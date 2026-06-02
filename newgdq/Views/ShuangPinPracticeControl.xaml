@@ -14,51 +14,62 @@
         <!-- 顶部工具条 -->
         <Border DockPanel.Dock="Top" Background="{DynamicResource CellBG}"
                 BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,0,1" Padding="10,6">
-            <DockPanel LastChildFill="False">
-                <TextBlock DockPanel.Dock="Left" Text="键位练习"
-                           Foreground="{DynamicResource AccentFG}" FontWeight="Bold" FontSize="15"
-                           VerticalAlignment="Center" Margin="0,0,16,0"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-                <TextBlock DockPanel.Dock="Left" Text="方案" Foreground="{DynamicResource LabelFG}"
-                           VerticalAlignment="Center" Margin="0,0,4,0"/>
-                <ComboBox DockPanel.Dock="Left" x:Name="CmbScheme" Width="100" VerticalAlignment="Center"
-                          SelectionChanged="CmbScheme_SelectionChanged" Margin="0,0,16,0">
-                    <ComboBoxItem Content="小鹤双拼"/>
-                    <ComboBoxItem Content="自然码"/>
-                    <ComboBoxItem Content="五笔字根"/>
-                </ComboBox>
+                <!-- 左侧控件：窗口偏窄时自动换行，绝不裁切 -->
+                <WrapPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="键位练习"
+                               Foreground="{DynamicResource AccentFG}" FontWeight="Bold" FontSize="15"
+                               VerticalAlignment="Center" Margin="0,2,16,2"/>
 
-                <TextBlock DockPanel.Dock="Left" Text="范围" Foreground="{DynamicResource LabelFG}"
-                           VerticalAlignment="Center" Margin="0,0,4,0"/>
-                <ComboBox DockPanel.Dock="Left" x:Name="CmbMode" Width="90" VerticalAlignment="Center"
-                          SelectionChanged="CmbMode_SelectionChanged" Margin="0,0,16,0">
-                    <ComboBoxItem Content="混合" IsSelected="True"/>
-                    <ComboBoxItem Content="仅声母"/>
-                    <ComboBoxItem Content="仅韵母"/>
-                    <ComboBoxItem Content="简单字"/>
-                </ComboBox>
+                    <TextBlock Text="方案" Foreground="{DynamicResource LabelFG}"
+                               VerticalAlignment="Center" Margin="0,2,4,2"/>
+                    <ComboBox x:Name="CmbScheme" Width="100" VerticalAlignment="Center"
+                              SelectionChanged="CmbScheme_SelectionChanged" Margin="0,2,16,2">
+                        <ComboBoxItem Content="小鹤双拼"/>
+                        <ComboBoxItem Content="自然码"/>
+                        <ComboBoxItem Content="五笔字根"/>
+                    </ComboBox>
 
-                <CheckBox DockPanel.Dock="Left" x:Name="ChkHint" Content="显示提示键"
-                          Foreground="{DynamicResource ValueFG}" VerticalAlignment="Center"
-                          IsChecked="True" Margin="0,0,16,0"
-                          Checked="ChkHint_Changed" Unchecked="ChkHint_Changed"/>
+                    <TextBlock Text="范围" Foreground="{DynamicResource LabelFG}"
+                               VerticalAlignment="Center" Margin="0,2,4,2"/>
+                    <ComboBox x:Name="CmbMode" Width="90" VerticalAlignment="Center"
+                              SelectionChanged="CmbMode_SelectionChanged" Margin="0,2,16,2">
+                        <ComboBoxItem Content="混合" IsSelected="True"/>
+                        <ComboBoxItem Content="仅声母"/>
+                        <ComboBoxItem Content="仅韵母"/>
+                        <ComboBoxItem Content="简单字"/>
+                    </ComboBox>
 
-                <CheckBox DockPanel.Dock="Left" x:Name="ChkSound" Content="声音"
-                          Foreground="{DynamicResource ValueFG}" VerticalAlignment="Center"
-                          IsChecked="True" Margin="0,0,16,0"
-                          Checked="ChkSound_Changed" Unchecked="ChkSound_Changed"/>
+                    <CheckBox x:Name="ChkHint" Content="显示提示键"
+                              Foreground="{DynamicResource ValueFG}" VerticalAlignment="Center"
+                              IsChecked="True" Margin="0,2,16,2"
+                              Checked="ChkHint_Changed" Unchecked="ChkHint_Changed"/>
 
-                <CheckBox DockPanel.Dock="Left" x:Name="ChkHeat" Content="热力图"
-                          Foreground="{DynamicResource ValueFG}" VerticalAlignment="Center"
-                          ToolTip="按各键错误率给键盘上色：越红越易错"
-                          IsChecked="False" Margin="0,0,16,0"
-                          Checked="ChkHeat_Changed" Unchecked="ChkHeat_Changed"/>
+                    <CheckBox x:Name="ChkSound" Content="声音"
+                              Foreground="{DynamicResource ValueFG}" VerticalAlignment="Center"
+                              IsChecked="True" Margin="0,2,16,2"
+                              Checked="ChkSound_Changed" Unchecked="ChkSound_Changed"/>
 
-                <Button DockPanel.Dock="Right" Content="返回跟打" Padding="12,3"
-                        Click="BtnBack_Click" VerticalAlignment="Center"/>
-                <Button DockPanel.Dock="Right" Content="重置统计" Padding="12,3" Margin="0,0,8,0"
-                        Click="BtnReset_Click" VerticalAlignment="Center"/>
-            </DockPanel>
+                    <CheckBox x:Name="ChkHeat" Content="热力图"
+                              Foreground="{DynamicResource ValueFG}" VerticalAlignment="Center"
+                              ToolTip="按各键错误率给键盘上色：越红越易错"
+                              IsChecked="False" Margin="0,2,16,2"
+                              Checked="ChkHeat_Changed" Unchecked="ChkHeat_Changed"/>
+                </WrapPanel>
+
+                <!-- 右侧按钮：固定列，始终完整可见 -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">
+                    <Button Content="重置统计" Padding="12,3" Margin="0,0,8,0"
+                            Click="BtnReset_Click" VerticalAlignment="Center"/>
+                    <Button Content="返回跟打" Padding="12,3"
+                            Click="BtnBack_Click" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
         </Border>
 
         <!-- 底部统计条 -->
@@ -84,40 +95,33 @@
             </StackPanel>
         </Border>
 
-        <!-- 中央：题目 + 键盘 -->
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-            <!-- 题目区 -->
-            <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,18,0,8">
-                <TextBlock x:Name="TxtPromptKind" Text="韵母" HorizontalAlignment="Center"
-                           Foreground="{DynamicResource LabelFG}" FontSize="13"/>
-                <TextBlock x:Name="TxtPrompt" Text="—" HorizontalAlignment="Center"
-                           Foreground="{DynamicResource ValueFG}" FontSize="44" FontWeight="Bold"/>
-                <TextBlock x:Name="TxtHint" Text=" " HorizontalAlignment="Center"
-                           Foreground="{DynamicResource AccentFG}" FontSize="14" Margin="0,2,0,0"/>
-            </StackPanel>
-
-            <!-- 虚拟键盘 + 矢量双手（可滚动，避免窗口偏矮时第一行键被裁） -->
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
-                          HorizontalScrollBarVisibility="Disabled">
-                <StackPanel VerticalAlignment="Top" HorizontalAlignment="Center"
-                            Margin="0,4,0,12">
-                    <StackPanel x:Name="KeyboardHost" HorizontalAlignment="Center"/>
-                    <views:FingerHandsControl x:Name="Hands" Width="380" Height="170"
-                                              Margin="0,14,0,0" HorizontalAlignment="Center"/>
+        <!-- 中央：题目 + 键盘（整体等比缩放，任意窗口尺寸都完整显示，无滚动条裁切） -->
+        <Viewbox Stretch="Uniform" StretchDirection="Both" Margin="12,12,12,12">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <!-- 题目区 -->
+                <StackPanel HorizontalAlignment="Center" Margin="0,0,0,8">
+                    <TextBlock x:Name="TxtPromptKind" Text="韵母" HorizontalAlignment="Center"
+                               Foreground="{DynamicResource LabelFG}" FontSize="13"/>
+                    <TextBlock x:Name="TxtPrompt" Text="—" HorizontalAlignment="Center"
+                               Foreground="{DynamicResource ValueFG}" FontSize="44" FontWeight="Bold"/>
+                    <TextBlock x:Name="TxtHint" Text=" " HorizontalAlignment="Center"
+                               Foreground="{DynamicResource AccentFG}" FontSize="14" Margin="0,2,0,0"/>
                 </StackPanel>
-            </ScrollViewer>
-        </Grid>
+
+                <!-- 虚拟键盘 + 矢量双手 -->
+                <StackPanel x:Name="KeyboardHost" HorizontalAlignment="Center"/>
+                <views:FingerHandsControl x:Name="Hands" Width="380" Height="170"
+                                          Margin="0,14,0,0" HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Viewbox>
     </DockPanel>
 
     <!-- 练习小结：面板内淡入卡片（覆盖整个控件，半透明遮罩 + 居中卡片） -->
     <Grid x:Name="SummaryOverlay" Visibility="Collapsed"
           Background="#B0000000" Opacity="0">
-        <Border Width="360" HorizontalAlignment="Center" VerticalAlignment="Center"
+        <Viewbox Stretch="Uniform" StretchDirection="DownOnly" Margin="16"
+                 HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Border Width="360"
                 CornerRadius="12" Background="{DynamicResource PanelBG}"
                 BorderBrush="{DynamicResource AccentFG}" BorderThickness="1"
                 Padding="0" SnapsToDevicePixels="True">
@@ -181,6 +185,7 @@
                         Background="{DynamicResource AccentFG}" Foreground="White" BorderThickness="0"/>
             </StackPanel>
         </Border>
+        </Viewbox>
     </Grid>
     </Grid>
 </UserControl>
