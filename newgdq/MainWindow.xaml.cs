@@ -1735,8 +1735,7 @@ namespace newgdq
                 Services.Toast.Info("当前没有可分析的跟打数据，先打一段试试");
                 return;
             }
-            var win = new Views.ReportWindow(_session, this);
-            win.Show();
+            ShowAnalysis(new Views.ReportView(_session), "跟打报告");
         }
 
         private void MenuItem_OpenJjCheck_Click(object sender, RoutedEventArgs e)
