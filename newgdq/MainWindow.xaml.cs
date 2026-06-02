@@ -265,6 +265,12 @@ namespace newgdq
             }
         }
 
+        // 左侧导航：悬浮滚动条拖动 → 同步滚动内容
+        private void NavScrollBar_Scroll(object sender, System.Windows.Controls.Primitives.ScrollEventArgs e)
+        {
+            NavScroll?.ScrollToVerticalOffset(e.NewValue);
+        }
+
         // ===== 界面缩放菜单（实际缩放逻辑在 Services.UiScaleManager） =====
 
         private void UpdateScaleMenuChecks()

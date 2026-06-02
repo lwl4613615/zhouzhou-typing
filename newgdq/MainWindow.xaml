@@ -9,7 +9,7 @@
         xmlns:local="clr-namespace:newgdq"
         xmlns:views="clr-namespace:newgdq.Views"
         mc:Ignorable="d"
-        Title="州州跟打器" Height="700" Width="1000" MinHeight="620" MinWidth="980"
+        Title="州州跟打器" Height="700" Width="1040" MinHeight="620" MinWidth="1040"
         FontFamily="微软雅黑" FontSize="12"
         Icon="pack://application:,,,/Resources/myicon.ico"
         Background="{DynamicResource RegionBrush}"
@@ -277,12 +277,11 @@
                     </StackPanel>
                 </Border>
 
-                <!-- 中间滚动区 -->
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                    <ScrollViewer.Resources>
-                        <Style TargetType="ScrollBar" BasedOn="{StaticResource SlimScrollBar}"/>
-                    </ScrollViewer.Resources>
-                <StackPanel Margin="0,2,0,8">
+                <!-- 中间滚动区：滚动条悬浮覆盖，不占布局宽度，hover 才淡入 -->
+                <Grid x:Name="NavScrollHost">
+                    <ScrollViewer x:Name="NavScroll" VerticalScrollBarVisibility="Hidden"
+                                  HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Margin="0,2,0,8">
                     <!-- 主操作 CTA -->
                     <Button Style="{StaticResource NavCtaBtn}" Click="MenuItem_OpenSendText_Click" ToolTip="F2">
                         <StackPanel Orientation="Horizontal">
@@ -514,7 +513,40 @@
                         </Button.ContextMenu>
                     </Button>
                 </StackPanel>
-            </ScrollViewer>
+                    </ScrollViewer>
+                    <!-- 悬浮滚动条：右贴边、不占布局、hover 才淡入 -->
+                    <ScrollBar x:Name="NavScrollBar" Orientation="Vertical"
+                               HorizontalAlignment="Right" Width="8" Margin="0,2,1,2"
+                               Minimum="0" Maximum="{Binding ScrollableHeight, ElementName=NavScroll}"
+                               ViewportSize="{Binding ViewportHeight, ElementName=NavScroll}"
+                               Value="{Binding VerticalOffset, ElementName=NavScroll, Mode=OneWay}"
+                               Scroll="NavScrollBar_Scroll" Opacity="0">
+                        <ScrollBar.Style>
+                            <Style TargetType="ScrollBar" BasedOn="{StaticResource SlimScrollBar}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsMouseOver, ElementName=NavRail}" Value="True">
+                                        <DataTrigger.EnterActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                     To="1" Duration="0:0:0.15"/>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </DataTrigger.EnterActions>
+                                        <DataTrigger.ExitActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                     To="0" Duration="0:0:0.25"/>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </DataTrigger.ExitActions>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ScrollBar.Style>
+                    </ScrollBar>
+                </Grid>
             </DockPanel>
         </Border>
 
