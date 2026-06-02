@@ -9,7 +9,7 @@
         xmlns:local="clr-namespace:newgdq"
         xmlns:views="clr-namespace:newgdq.Views"
         mc:Ignorable="d"
-        Title="州州跟打器" Height="700" Width="1040" MinHeight="620" MinWidth="1040"
+        Title="州州跟打器" Height="700" Width="1120" MinHeight="620" MinWidth="1040"
         FontFamily="微软雅黑" FontSize="12"
         Icon="pack://application:,,,/Resources/myicon.ico"
         Background="{DynamicResource RegionBrush}"
@@ -240,7 +240,7 @@
         </tb:TaskbarIcon>
 
         <!-- 1. 左侧导航栏（D/E 现代化重构：顶部菜单 → 左侧导航；复用全部原 Click 处理器） -->
-        <Border DockPanel.Dock="Left" x:Name="NavRail" Width="178"
+        <Border DockPanel.Dock="Left" x:Name="NavRail" Width="168"
                 Background="{DynamicResource PanelBG}"
                 BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,1,0">
             <DockPanel LastChildFill="True">
