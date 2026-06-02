@@ -35,6 +35,26 @@ $msbuild = "C:\Program Files\Microsoft Visual Studio\18\Enterprise\MSBuild\Curre
 
 ---
 
+## 发布 / 部署约定
+
+部署目录：`D:\gdq\exe`。每次部署用以下命令（排除用户数据，避免覆盖历史/设置）：
+
+```powershell
+Get-Process newgdq -ErrorAction SilentlyContinue | Stop-Process -Force
+Start-Sleep -Milliseconds 300
+Copy-Item 'D:\gdq\zhouzhou-typing\newgdq\bin\Release\*' 'D:\gdq\exe' -Recurse -Force -Exclude 'history.db','settings.json','settings.json.bak','newgdq.log'
+Start-Process 'D:\gdq\exe\newgdq.exe'
+```
+
+**默认约定：每次发布更新，都要在部署目录 `D:\gdq\exe` 生成 / 更新 `更新说明.txt`。**
+
+- 内容含：版本号 + 日期、本次更新分组要点（新功能 / 修复 / 其他）、常用快捷键速查
+- 面向最终用户，用中文白话，不写代码细节
+- 版本号与 `AssemblyInfo.cs` 保持一致
+- 该文件只放在部署目录，不纳入 Git 仓库
+
+---
+
 ## 已知技术坑
 
 ### 1. IME 中文判错（WPF/TSF 合成串污染 TextBox.Text）
