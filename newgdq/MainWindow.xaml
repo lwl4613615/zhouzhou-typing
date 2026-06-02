@@ -241,12 +241,8 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <ui:TitleBar Grid.Row="0" x:Name="AppTitleBar" Title="州州跟打器"
-                     Background="{DynamicResource PanelBG}" Height="36">
-            <ui:TitleBar.Icon>
-                <ui:ImageIcon Source="pack://application:,,,/Resources/myicon.ico" Width="18" Height="18"/>
-            </ui:TitleBar.Icon>
-        </ui:TitleBar>
+        <ui:TitleBar Grid.Row="0" x:Name="AppTitleBar" Title=""
+                     Background="{DynamicResource PanelBG}" Height="36"/>
     <DockPanel Grid.Row="1" LastChildFill="True">
 
 
