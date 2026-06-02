@@ -105,6 +105,36 @@ namespace newgdq.Views
             catch { preview.Background = Brushes.Transparent; }
         }
 
+        /// <summary>一键配色预设：只填充跟打区 6 个色值，不改整体主题。
+        /// 顺序：正确前景 / 正确背景 / 错字前景 / 错字背景 / 对照区背景 / 输入区背景。</summary>
+        private void BtnPreset_Click(object sender, RoutedEventArgs e)
+        {
+            string tag = (sender as Button)?.Tag as string;
+            string[] p;
+            switch (tag)
+            {
+                case "eye":      // 护眼：豆沙绿底，柔和前景
+                    p = new[] { "#1B5E20", "#D7E8C8", "#B71C1C", "#F0CFC2", "#E8F0D8", "#E8F0D8" };
+                    break;
+                case "contrast": // 高对比：黑底亮字
+                    p = new[] { "#00E676", "#102010", "#FF5252", "#301010", "#101010", "#101010" };
+                    break;
+                case "dark":     // 暗夜：深灰底
+                    p = new[] { "#7CD992", "#1F2A22", "#FF8A80", "#2A1F1F", "#1E1E1E", "#1E1E1E" };
+                    break;
+                default:         // 默认（与初始一致）
+                    p = new[] { DefRight, DefRightBg, DefWrong, DefWrongBg, DefCmpBg, DefInputBg };
+                    break;
+            }
+            TxtColorRight.Text     = p[0];
+            TxtColorRightBg.Text   = p[1];
+            TxtColorWrong.Text     = p[2];
+            TxtColorWrongBg.Text   = p[3];
+            TxtColorCompareBg.Text = p[4];
+            TxtColorInputBg.Text   = p[5];
+            UpdateAllPreviews();
+        }
+
         /// <summary>颜色预览块点击 → 弹 HandyControl 拾色器，把选中的颜色写回对应 TextBox。
         /// XAML 里给 Border 设 Tag="TxtColorRight" 等，按名字反查 TextBox。</summary>
         private void Pvw_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)

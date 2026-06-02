@@ -48,6 +48,12 @@
                           IsChecked="True" Margin="0,0,16,0"
                           Checked="ChkSound_Changed" Unchecked="ChkSound_Changed"/>
 
+                <CheckBox DockPanel.Dock="Left" x:Name="ChkHeat" Content="热力图"
+                          Foreground="{DynamicResource ValueFG}" VerticalAlignment="Center"
+                          ToolTip="按各键错误率给键盘上色：越红越易错"
+                          IsChecked="False" Margin="0,0,16,0"
+                          Checked="ChkHeat_Changed" Unchecked="ChkHeat_Changed"/>
+
                 <Button DockPanel.Dock="Right" Content="返回跟打" Padding="12,3"
                         Click="BtnBack_Click" VerticalAlignment="Center"/>
                 <Button DockPanel.Dock="Right" Content="重置统计" Padding="12,3" Margin="0,0,8,0"

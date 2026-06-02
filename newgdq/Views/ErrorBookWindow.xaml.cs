@@ -4,6 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using OxyPlot;
+using OxyPlot.Axes;
+using OxyPlot.Series;
 using newgdq.Services;
 
 namespace newgdq.Views
@@ -68,6 +71,98 @@ namespace newgdq.Views
             TxtTitle.Text = totalErr == 0
                 ? "这个范围内没有错字，很稳 ~"
                 : $"共 {totalErr} 次错误 · 涉及 {distinct} 个不同的字";
+
+            BuildChart(stats);
+        }
+
+        /// <summary>右侧 TOP 10 错字横向柱状图（按错次倒序）。</summary>
+        private void BuildChart(IReadOnlyList<ErrorStat> stats)
+        {
+            if (PlotErr == null) return;
+            var top = stats.OrderByDescending(s => s.Count).Take(10).ToList();
+            if (top.Count == 0)
+            {
+                PlotErr.Model = null;
+                PlotErr.Visibility = Visibility.Collapsed;
+                if (TxtChartEmpty != null) TxtChartEmpty.Visibility = Visibility.Visible;
+                return;
+            }
+            PlotErr.Visibility = Visibility.Visible;
+            if (TxtChartEmpty != null) TxtChartEmpty.Visibility = Visibility.Collapsed;
+
+            var fg = (this.FindResource("ValueFG") as System.Windows.Media.SolidColorBrush)?.Color;
+            var axisColor = fg.HasValue
+                ? OxyColor.FromArgb(0x99, fg.Value.R, fg.Value.G, fg.Value.B)
+                : OxyColors.Gray;
+            var textColor = fg.HasValue
+                ? OxyColor.FromRgb(fg.Value.R, fg.Value.G, fg.Value.B)
+                : OxyColors.Gray;
+
+            var model = new PlotModel
+            {
+                PlotAreaBorderColor = OxyColors.Transparent,
+                TextColor    = textColor,
+                TitleColor   = textColor,
+                Background   = OxyColors.Transparent,
+                PlotMargins  = new OxyThickness(0),
+                Padding      = new OxyThickness(0),
+            };
+            var bar = new BarSeries
+            {
+                StrokeColor = OxyColors.Transparent,
+                LabelPlacement = LabelPlacement.Inside,
+                LabelFormatString = "{0}",
+                TextColor = OxyColors.White,
+            };
+            int max = top.Max(s => s.Count);
+            // 表格倒序，柱图从下往上，反转使最高项在顶部
+            var ordered = top.AsEnumerable().Reverse().ToList();
+            foreach (var s in ordered)
+            {
+                double t = max > 0 ? (double)s.Count / max : 0;
+                var col = OxyColor.FromRgb(
+                    (byte)(0x42 + (0xEF - 0x42) * t),
+                    (byte)(0xC3 + (0x44 - 0xC3) * t),
+                    (byte)(0x6E + (0x36 - 0x6E) * t));
+                bar.Items.Add(new BarItem { Value = s.Count, Color = col });
+            }
+
+            var categoryAxis = new CategoryAxis
+            {
+                Position = AxisPosition.Left,
+                TextColor = textColor,
+                AxislineColor = axisColor,
+                TicklineColor = axisColor,
+                FontSize = 13,
+            };
+            foreach (var s in ordered)
+                categoryAxis.Labels.Add(s.Correct + "→" + ShowCharShort(s.Typed));
+
+            var valueAxis = new LinearAxis
+            {
+                Position = AxisPosition.Bottom,
+                Minimum = 0,
+                MajorGridlineStyle = LineStyle.Dot,
+                MajorGridlineColor = axisColor,
+                MinorTickSize = 0,
+                TextColor = textColor,
+                AxislineColor = axisColor,
+                TicklineColor = axisColor,
+            };
+
+            model.Axes.Add(categoryAxis);
+            model.Axes.Add(valueAxis);
+            model.Series.Add(bar);
+            PlotErr.Model = model;
+        }
+
+        /// <summary>柱图轴标用的紧凑“打成字”显示。</summary>
+        private static string ShowCharShort(string s)
+        {
+            if (string.IsNullOrEmpty(s)) return "∅";
+            if (s == " ") return "␣";
+            if (s == "\t") return "⇥";
+            return s;
         }
 
         private static string ShowChar(string s)

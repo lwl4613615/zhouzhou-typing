@@ -52,6 +52,8 @@ namespace newgdq.Views
         private readonly Dictionary<char, int> _attempts = new Dictionary<char, int>();
         private readonly Dictionary<char, int> _errors   = new Dictionary<char, int>();
 
+        private bool _heatOn;   // 键盘热力图开关（按错误率给键上色）
+
         // 固定难度权重：小指/边角键先天别扭，权重高（无实战数据时的兜底）
         private static readonly Dictionary<char, int> DifficultyWeight = BuildDifficulty();
 
@@ -563,12 +565,34 @@ namespace newgdq.Views
 
         private void ClearKeyHighlights()
         {
-            foreach (var b in _keyBorders.Values)
+            foreach (var kv in _keyBorders)
             {
-                b.BorderBrush = (Brush)FindResource("GridLine");
-                b.BorderThickness = new Thickness(1);
-                b.Background = (Brush)FindResource("CellBG");
+                kv.Value.BorderBrush = (Brush)FindResource("GridLine");
+                kv.Value.BorderThickness = new Thickness(1);
+                kv.Value.Background = KeyBaseBrush(kv.Key);
             }
+        }
+
+        /// <summary>键的底色：热力图开启时按错误率上冷暖色，否则普通 CellBG。</summary>
+        private Brush KeyBaseBrush(char k)
+        {
+            if (!_heatOn) return (Brush)FindResource("CellBG");
+            if (!_attempts.TryGetValue(k, out var att) || att <= 0)
+                return (Brush)FindResource("CellBG");
+            _errors.TryGetValue(k, out var err);
+            double rate = Math.Max(0, Math.Min(1, (double)err / att));
+            byte r = (byte)(0x42 + (0xEF - 0x42) * rate);
+            byte g = (byte)(0xC3 + (0x44 - 0xC3) * rate);
+            byte b = (byte)(0x6E + (0x36 - 0x6E) * rate);
+            return new SolidColorBrush(Color.FromArgb(0x88, r, g, b));   // 半透明，标签仍清晰
+        }
+
+        private void ChkHeat_Changed(object sender, RoutedEventArgs e)
+        {
+            _heatOn = ChkHeat.IsChecked == true;
+            foreach (var kv in _keyBorders)
+                kv.Value.Background = KeyBaseBrush(kv.Key);   // 只换底色，保留目标键边框
+            FocusForInput();
         }
 
         protected override void OnPreviewKeyDown(KeyEventArgs e)
@@ -649,7 +673,7 @@ namespace newgdq.Views
         {
             _flash.Stop();
             if (_keyBorders.TryGetValue(_flashKey, out var b))
-                b.Background = (Brush)FindResource("CellBG");
+                b.Background = KeyBaseBrush(_flashKey);
             var a = _afterFlash; _afterFlash = null;
             a?.Invoke();   // 答对→换题/进入下一键；答错→保留或回到第一键
         }

@@ -2278,6 +2278,8 @@ namespace newgdq
             RefreshBmTips();
 
             var (speed, speed2, jj, mc, sec) = _session.ComputeStats(total);
+            // 个人最佳(PB)：必须在把当前成绩写库前取历史最高速，否则纪录里已含本段
+            double oldBest = HistoryRepository.LoadAggregate().MaxSpeed;
             Services.KeyHook.LogLine($"==== FINISH 字数={total} Keys={_session.Keys} Hg={_session.Hg} Cz={_session.Cz} "
                 + $"用时={sec:0.00}s 速度={speed:0.00} 击键={jj:0.00} 码长={mc:0.00} ====");
 
@@ -2328,12 +2330,22 @@ namespace newgdq
             }
             else
             {
+                // 个人最佳提醒：仅在本段已入历史（未被限速拦截）且历史非空时比较
+                string pbLine = "";
+                if (!blockedByLimit && oldBest > 0)
+                {
+                    if (speed > oldBest)
+                        pbLine = $"🏆 新纪录！比上次最佳 +{speed - oldBest:0.0} 字/分\n";
+                    else if (speed >= oldBest * 0.95)
+                        pbLine = $"距纪录就差 {oldBest - speed:0.0} 字/分，加油！\n";
+                }
+
                 HandyControl.Controls.Growl.Success(new HandyControl.Data.GrowlInfo
                 {
-                    Message =
+                    Message = pbLine +
                         $"完成！速度 {speed:0.00}（错一罚五 {speed2:0.00}）| 击键 {jj:0.00} | 码长 {mc:0.00} | 用时 {sec:0.00}s\n" +
                         $"错字 {_session.Cz} | 回改 {_session.Hg} | 键数 {_session.Keys} | 打词 {_session.Words} | 选重 {_session.Reselect} | 拼回 {_session.Enter} | 左:右 {_session.LeftHand}:{_session.RightHand}",
-                    WaitTime = 2,   // 默认 5 秒太长，缩到 2 秒
+                    WaitTime = pbLine.Length > 0 ? 4 : 2,   // 破纪录/接近多停一会儿
                     ShowDateTime = false,
                 });
 

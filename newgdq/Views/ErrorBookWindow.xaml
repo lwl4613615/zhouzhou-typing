@@ -2,7 +2,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:hc="https://handyorg.github.io/handycontrol"
-        Title="错字本" Height="540" Width="640"
+        xmlns:oxy="http://oxyplot.org/wpf"
+        Title="错字本" Height="540" Width="880"
         Icon="pack://application:,,,/Resources/myicon.ico"
         FontFamily="微软雅黑" FontSize="12"
         Background="{DynamicResource RegionBrush}"
@@ -41,19 +42,43 @@
             <Button Content="关闭" Width="72" Margin="6,0" Click="BtnClose_Click"/>
         </StackPanel>
 
-        <!-- 排行表 -->
-        <DataGrid x:Name="Grid" AutoGenerateColumns="False" IsReadOnly="True"
-                  HeadersVisibility="Column" GridLinesVisibility="Horizontal"
-                  CanUserAddRows="False" CanUserDeleteRows="False"
-                  Background="Transparent" RowBackground="Transparent">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="正确字" Binding="{Binding Correct}" Width="70"/>
-                <DataGridTextColumn Header="打成了" Binding="{Binding TypedShow}" Width="80"/>
-                <DataGridTextColumn Header="错次" Binding="{Binding Count}" Width="60"/>
-                <DataGridTextColumn Header="连对" Binding="{Binding StreakShow}" Width="60"/>
-                <DataGridTextColumn Header="错误率" Binding="{Binding RateShow}" Width="70"/>
-                <DataGridTextColumn Header="最近一次" Binding="{Binding LastShow}" Width="*"/>
-            </DataGrid.Columns>
-        </DataGrid>
+        <!-- 主体：左表格 + 右 TOP 错字柱状图 -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" MinWidth="360"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="300" MinWidth="240"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- 排行表 -->
+            <DataGrid x:Name="Grid" Grid.Column="0" AutoGenerateColumns="False" IsReadOnly="True"
+                      HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                      CanUserAddRows="False" CanUserDeleteRows="False"
+                      Background="Transparent" RowBackground="Transparent">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="正确字" Binding="{Binding Correct}" Width="70"/>
+                    <DataGridTextColumn Header="打成了" Binding="{Binding TypedShow}" Width="80"/>
+                    <DataGridTextColumn Header="错次" Binding="{Binding Count}" Width="60"/>
+                    <DataGridTextColumn Header="连对" Binding="{Binding StreakShow}" Width="60"/>
+                    <DataGridTextColumn Header="错误率" Binding="{Binding RateShow}" Width="70"/>
+                    <DataGridTextColumn Header="最近一次" Binding="{Binding LastShow}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Center"
+                          VerticalAlignment="Stretch" Background="Transparent"/>
+
+            <!-- TOP 错字柱状图 -->
+            <Border Grid.Column="2" Margin="4,0,0,0" Background="{DynamicResource AltRowBG}" CornerRadius="6">
+                <DockPanel Margin="6">
+                    <TextBlock DockPanel.Dock="Top" Text="错字 TOP 10" FontWeight="Bold"
+                               Foreground="{DynamicResource ValueFG}" Margin="4,2,0,4"/>
+                    <TextBlock x:Name="TxtChartEmpty" DockPanel.Dock="Bottom" Visibility="Collapsed"
+                               Text="暂无错字数据" Foreground="{DynamicResource ValueFG}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,20"/>
+                    <oxy:PlotView x:Name="PlotErr" Background="Transparent"/>
+                </DockPanel>
+            </Border>
+        </Grid>
     </DockPanel>
 </hc:Window>

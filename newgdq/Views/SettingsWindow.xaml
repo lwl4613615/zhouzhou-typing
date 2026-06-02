@@ -54,6 +54,7 @@
                         <RowDefinition Height="36"/>
                         <RowDefinition Height="36"/>
                         <RowDefinition Height="36"/>
+                        <RowDefinition Height="42"/>
                     </Grid.RowDefinitions>
 
                     <TextBlock Grid.Row="0" Grid.Column="0" Text="正确字 前景"   VerticalAlignment="Center"/>
@@ -79,6 +80,15 @@
                     <TextBlock Grid.Row="5" Grid.Column="0" Text="输入区 背景"   VerticalAlignment="Center"/>
                     <TextBox Grid.Row="5" Grid.Column="1" x:Name="TxtColorInputBg" Margin="0,4" VerticalContentAlignment="Center"/>
                     <Border  Grid.Row="5" Grid.Column="2" x:Name="PvwColorInputBg" Margin="6,4,0,4" BorderBrush="#666" BorderThickness="1" Cursor="Hand" MouseLeftButtonUp="Pvw_Click" Tag="TxtColorInputBg"/>
+
+                    <StackPanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="一键预设：" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                        <Button Content="默认"   Padding="12,2" Margin="2,0" Click="BtnPreset_Click" Tag="default"/>
+                        <Button Content="护眼"   Padding="12,2" Margin="2,0" Click="BtnPreset_Click" Tag="eye"/>
+                        <Button Content="高对比" Padding="12,2" Margin="2,0" Click="BtnPreset_Click" Tag="contrast"/>
+                        <Button Content="暗夜"   Padding="12,2" Margin="2,0" Click="BtnPreset_Click" Tag="dark"/>
+                        <TextBlock Text="（只改跟打区配色，不动整体主题）" Opacity="0.6" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                    </StackPanel>
                 </Grid>
             </TabItem>
 
