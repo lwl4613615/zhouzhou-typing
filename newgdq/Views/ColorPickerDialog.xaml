@@ -1,0 +1,97 @@
+<ui:FluentWindow x:Class="newgdq.Views.ColorPickerDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        Title="选择颜色" Width="360" SizeToContent="Height"
+        Icon="pack://application:,,,/Resources/myicon.ico"
+        FontFamily="微软雅黑" FontSize="12"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner"
+        ExtendsContentIntoTitleBar="True"
+        WindowBackdropType="None"
+        Background="{DynamicResource RegionBrush}"
+        Foreground="{DynamicResource PrimaryTextBrush}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <ui:TitleBar Grid.Row="0" Title="选择颜色" Background="{DynamicResource PanelBG}" Height="36">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Source="pack://application:,,,/Resources/myicon.ico" Width="18" Height="18"/>
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
+
+        <StackPanel Grid.Row="1" Margin="16">
+            <!-- 大预览 + HEX -->
+            <Grid Margin="0,0,0,14">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Border x:Name="PvwBig" Grid.Column="0" Width="64" Height="64" CornerRadius="8"
+                        BorderBrush="{DynamicResource GridLine}" BorderThickness="1"/>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="14,0,0,0">
+                    <TextBlock Text="HEX" Foreground="{DynamicResource LabelFG}" Margin="0,0,0,4"/>
+                    <ui:TextBox x:Name="TxtHex" MaxLength="7" VerticalContentAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- RGB 滑块 -->
+            <Grid Margin="0,0,0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="40"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="R" VerticalAlignment="Center" Foreground="#E53935" FontWeight="Bold"/>
+                <Slider x:Name="SldR" Grid.Column="1" Minimum="0" Maximum="255" VerticalAlignment="Center"/>
+                <TextBlock x:Name="LblR" Grid.Column="2" Text="0" VerticalAlignment="Center" TextAlignment="Right"/>
+            </Grid>
+            <Grid Margin="0,0,0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="40"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="G" VerticalAlignment="Center" Foreground="#43A047" FontWeight="Bold"/>
+                <Slider x:Name="SldG" Grid.Column="1" Minimum="0" Maximum="255" VerticalAlignment="Center"/>
+                <TextBlock x:Name="LblG" Grid.Column="2" Text="0" VerticalAlignment="Center" TextAlignment="Right"/>
+            </Grid>
+            <Grid Margin="0,0,0,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="40"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="B" VerticalAlignment="Center" Foreground="#1E88E5" FontWeight="Bold"/>
+                <Slider x:Name="SldB" Grid.Column="1" Minimum="0" Maximum="255" VerticalAlignment="Center"/>
+                <TextBlock x:Name="LblB" Grid.Column="2" Text="0" VerticalAlignment="Center" TextAlignment="Right"/>
+            </Grid>
+
+            <!-- 常用色板 -->
+            <TextBlock Text="常用颜色" Foreground="{DynamicResource LabelFG}" Margin="0,0,0,6"/>
+            <ItemsControl x:Name="Swatches">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Width="24" Height="24" Margin="2" CornerRadius="4" Cursor="Hand"
+                                Background="{Binding}" BorderBrush="{DynamicResource GridLine}" BorderThickness="1"
+                                MouseLeftButtonUp="Swatch_Click"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- 按钮 -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+                <ui:Button Content="取消" MinWidth="72" Margin="0,0,8,0" Click="BtnCancel_Click"/>
+                <ui:Button Content="确定" Appearance="Primary" MinWidth="72" Click="BtnOk_Click"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</ui:FluentWindow>

@@ -152,17 +152,11 @@ namespace newgdq.Views
             {
                 Color initial;
                 try { initial = (Color)ColorConverter.ConvertFromString(tbx.Text); } catch { initial = Colors.White; }
-                using (var dlg = new System.Windows.Forms.ColorDialog
+                var dlg = new ColorPickerDialog(initial) { Owner = this };
+                if (dlg.ShowDialog() == true)
                 {
-                    Color = System.Drawing.Color.FromArgb(initial.R, initial.G, initial.B),
-                    FullOpen = true,
-                })
-                {
-                    if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                    {
-                        var c = dlg.Color;
-                        tbx.Text = "#" + c.R.ToString("X2") + c.G.ToString("X2") + c.B.ToString("X2");
-                    }
+                    var c = dlg.SelectedColor;
+                    tbx.Text = "#" + c.R.ToString("X2") + c.G.ToString("X2") + c.B.ToString("X2");
                 }
             }
             catch (Exception ex)
