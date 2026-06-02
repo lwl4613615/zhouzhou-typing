@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:sp="http://oxyplot.org/wpf"
-        Title="错字本" Height="540" Width="880"
+        Title="错字本" Height="540" Width="880" MinWidth="600" MinHeight="400"
         Icon="pack://application:,,,/Resources/myicon.ico"
         FontFamily="微软雅黑" FontSize="12"
         Background="{DynamicResource RegionBrush}"
@@ -24,7 +24,7 @@
     <DockPanel Grid.Row="1" Margin="16" LastChildFill="True">
         <!-- 顶部：时间范围 + 标题 -->
         <DockPanel DockPanel.Dock="Top" Margin="0,0,0,10">
-            <ComboBox x:Name="CmbRange" Width="110" DockPanel.Dock="Left"
+            <ComboBox x:Name="CmbRange" Width="110" MinWidth="100" DockPanel.Dock="Left"
                       SelectionChanged="CmbRange_SelectionChanged">
                 <ComboBoxItem Content="本次"/>
                 <ComboBoxItem Content="本日"/>
@@ -43,16 +43,16 @@
 
         <!-- 底部按钮 -->
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
-            <ui:Button Content="标记已掌握" Width="84" Margin="6,0" Click="BtnMaster_Click"
+            <ui:Button Content="标记已掌握" Padding="10,4" MinWidth="84" Margin="6,0" Click="BtnMaster_Click"
                     ToolTip="选中行的字标为已掌握，从默认榜单淡出（再错会重新出现）"/>
-            <ui:Button Content="删除此字" Width="84" Margin="6,0" Click="BtnDeleteChar_Click"
+            <ui:Button Content="删除此字" Padding="10,4" MinWidth="84" Margin="6,0" Click="BtnDeleteChar_Click"
                     ToolTip="彻底删除选中字的全部错字记录"/>
-            <ui:Button Content="复制错字" Width="84" Margin="6,0" Click="BtnCopyChars_Click"
+            <ui:Button Content="复制错字" Padding="10,4" MinWidth="84" Margin="6,0" Click="BtnCopyChars_Click"
                     ToolTip="复制当前范围内去重后的错字，可粘到发文窗当练习语料"/>
-            <ui:Button Content="生成练习" Width="84" Margin="6,0" Click="BtnGenPractice_Click"
+            <ui:Button Content="生成练习" Padding="10,4" MinWidth="84" Margin="6,0" Click="BtnGenPractice_Click"
                     ToolTip="把当前范围的高频错字组成重复练习段，直接送入主窗跟打区开打"/>
-            <ui:Button Content="清空本范围" Width="84" Margin="6,0" Click="BtnClear_Click"/>
-            <ui:Button Content="关闭" Width="72" Margin="6,0" Click="BtnClose_Click"/>
+            <ui:Button Content="清空本范围" Padding="10,4" MinWidth="84" Margin="6,0" Click="BtnClear_Click"/>
+            <ui:Button Content="关闭" Padding="10,4" MinWidth="72" Margin="6,0" Click="BtnClose_Click"/>
         </StackPanel>
 
         <!-- 主体：左表格 + 右 TOP 错字柱状图 -->
@@ -94,7 +94,7 @@
                         <StackPanel>
                             <TextBlock x:Name="TxtSrcTitle" Text="错字溯源（点选左侧某字查看）"
                                        FontWeight="Bold" Foreground="{DynamicResource ValueFG}" Margin="4,0,0,4"/>
-                            <ScrollViewer MaxHeight="130" VerticalScrollBarVisibility="Auto">
+                            <ScrollViewer MaxHeight="200" VerticalScrollBarVisibility="Auto">
                                 <TextBlock x:Name="TxtSrc" Text="—" TextWrapping="Wrap"
                                            Foreground="{DynamicResource ValueFG}" Margin="4,0"/>
                             </ScrollViewer>

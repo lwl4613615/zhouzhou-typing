@@ -28,7 +28,7 @@
 
                     <TextBlock Text="方案" Foreground="{DynamicResource LabelFG}"
                                VerticalAlignment="Center" Margin="0,2,4,2"/>
-                    <ComboBox x:Name="CmbScheme" Width="100" VerticalAlignment="Center"
+                    <ComboBox x:Name="CmbScheme" Width="100" MinWidth="100" VerticalAlignment="Center"
                               SelectionChanged="CmbScheme_SelectionChanged" Margin="0,2,16,2">
                         <ComboBoxItem Content="小鹤双拼"/>
                         <ComboBoxItem Content="自然码"/>
@@ -37,7 +37,7 @@
 
                     <TextBlock Text="范围" Foreground="{DynamicResource LabelFG}"
                                VerticalAlignment="Center" Margin="0,2,4,2"/>
-                    <ComboBox x:Name="CmbMode" Width="90" VerticalAlignment="Center"
+                    <ComboBox x:Name="CmbMode" Width="90" MinWidth="90" VerticalAlignment="Center"
                               SelectionChanged="CmbMode_SelectionChanged" Margin="0,2,16,2">
                         <ComboBoxItem Content="混合" IsSelected="True"/>
                         <ComboBoxItem Content="仅声母"/>

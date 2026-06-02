@@ -52,9 +52,9 @@
                 </Paragraph>
                 <Table CellSpacing="0" Margin="0,4,0,0">
                     <Table.Columns>
-                        <TableColumn Width="80"/>
-                        <TableColumn Width="140"/>
-                        <TableColumn Width="100"/>
+                        <TableColumn Width="*"/>
+                        <TableColumn Width="2*"/>
+                        <TableColumn Width="1.4*"/>
                     </Table.Columns>
                     <TableRowGroup>
                         <TableRow Background="{DynamicResource PanelBG}">

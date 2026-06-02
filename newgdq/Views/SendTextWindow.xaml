@@ -2,7 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-        Title="州州发文设置" Width="760" Height="540"
+        Title="州州发文设置" Width="760" Height="540" MinWidth="560" MinHeight="420"
         Icon="pack://application:,,,/Resources/myicon.ico"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource RegionBrush}"
@@ -59,11 +59,11 @@
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="发送字数" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{DynamicResource LabelFG}"/>
-                        <ui:TextBox x:Name="TbxSendCount" Width="50" Text="25" Margin="0,0,8,0" PreviewTextInput="DigitOnly_PreviewTextInput"/>
+                        <ui:TextBox x:Name="TbxSendCount" Width="60" MinWidth="60" Text="25" Margin="0,0,8,0" PreviewTextInput="DigitOnly_PreviewTextInput"/>
                         <TextBlock Text="起始位置" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{DynamicResource LabelFG}"/>
-                        <ui:TextBox x:Name="TbxSendStart" Width="50" Text="0" Margin="0,0,8,0" PreviewTextInput="DigitOnly_PreviewTextInput"/>
+                        <ui:TextBox x:Name="TbxSendStart" Width="60" MinWidth="60" Text="0" Margin="0,0,8,0" PreviewTextInput="DigitOnly_PreviewTextInput"/>
                         <TextBlock Text="始段号" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{DynamicResource LabelFG}"/>
-                        <ui:TextBox x:Name="TbxStartSeg" Width="50" Text="1" PreviewTextInput="DigitOnly_PreviewTextInput"/>
+                        <ui:TextBox x:Name="TbxStartSeg" Width="60" MinWidth="60" Text="1" PreviewTextInput="DigitOnly_PreviewTextInput"/>
                     </StackPanel>
                 </StackPanel>
 
@@ -145,8 +145,8 @@
                     <DockPanel Grid.Column="0" Margin="0,0,6,0">
                         <TextBlock DockPanel.Dock="Top" Text="已保存的预设" FontWeight="Bold" Margin="0,0,0,4"/>
                         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,4,0,0">
-                            <ui:Button Content="删除"     Width="60" Margin="0,0,4,0" Click="BtnPresetDelete_Click"/>
-                            <ui:Button Content="应用到当前" Width="100" Click="BtnPresetApply_Click"/>
+                            <ui:Button Content="删除"     Padding="12,4" MinWidth="60" Margin="0,0,4,0" Click="BtnPresetDelete_Click"/>
+                            <ui:Button Content="应用到当前" Padding="12,4" MinWidth="100" Click="BtnPresetApply_Click"/>
                         </StackPanel>
                         <ListBox x:Name="LbxPresets" SelectionChanged="LbxPresets_SelectionChanged"
                                  DisplayMemberPath="Name"/>
@@ -157,24 +157,24 @@
                         <TextBlock DockPanel.Dock="Top" Text="编辑预设" FontWeight="Bold" Margin="0,0,0,4"/>
 
                         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
-                            <ui:Button Content="保存为新预设"  Width="120" Margin="0,0,6,0" Click="BtnPresetCreate_Click"/>
-                            <ui:Button Content="更新选中预设"  Width="120" Click="BtnPresetUpdate_Click"/>
+                            <ui:Button Content="保存为新预设"  Padding="12,4" MinWidth="120" Margin="0,0,6,0" Click="BtnPresetCreate_Click"/>
+                            <ui:Button Content="更新选中预设"  Padding="12,4" MinWidth="120" Click="BtnPresetUpdate_Click"/>
                         </StackPanel>
 
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="Auto" MinWidth="80"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="32"/>
-                                <RowDefinition Height="32"/>
-                                <RowDefinition Height="32"/>
-                                <RowDefinition Height="32"/>
-                                <RowDefinition Height="28"/>
-                                <RowDefinition Height="28"/>
-                                <RowDefinition Height="28"/>
-                                <RowDefinition Height="28"/>
+                                <RowDefinition Height="Auto" MinHeight="32"/>
+                                <RowDefinition Height="Auto" MinHeight="32"/>
+                                <RowDefinition Height="Auto" MinHeight="32"/>
+                                <RowDefinition Height="Auto" MinHeight="32"/>
+                                <RowDefinition Height="Auto" MinHeight="28"/>
+                                <RowDefinition Height="Auto" MinHeight="28"/>
+                                <RowDefinition Height="Auto" MinHeight="28"/>
+                                <RowDefinition Height="Auto" MinHeight="28"/>
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
                             <TextBlock Grid.Row="0" Grid.Column="0" Text="名称"        VerticalAlignment="Center"/>

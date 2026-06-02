@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:sp="http://oxyplot.org/wpf"
-        Title="成绩趋势" Height="600" Width="780" MinHeight="480" MinWidth="640"
+        Title="成绩趋势" Height="600" Width="780" MinHeight="420" MinWidth="480"
         Icon="pack://application:,,,/Resources/myicon.ico"
         FontFamily="微软雅黑" FontSize="12"
         Background="{DynamicResource RegionBrush}"
