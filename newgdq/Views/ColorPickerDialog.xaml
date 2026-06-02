@@ -38,6 +38,66 @@
                 </StackPanel>
             </Grid>
 
+            <!-- 色谱：SV 方块 + Hue 竖条 -->
+            <Grid Height="160" Margin="0,0,0,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="24"/>
+                </Grid.ColumnDefinitions>
+                <!-- SV 取色面板 -->
+                <Border Grid.Column="0" CornerRadius="6" ClipToBounds="True"
+                        BorderBrush="{DynamicResource GridLine}" BorderThickness="1">
+                    <Grid x:Name="SvPanel" MouseLeftButtonDown="SvPanel_Mouse" MouseMove="SvPanel_Mouse"
+                          Background="Transparent">
+                        <!-- 底色：纯 Hue 色 -->
+                        <Rectangle x:Name="SvHueLayer"/>
+                        <!-- 横向：白 → 透明（饱和度） -->
+                        <Rectangle>
+                            <Rectangle.Fill>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                    <GradientStop Offset="0" Color="#FFFFFFFF"/>
+                                    <GradientStop Offset="1" Color="#00FFFFFF"/>
+                                </LinearGradientBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                        <!-- 纵向：透明 → 黑（明度） -->
+                        <Rectangle>
+                            <Rectangle.Fill>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Offset="0" Color="#00000000"/>
+                                    <GradientStop Offset="1" Color="#FF000000"/>
+                                </LinearGradientBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                        <!-- 选取游标 -->
+                        <Ellipse x:Name="SvCursor" Width="12" Height="12" Stroke="White" StrokeThickness="2"
+                                 IsHitTestVisible="False" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    </Grid>
+                </Border>
+                <!-- Hue 竖条 -->
+                <Border Grid.Column="1" Margin="6,0,0,0" CornerRadius="6" ClipToBounds="True"
+                        BorderBrush="{DynamicResource GridLine}" BorderThickness="1">
+                    <Grid x:Name="HuePanel" MouseLeftButtonDown="HuePanel_Mouse" MouseMove="HuePanel_Mouse"
+                          Background="Transparent">
+                        <Rectangle>
+                            <Rectangle.Fill>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Offset="0.00" Color="#FF0000"/>
+                                    <GradientStop Offset="0.17" Color="#FFFF00"/>
+                                    <GradientStop Offset="0.33" Color="#00FF00"/>
+                                    <GradientStop Offset="0.50" Color="#00FFFF"/>
+                                    <GradientStop Offset="0.67" Color="#0000FF"/>
+                                    <GradientStop Offset="0.83" Color="#FF00FF"/>
+                                    <GradientStop Offset="1.00" Color="#FF0000"/>
+                                </LinearGradientBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                        <Border x:Name="HueCursor" Height="4" BorderBrush="White" BorderThickness="0,2"
+                                IsHitTestVisible="False" VerticalAlignment="Top" HorizontalAlignment="Stretch"/>
+                    </Grid>
+                </Border>
+            </Grid>
+
             <!-- RGB 滑块 -->
             <Grid Margin="0,0,0,4">
                 <Grid.ColumnDefinitions>
@@ -89,8 +149,8 @@
 
             <!-- 按钮 -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
-                <ui:Button Content="取消" MinWidth="72" Margin="0,0,8,0" Click="BtnCancel_Click"/>
-                <ui:Button Content="确定" Appearance="Primary" MinWidth="72" Click="BtnOk_Click"/>
+                <ui:Button Content="取消" Appearance="Secondary" MinWidth="80" Height="34" Margin="0,0,10,0" Click="BtnCancel_Click"/>
+                <ui:Button Content="确定" Appearance="Primary" MinWidth="80" Height="34" Click="BtnOk_Click"/>
             </StackPanel>
         </StackPanel>
     </Grid>
