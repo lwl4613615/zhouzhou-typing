@@ -53,9 +53,23 @@ namespace newgdq.Services
 
         private static void Relayout()
         {
-            var wa = SystemParameters.WorkArea;
-            double left = wa.Right - Width - Margin;
-            double y = wa.Top + Margin;
+            // 优先贴合主窗口右上角；主窗口不可见/最小化时回退到屏幕工作区
+            double right, top;
+            var owner = Application.Current?.MainWindow;
+            if (owner != null && owner.IsVisible && owner.WindowState != WindowState.Minimized
+                && owner.ActualWidth > 0)
+            {
+                right = owner.Left + owner.ActualWidth;
+                top = owner.Top;
+            }
+            else
+            {
+                var wa = SystemParameters.WorkArea;
+                right = wa.Right;
+                top = wa.Top;
+            }
+            double left = right - Width - Margin;
+            double y = top + Margin;
             foreach (var w in _active)
             {
                 w.Left = left;

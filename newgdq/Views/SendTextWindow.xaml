@@ -31,8 +31,8 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- 左：信息 + 模式选项 -->
-                <StackPanel Grid.Column="0" Orientation="Vertical">
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                <StackPanel Grid.Column="0" Orientation="Vertical" Margin="0,0,12,0">
+                    <WrapPanel Orientation="Horizontal" Margin="0,0,0,4">
                         <TextBlock Text="标题:" Width="40" VerticalAlignment="Center" Foreground="{DynamicResource LabelFG}"/>
                         <TextBlock x:Name="LblTitle" Text="-" Width="160" Foreground="{DynamicResource AccentFG}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="字数:" Width="40" VerticalAlignment="Center" Foreground="{DynamicResource LabelFG}"/>
@@ -45,26 +45,26 @@
                             <ComboBoxItem>单字</ComboBoxItem>
                         </ComboBox>
                         <TextBlock x:Name="LblStyle" Text="-" Width="60" Foreground="{DynamicResource TimeFG}" VerticalAlignment="Center" Margin="4,0,0,0"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                        <RadioButton x:Name="RbnInOrder"  Content="顺序" GroupName="Order" IsChecked="True" Margin="0,0,12,0" Foreground="{DynamicResource ValueFG}"/>
-                        <RadioButton x:Name="RbnOutOrder" Content="乱序" GroupName="Order" Margin="0,0,12,0" Foreground="{DynamicResource ValueFG}"/>
-                        <CheckBox x:Name="ChkOneEnd" Content="以一句结束" Margin="0,0,12,0" Foreground="{DynamicResource ValueFG}"/>
-                        <CheckBox x:Name="ChkNoRepeat" Content="乱序全段不重复" Margin="0,0,12,0" Foreground="{DynamicResource ValueFG}"/>
-                        <CheckBox x:Name="ChkTickOut" Content="自动剔除空格" IsChecked="True" Foreground="{DynamicResource ValueFG}"/>
-                    </StackPanel>
+                    </WrapPanel>
+                    <WrapPanel Orientation="Horizontal" Margin="0,0,0,4">
+                        <RadioButton x:Name="RbnInOrder"  Content="顺序" GroupName="Order" IsChecked="True" Margin="0,0,12,4" Foreground="{DynamicResource ValueFG}"/>
+                        <RadioButton x:Name="RbnOutOrder" Content="乱序" GroupName="Order" Margin="0,0,12,4" Foreground="{DynamicResource ValueFG}"/>
+                        <CheckBox x:Name="ChkOneEnd" Content="以一句结束" Margin="0,0,12,4" Foreground="{DynamicResource ValueFG}"/>
+                        <CheckBox x:Name="ChkNoRepeat" Content="乱序全段不重复" Margin="0,0,12,4" Foreground="{DynamicResource ValueFG}"/>
+                        <CheckBox x:Name="ChkTickOut" Content="自动剔除空格" IsChecked="True" Margin="0,0,0,4" Foreground="{DynamicResource ValueFG}"/>
+                    </WrapPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                         <CheckBox x:Name="ChkAutoAdvance" Content="打完自动发下一段" Margin="0,0,12,0" Foreground="{DynamicResource ValueFG}"
                                   ToolTip="每打完一段，约 0.7 秒后自动载入下一段，连续不间断练习（发完最后一段自动停止）"/>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal">
+                    <WrapPanel Orientation="Horizontal">
                         <TextBlock Text="发送字数" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{DynamicResource LabelFG}"/>
                         <ui:TextBox x:Name="TbxSendCount" Width="60" MinWidth="60" Text="25" Margin="0,0,8,0" PreviewTextInput="DigitOnly_PreviewTextInput"/>
                         <TextBlock Text="起始位置" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{DynamicResource LabelFG}"/>
                         <ui:TextBox x:Name="TbxSendStart" Width="60" MinWidth="60" Text="0" Margin="0,0,8,0" PreviewTextInput="DigitOnly_PreviewTextInput"/>
                         <TextBlock Text="始段号" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{DynamicResource LabelFG}"/>
                         <ui:TextBox x:Name="TbxStartSeg" Width="60" MinWidth="60" Text="1" PreviewTextInput="DigitOnly_PreviewTextInput"/>
-                    </StackPanel>
+                    </WrapPanel>
                 </StackPanel>
 
                 <!-- 右：动作按钮 -->
