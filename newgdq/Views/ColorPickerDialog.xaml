@@ -14,7 +14,7 @@
         Foreground="{DynamicResource PrimaryTextBrush}">
     <ui:FluentWindow.Resources>
         <!-- 确定按钮：强调底+白字，自控 hover/pressed，随主题走 -->
-        <Style x:Key="DialogPrimaryButton" TargetType="Button">
+        <Style x:Key="DialogPrimaryButton" TargetType="ui:Button">
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="Background" Value="{DynamicResource AccentFG}"/>
             <Setter Property="FontSize" Value="14"/>
@@ -22,7 +22,7 @@
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="Button">
+                    <ControlTemplate TargetType="ui:Button">
                         <Border x:Name="bd" CornerRadius="6" Background="{TemplateBinding Background}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
@@ -39,7 +39,7 @@
             </Setter>
         </Style>
         <!-- 取消按钮：次要底+正文色，自控 hover -->
-        <Style x:Key="DialogSecondaryButton" TargetType="Button">
+        <Style x:Key="DialogSecondaryButton" TargetType="ui:Button">
             <Setter Property="Foreground" Value="{DynamicResource ValueFG}"/>
             <Setter Property="Background" Value="{DynamicResource CellBG}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource GridLine}"/>
@@ -47,7 +47,7 @@
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="Button">
+                    <ControlTemplate TargetType="ui:Button">
                         <Border x:Name="bd" CornerRadius="6" BorderThickness="1"
                                 Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -202,8 +202,8 @@
 
             <!-- 按钮 -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
-                <Button Content="确定" Style="{StaticResource DialogPrimaryButton}" MinWidth="84" Height="34" Margin="0,0,10,0" Click="BtnOk_Click"/>
-                <Button Content="取消" Style="{StaticResource DialogSecondaryButton}" MinWidth="84" Height="34" Click="BtnCancel_Click"/>
+                <ui:Button Content="确定" Style="{StaticResource DialogPrimaryButton}" MinWidth="84" Height="34" Margin="0,0,10,0" Click="BtnOk_Click"/>
+                <ui:Button Content="取消" Style="{StaticResource DialogSecondaryButton}" MinWidth="84" Height="34" Click="BtnCancel_Click"/>
             </StackPanel>
         </StackPanel>
     </Grid>
