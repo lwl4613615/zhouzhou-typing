@@ -21,12 +21,12 @@
             </ui:TitleBar.Icon>
         </ui:TitleBar>
     <DockPanel Grid.Row="1" Margin="16" LastChildFill="True">
-        <TextBlock DockPanel.Dock="Top" x:Name="TxtTitle" FontSize="14" FontWeight="Bold"
-                   Foreground="{DynamicResource ValueFG}" Margin="0,0,0,12"/>
+        <TextBlock DockPanel.Dock="Top" x:Name="TxtTitle" Style="{StaticResource PageTitleStyle}"/>
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
             <ui:Button Content="复制" Width="80" Margin="6,0" Click="BtnCopy_Click"/>
             <ui:Button Content="关闭" Width="80" Margin="6,0" Click="BtnClose_Click"/>
         </StackPanel>
+        <Border Style="{StaticResource CardStyle}">
         <Grid x:Name="GridStats">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="120"/>
@@ -53,6 +53,7 @@
             <TextBlock Grid.Row="5" Grid.Column="0" Text="最高速度 / 总用时" VerticalAlignment="Center"/>
             <TextBlock Grid.Row="5" Grid.Column="1" x:Name="TxtMisc"       VerticalAlignment="Center" Foreground="{DynamicResource TimeFG}"/>
         </Grid>
+        </Border>
     </DockPanel>
     </Grid>
 </ui:FluentWindow>

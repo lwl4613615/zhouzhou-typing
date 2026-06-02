@@ -22,9 +22,9 @@
     <DockPanel Grid.Row="1" Margin="12" LastChildFill="True">
 
         <!-- 顶部：摘要 -->
-        <Border DockPanel.Dock="Top" Background="{DynamicResource PanelBG}" Padding="10" CornerRadius="3">
+        <Border DockPanel.Dock="Top" Background="{DynamicResource CellBG}" Padding="14,12" CornerRadius="8">
             <StackPanel>
-                <TextBlock x:Name="TxtTitle" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ValueFG}"/>
+                <TextBlock x:Name="TxtTitle" Style="{StaticResource PageTitleStyle}" Margin="0,0,0,2"/>
                 <UniformGrid Columns="6" Margin="0,8,0,0" x:Name="StatGrid">
                     <StackPanel><TextBlock Text="速度"    Foreground="{DynamicResource LabelFG}"/><TextBlock x:Name="TxtSpeed"  Foreground="{DynamicResource SpeedFG}" FontSize="16" FontWeight="Bold"/></StackPanel>
                     <StackPanel><TextBlock Text="罚五"    Foreground="{DynamicResource LabelFG}"/><TextBlock x:Name="TxtSpeed2" Foreground="{DynamicResource SpeedFG}" FontSize="16" FontWeight="Bold"/></StackPanel>
