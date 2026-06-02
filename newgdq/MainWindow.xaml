@@ -690,15 +690,16 @@
                         <RowDefinition Height="14"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" MinWidth="80"/>   <!-- 时间 -->
-                        <ColumnDefinition Width="Auto" MinWidth="56"/>   <!-- 字数 -->
-                        <ColumnDefinition Width="*"    MinWidth="160"/>  <!-- 编码提示 / 进度条 -->
-                        <ColumnDefinition Width="Auto" MinWidth="48"/>   <!-- 击键 -->
-                        <ColumnDefinition Width="Auto" MinWidth="48"/>   <!-- 回改 -->
-                        <ColumnDefinition Width="Auto" MinWidth="48"/>   <!-- 错字 -->
-                        <ColumnDefinition Width="Auto" MinWidth="56"/>   <!-- 左:右 -->
-                        <ColumnDefinition Width="Auto" MinWidth="64"/>   <!-- 理论码长 -->
-                        <ColumnDefinition Width="Auto" MinWidth="150"/>  <!-- 累计 -->
+                        <ColumnDefinition Width="Auto" MinWidth="72"/>             <!-- 时间 -->
+                        <ColumnDefinition Width="Auto" MinWidth="48"/>             <!-- 字数 -->
+                        <ColumnDefinition Width="*" MinWidth="120" MaxWidth="300"/> <!-- 编码提示 / 进度条 -->
+                        <ColumnDefinition Width="*" MinWidth="0"/>                 <!-- 弹性 spacer：吸收多余宽度，把右侧统计推成紧凑簇 -->
+                        <ColumnDefinition Width="Auto" MinWidth="44"/>             <!-- 击键 -->
+                        <ColumnDefinition Width="Auto" MinWidth="44"/>             <!-- 回改 -->
+                        <ColumnDefinition Width="Auto" MinWidth="44"/>             <!-- 错字 -->
+                        <ColumnDefinition Width="Auto" MinWidth="52"/>             <!-- 左:右 -->
+                        <ColumnDefinition Width="Auto" MinWidth="60"/>             <!-- 理论码长 -->
+                        <ColumnDefinition Width="Auto" MinWidth="120"/>            <!-- 今日/累计 -->
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Row="0" Grid.Column="0" x:Name="TxtTime"      Text="00:00.00" Style="{StaticResource LblValue}"/>
                     <TextBlock Grid.Row="0" Grid.Column="1" x:Name="TxtCount1"    Text="0/0"      Style="{StaticResource LblValue}"/>
@@ -729,21 +730,21 @@
                         <TextBlock x:Name="TxtProgress" Text="-" Foreground="{DynamicResource ValueFG}"
                                    FontSize="10" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Grid>
-                    <TextBlock Grid.Row="0" Grid.Column="3" x:Name="TxtKeysCount" Text="0" Style="{StaticResource LblValueKey}"/>
-                    <TextBlock Grid.Row="0" Grid.Column="4" x:Name="TxtHg"  Text="0" Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Row="0" Grid.Column="5" x:Name="TxtCz"  Text="0" Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Row="0" Grid.Column="6" x:Name="TxtRightLast" Text="0:0" Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Row="0" Grid.Column="7" x:Name="TxtTheoryMc" Text="-" Style="{StaticResource LblValue}"/>
-                    <TextBlock Grid.Row="0" Grid.Column="8" x:Name="TxtTotalInfo" Text="0/0/1天/0"
+                    <TextBlock Grid.Row="0" Grid.Column="4" x:Name="TxtKeysCount" Text="0" Style="{StaticResource LblValueKey}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="5" x:Name="TxtHg"  Text="0" Style="{StaticResource LblValue}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="6" x:Name="TxtCz"  Text="0" Style="{StaticResource LblValue}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="7" x:Name="TxtRightLast" Text="0:0" Style="{StaticResource LblValue}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="8" x:Name="TxtTheoryMc" Text="-" Style="{StaticResource LblValue}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="9" x:Name="TxtTotalInfo" Text="0/0/1天/0"
                                Style="{StaticResource LblValue}" HorizontalAlignment="Right" Margin="0,0,8,0"/>
                     <TextBlock Grid.Row="1" Grid.Column="0" Text="时间" Style="{StaticResource LblText}" FontSize="10"/>
                     <TextBlock Grid.Row="1" Grid.Column="1" x:Name="TxtCount1Pct" Text="0%" Style="{StaticResource LblText}" FontSize="10"/>
-                    <TextBlock Grid.Row="1" Grid.Column="3" Text="击键" Style="{StaticResource LblText}" FontSize="10"/>
-                    <TextBlock Grid.Row="1" Grid.Column="4" Text="回改" Style="{StaticResource LblText}" FontSize="10"/>
-                    <TextBlock Grid.Row="1" Grid.Column="5" Text="错字" Style="{StaticResource LblText}" FontSize="10"/>
-                    <TextBlock Grid.Row="1" Grid.Column="6" Text="左:右" Style="{StaticResource LblText}" FontSize="10"/>
-                    <TextBlock Grid.Row="1" Grid.Column="7" Text="理论码长" Style="{StaticResource LblText}" FontSize="10"/>
-                    <TextBlock Grid.Row="1" Grid.Column="8" Text="今日/累计/天/记录" Style="{StaticResource LblText}" FontSize="10" HorizontalAlignment="Right" Margin="0,0,8,0"/>
+                    <TextBlock Grid.Row="1" Grid.Column="4" Text="击键" Style="{StaticResource LblText}" FontSize="10"/>
+                    <TextBlock Grid.Row="1" Grid.Column="5" Text="回改" Style="{StaticResource LblText}" FontSize="10"/>
+                    <TextBlock Grid.Row="1" Grid.Column="6" Text="错字" Style="{StaticResource LblText}" FontSize="10"/>
+                    <TextBlock Grid.Row="1" Grid.Column="7" Text="左:右" Style="{StaticResource LblText}" FontSize="10"/>
+                    <TextBlock Grid.Row="1" Grid.Column="8" Text="理论码长" Style="{StaticResource LblText}" FontSize="10"/>
+                    <TextBlock Grid.Row="1" Grid.Column="9" Text="今日/累计/天/记录" Style="{StaticResource LblText}" FontSize="10" HorizontalAlignment="Right" Margin="0,0,8,0"/>
                 </Grid>
             </Border>
 
