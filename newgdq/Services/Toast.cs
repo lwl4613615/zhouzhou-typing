@@ -29,6 +29,17 @@ namespace newgdq.Services
 
         private enum ToastKind { Success, Info, Warning, Error }
 
+        /// <summary>从应用资源取一个主题色（SolidColorBrush 的 Color），取不到时返回回退色。</summary>
+        private static Color ResColor(string key, Color fallback)
+        {
+            try
+            {
+                if (Application.Current?.TryFindResource(key) is SolidColorBrush b) return b.Color;
+            }
+            catch { }
+            return fallback;
+        }
+
         private static void Show(string message, ToastKind kind, int seconds)
         {
             var app = Application.Current;
@@ -104,7 +115,9 @@ namespace newgdq.Services
                     case ToastKind.Error:   bar = Color.FromRgb(0xF4, 0x43, 0x36); icon = "\u2716"; break;
                     default:                bar = Color.FromRgb(0x29, 0x9B, 0xF7); icon = "\u2139"; break;
                 }
-                bg = Color.FromRgb(0x26, 0x2B, 0x33);
+                // 底色/文字色跟随当前深浅主题：从资源取 PanelBG / ValueFG，取不到时回退深色
+                bg = ResColor("PanelBG", Color.FromRgb(0x26, 0x2B, 0x33));
+                Color fg = ResColor("ValueFG", Color.FromRgb(0xE8, 0xEE, 0xF6));
 
                 var border = new Border
                 {
@@ -147,7 +160,7 @@ namespace newgdq.Services
                 var msg = new TextBlock
                 {
                     Text = message,
-                    Foreground = new SolidColorBrush(Color.FromRgb(0xE8, 0xEE, 0xF6)),
+                    Foreground = new SolidColorBrush(fg),
                     FontSize = 13,
                     FontFamily = new FontFamily("\u5fae\u8f6f\u96c5\u9ed1"),
                     TextWrapping = TextWrapping.Wrap,

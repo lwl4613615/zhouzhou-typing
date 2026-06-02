@@ -131,9 +131,14 @@
         <Menu DockPanel.Dock="Top" Background="{DynamicResource PanelBG}" x:Name="MainMenu">
             <MenuItem Header="菜单">
                 <MenuItem.Icon><ui:SymbolIcon Symbol="Navigation24" FontSize="16"/></MenuItem.Icon>
-                <MenuItem Header="发文..."    InputGestureText="F2" Click="MenuItem_OpenSendText_Click"/>
-                <MenuItem Header="外观..." Click="MenuItem_OpenSettings_Click"/>
+                <MenuItem Header="发文..."    InputGestureText="F2" Click="MenuItem_OpenSendText_Click">
+                    <MenuItem.Icon><ui:SymbolIcon Symbol="DocumentAdd24" FontSize="16"/></MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="外观..." Click="MenuItem_OpenSettings_Click">
+                    <MenuItem.Icon><ui:SymbolIcon Symbol="Color24" FontSize="16"/></MenuItem.Icon>
+                </MenuItem>
                 <MenuItem Header="界面缩放" x:Name="MnuUiScale">
+                    <MenuItem.Icon><ui:SymbolIcon Symbol="ZoomIn24" FontSize="16"/></MenuItem.Icon>
                     <MenuItem Header="放大  (Ctrl + 滚轮上)" InputGestureText="Ctrl+加号" Click="MenuItem_ScaleUp_Click"/>
                     <MenuItem Header="缩小  (Ctrl + 滚轮下)" InputGestureText="Ctrl+减号" Click="MenuItem_ScaleDown_Click"/>
                     <Separator/>
@@ -152,16 +157,20 @@
                 <MenuItem Header="复制成绩" InputGestureText="F9"     Click="MenuItem_CopyResult_Click">
                     <MenuItem.Icon><ui:SymbolIcon Symbol="Copy24" FontSize="16"/></MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="退出"     Click="MenuItem_Exit_Click"/>
+                <MenuItem Header="退出"     Click="MenuItem_Exit_Click">
+                    <MenuItem.Icon><ui:SymbolIcon Symbol="ArrowExit20" FontSize="16"/></MenuItem.Icon>
+                </MenuItem>
             </MenuItem>
             <MenuItem Header="功能">
                 <MenuItem.Icon><ui:SymbolIcon Symbol="Apps24" FontSize="16"/></MenuItem.Icon>
                 <MenuItem Header="文章处理">
+                    <MenuItem.Icon><ui:SymbolIcon Symbol="TextAlignLeft24" FontSize="16"/></MenuItem.Icon>
                     <MenuItem Header="将目前文章乱序"     InputGestureText="Ctrl+Q" Click="MenuItem_ShuffleArticle_Click"/>
                     <MenuItem Header="英文标点换中文标点" InputGestureText="Ctrl+W" Click="MenuItem_En2CnPunct_Click"/>
                     <MenuItem Header="删除空格（包含全角）"   Click="MenuItem_StripSpace_Click"/>
                 </MenuItem>
                 <MenuItem Header="内部测速">
+                    <MenuItem.Icon><ui:SymbolIcon Symbol="Timer24" FontSize="16"/></MenuItem.Icon>
                     <MenuItem Header="10字测试"     Tag="10字测试.txt"     Click="MenuItem_LoadInternal_Click"/>
                     <Separator/>
                     <MenuItem Header="常用单字前五百" Tag="常用单字前五百.txt" Click="MenuItem_LoadInternal_Click"/>
@@ -198,31 +207,53 @@
                 </MenuItem>
                 <Separator/>
                 <MenuItem Header="键位练习" Click="MenuItem_OpenShuangPin_Click"
-                          ToolTip="小鹤双拼 / 自然码 声母韵母键位练习（内嵌面板）"/>
+                          ToolTip="小鹤双拼 / 自然码 声母韵母键位练习（内嵌面板）">
+                    <MenuItem.Icon><ui:SymbolIcon Symbol="BookOpen24" FontSize="16"/></MenuItem.Icon>
+                </MenuItem>
                 <MenuItem Header="自然码辅助码说明..." Click="MenuItem_AuxCodeHelp_Click"
-                          ToolTip="讲清自然码「声+韵+形」辅助码怎么打（偏旁声母）"/>
+                          ToolTip="讲清自然码「声+韵+形」辅助码怎么打（偏旁声母）">
+                    <MenuItem.Icon><ui:SymbolIcon Symbol="Info24" FontSize="16"/></MenuItem.Icon>
+                </MenuItem>
                 <MenuItem Header="小鹤双拼辅助码说明..." Click="MenuItem_XhAuxCodeHelp_Click"
-                          ToolTip="打开小鹤双拼官方帮助页面"/>
+                          ToolTip="打开小鹤双拼官方帮助页面">
+                    <MenuItem.Icon><ui:SymbolIcon Symbol="Info24" FontSize="16"/></MenuItem.Icon>
+                </MenuItem>
                 <Separator/>
                 <MenuItem Header="测试自定义 bm.txt..." Click="MenuItem_TestBmFile_Click"
-                          ToolTip="选一个 bm.txt 文件，验证格式是否合法 + 显示统计信息&#10;不会替换当前词典，仅用于自检"/>
+                          ToolTip="选一个 bm.txt 文件，验证格式是否合法 + 显示统计信息&#10;不会替换当前词典，仅用于自检">
+                    <MenuItem.Icon><ui:SymbolIcon Symbol="DocumentSearch24" FontSize="16"/></MenuItem.Icon>
+                </MenuItem>
                 <MenuItem Header="词组模式" x:Name="MnuSmartCi" IsCheckable="True"
                           ToolTip="开：按最长词组划下划线 + 理论码长按词算；关：无下划线，只查单字"
                           Click="MnuSmartCi_Click"/>
             </MenuItem>
             <MenuItem Header="发文">
                 <MenuItem.Icon><ui:SymbolIcon Symbol="Send24" FontSize="16"/></MenuItem.Icon>
-                <MenuItem Header="发文状态" InputGestureText="Ctrl+F2" Click="MenuItem_SendStatus_Click"/>
-                <MenuItem Header="发下一段" InputGestureText="F6 / Ctrl+R" Click="MenuItem_SendNext_Click"/>
-                <MenuItem Header="乱序重抽" Click="MenuItem_SendShuffle_Click"/>
+                <MenuItem Header="发文状态" InputGestureText="Ctrl+F2" Click="MenuItem_SendStatus_Click">
+                    <MenuItem.Icon><ui:SymbolIcon Symbol="DataUsage24" FontSize="16"/></MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="发下一段" InputGestureText="F6 / Ctrl+R" Click="MenuItem_SendNext_Click">
+                    <MenuItem.Icon><ui:SymbolIcon Symbol="ArrowNext24" FontSize="16"/></MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="乱序重抽" Click="MenuItem_SendShuffle_Click">
+                    <MenuItem.Icon><ui:SymbolIcon Symbol="ArrowShuffle24" FontSize="16"/></MenuItem.Icon>
+                </MenuItem>
             </MenuItem>
             <MenuItem Header="帮助">
                 <MenuItem.Icon><ui:SymbolIcon Symbol="QuestionCircle24" FontSize="16"/></MenuItem.Icon>
-                <MenuItem Header="快捷键列表" Click="MenuItem_Hotkeys_Click"/>
+                <MenuItem Header="快捷键列表" Click="MenuItem_Hotkeys_Click">
+                    <MenuItem.Icon><ui:SymbolIcon Symbol="Keyboard24" FontSize="16"/></MenuItem.Icon>
+                </MenuItem>
                 <Separator/>
-                <MenuItem Header="访问 项目主页" Click="MenuItem_Homepage_Click"/>
-                <MenuItem Header="加入 QQ 交流群" Click="MenuItem_JoinQQ_Click"/>
-                <MenuItem Header="关于 州州跟打器..." Click="MenuItem_About_Click"/>
+                <MenuItem Header="访问 项目主页" Click="MenuItem_Homepage_Click">
+                    <MenuItem.Icon><ui:SymbolIcon Symbol="Home24" FontSize="16"/></MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="加入 QQ 交流群" Click="MenuItem_JoinQQ_Click">
+                    <MenuItem.Icon><ui:SymbolIcon Symbol="People24" FontSize="16"/></MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="关于 州州跟打器..." Click="MenuItem_About_Click">
+                    <MenuItem.Icon><ui:SymbolIcon Symbol="Info24" FontSize="16"/></MenuItem.Icon>
+                </MenuItem>
             </MenuItem>
             <MenuItem Header="复位" Click="MenuItem_Reset_Click">
                 <MenuItem.Icon><ui:SymbolIcon Symbol="ArrowReset24" FontSize="16"/></MenuItem.Icon>
