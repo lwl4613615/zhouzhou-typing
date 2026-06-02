@@ -1698,12 +1698,12 @@ namespace newgdq
 
         private void MenuItem_OpenTrend_Click(object sender, RoutedEventArgs e)
         {
-            new Views.TrendWindow(this).Show();
+            ShowAnalysis(new Views.TrendView(), "成绩趋势");
         }
 
         private void TxtFootLabel_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            new Views.TrendWindow(this).Show();
+            ShowAnalysis(new Views.TrendView(), "成绩趋势");
         }
         private void MenuItem_SendImageScore_Click(object sender, RoutedEventArgs e)
         {
@@ -1803,7 +1803,7 @@ namespace newgdq
                 Services.Toast.Info("当前没有可分析的跟打数据，先打一段试试");
                 return;
             }
-            new Views.SpeedAnalysisWindow(_session, this).Show();
+            ShowAnalysis(new Views.SpeedAnalysisView(_session), "速度分析");
         }
 
         // ===== 信息条段号点击 → 弹列表跳段 =====
