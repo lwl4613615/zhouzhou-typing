@@ -10,7 +10,7 @@
         ExtendsContentIntoTitleBar="True"
         WindowBackdropType="None"
         WindowStartupLocation="CenterOwner">
-    <Grid>
+    <Grid Background="{DynamicResource RegionBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>

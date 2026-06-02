@@ -10,7 +10,7 @@
         ExtendsContentIntoTitleBar="True"
         WindowBackdropType="None"
         FontFamily="微软雅黑">
-    <Grid>
+    <Grid Background="{DynamicResource RegionBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
