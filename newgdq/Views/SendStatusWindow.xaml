@@ -99,7 +99,11 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <ui:TitleBar Grid.Row="0" Title="州州跟打器发文状态"/>
+        <ui:TitleBar Grid.Row="0" Title="州州跟打器发文状态" Background="{DynamicResource PanelBG}" Height="36">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Source="pack://application:,,,/Resources/myicon.ico" Width="18" Height="18"/>
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
     <Grid Grid.Row="1" Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

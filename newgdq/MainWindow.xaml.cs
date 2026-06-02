@@ -527,9 +527,11 @@ namespace newgdq
             plot.Axes.Color(fgColor);
             plot.Axes.Bottom.Label.Text = "用时(s)";
             plot.Axes.Bottom.Label.FontSize = 10;
+            plot.Axes.Bottom.Label.FontName = "Microsoft YaHei";
             plot.Axes.Bottom.Label.ForeColor = fgColor;
             plot.Axes.Left.Label.Text = "速度(字/分)";
             plot.Axes.Left.Label.FontSize = 10;
+            plot.Axes.Left.Label.FontName = "Microsoft YaHei";
             plot.Axes.Left.Label.ForeColor = fgColor;
             plot.Axes.Bottom.TickLabelStyle.ForeColor = fgColor;
             plot.Axes.Bottom.TickLabelStyle.FontName = "Microsoft YaHei";

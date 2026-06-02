@@ -15,7 +15,11 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <ui:TitleBar Grid.Row="0" Title="成绩趋势"/>
+        <ui:TitleBar Grid.Row="0" Title="成绩趋势" Background="{DynamicResource PanelBG}" Height="36">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Source="pack://application:,,,/Resources/myicon.ico" Width="18" Height="18"/>
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
     <DockPanel Grid.Row="1" Margin="16" LastChildFill="True">
 
         <!-- 顶部工具栏：粒度 + 目标速度 -->

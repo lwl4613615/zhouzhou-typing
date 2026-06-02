@@ -14,7 +14,11 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <ui:TitleBar Grid.Row="0" Title="跟打报告"/>
+        <ui:TitleBar Grid.Row="0" Title="跟打报告" Background="{DynamicResource PanelBG}" Height="36">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Source="pack://application:,,,/Resources/myicon.ico" Width="18" Height="18"/>
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
     <DockPanel Grid.Row="1" Margin="12" LastChildFill="True">
 
         <!-- 顶部：摘要 -->

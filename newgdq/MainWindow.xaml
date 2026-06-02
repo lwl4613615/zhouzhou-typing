@@ -9,7 +9,7 @@
         xmlns:local="clr-namespace:newgdq"
         xmlns:views="clr-namespace:newgdq.Views"
         mc:Ignorable="d"
-        Title="州州跟打器" Height="620" Width="940"
+        Title="州州跟打器" Height="680" Width="940" MinHeight="560" MinWidth="820"
         FontFamily="微软雅黑" FontSize="12"
         Icon="pack://application:,,,/Resources/myicon.ico"
         Background="{DynamicResource RegionBrush}"
@@ -77,7 +77,12 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <ui:TitleBar Grid.Row="0" Title="州州跟打器"/>
+        <ui:TitleBar Grid.Row="0" x:Name="AppTitleBar" Title="州州跟打器"
+                     Background="{DynamicResource PanelBG}" Height="36">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Source="pack://application:,,,/Resources/myicon.ico" Width="18" Height="18"/>
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
     <DockPanel Grid.Row="1" LastChildFill="True">
 
 

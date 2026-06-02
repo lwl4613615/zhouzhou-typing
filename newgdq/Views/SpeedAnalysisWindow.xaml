@@ -15,7 +15,11 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <ui:TitleBar Grid.Row="0" Title="速度分析"/>
+        <ui:TitleBar Grid.Row="0" Title="速度分析" Background="{DynamicResource PanelBG}" Height="36">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Source="pack://application:,,,/Resources/myicon.ico" Width="18" Height="18"/>
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
     <DockPanel Grid.Row="1" Margin="12" LastChildFill="True">
 
         <Border DockPanel.Dock="Top" Background="{DynamicResource PanelBG}" Padding="10" CornerRadius="3">
