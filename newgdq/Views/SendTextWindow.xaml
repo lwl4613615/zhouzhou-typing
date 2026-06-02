@@ -59,11 +59,11 @@
                     </StackPanel>
                     <WrapPanel Orientation="Horizontal">
                         <TextBlock Text="发送字数" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{DynamicResource LabelFG}"/>
-                        <ui:TextBox x:Name="TbxSendCount" Width="84" MinWidth="84" Text="25" Margin="0,0,8,0" PreviewTextInput="DigitOnly_PreviewTextInput"/>
+                        <ui:TextBox x:Name="TbxSendCount" MinWidth="64" MaxWidth="140" Text="25" Margin="0,0,8,0" PreviewTextInput="DigitOnly_PreviewTextInput"/>
                         <TextBlock Text="起始位置" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{DynamicResource LabelFG}"/>
-                        <ui:TextBox x:Name="TbxSendStart" Width="84" MinWidth="84" Text="0" Margin="0,0,8,0" PreviewTextInput="DigitOnly_PreviewTextInput"/>
+                        <ui:TextBox x:Name="TbxSendStart" MinWidth="64" MaxWidth="140" Text="0" Margin="0,0,8,0" PreviewTextInput="DigitOnly_PreviewTextInput"/>
                         <TextBlock Text="始段号" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{DynamicResource LabelFG}"/>
-                        <ui:TextBox x:Name="TbxStartSeg" Width="84" MinWidth="84" Text="1" PreviewTextInput="DigitOnly_PreviewTextInput"/>
+                        <ui:TextBox x:Name="TbxStartSeg" MinWidth="64" MaxWidth="140" Text="1" PreviewTextInput="DigitOnly_PreviewTextInput"/>
                     </WrapPanel>
                 </StackPanel>
 
