@@ -499,24 +499,24 @@
                         </Style>
                     </DataGrid.RowStyle>
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="序"    Width="40" Binding="{Binding Index}"/>
-                        <DataGridTextColumn Header="时间"  Width="80" Binding="{Binding Time}"/>
-                        <DataGridTextColumn Header="段"    Width="55" Binding="{Binding Seg}"/>
-                        <DataGridTextColumn Header="速度"  Width="70" Binding="{Binding Speed, StringFormat=0.00}"/>
-                        <DataGridTextColumn Header="击键"  Width="70" Binding="{Binding Jj, StringFormat=0.00}"/>
-                        <DataGridTextColumn Header="码长"  Width="70" Binding="{Binding Mc, StringFormat=0.00}"/>
-                        <DataGridTextColumn Header="回改"  Width="60" Binding="{Binding Hg}"/>
-                        <DataGridTextColumn Header="错字"  Width="60" Binding="{Binding Cz}"/>
-                        <DataGridTextColumn Header="键数"  Width="60" Binding="{Binding Js}"/>
-                        <DataGridTextColumn Header="字数"  Width="60" Binding="{Binding Words}"/>
-                        <DataGridTextColumn Header="打词"  Width="60" Binding="{Binding DaCi}"/>
-                        <DataGridTextColumn Header="选重"  Width="50" Binding="{Binding Reselect}"/>
-                        <DataGridTextColumn Header="拼回"  Width="50" Binding="{Binding Enter}"/>
-                        <DataGridTextColumn Header="左:右" Width="70" Binding="{Binding LeftRight}"/>
-                        <DataGridTextColumn Header="用时" Width="70" MinWidth="60" Binding="{Binding UseTime, StringFormat=0.00}"/>
+                        <DataGridTextColumn Header="序"    Width="38" Binding="{Binding Index}"/>
+                        <DataGridTextColumn Header="时间"  Width="74" Binding="{Binding Time}"/>
+                        <DataGridTextColumn Header="段"    Width="44" Binding="{Binding Seg}"/>
+                        <DataGridTextColumn Header="速度"  Width="58" Binding="{Binding Speed, StringFormat=0.00}"/>
+                        <DataGridTextColumn Header="击键"  Width="58" Binding="{Binding Jj, StringFormat=0.00}"/>
+                        <DataGridTextColumn Header="码长"  Width="58" Binding="{Binding Mc, StringFormat=0.00}"/>
+                        <DataGridTextColumn Header="回改"  Width="48" Binding="{Binding Hg}"/>
+                        <DataGridTextColumn Header="错字"  Width="48" Binding="{Binding Cz}"/>
+                        <DataGridTextColumn Header="键数"  Width="48" Binding="{Binding Js}"/>
+                        <DataGridTextColumn Header="字数"  Width="50" Binding="{Binding Words}"/>
+                        <DataGridTextColumn Header="打词"  Width="50" Binding="{Binding DaCi}"/>
+                        <DataGridTextColumn Header="选重"  Width="46" Binding="{Binding Reselect}"/>
+                        <DataGridTextColumn Header="拼回"  Width="46" Binding="{Binding Enter}"/>
+                        <DataGridTextColumn Header="左:右" Width="62" Binding="{Binding LeftRight}"/>
+                        <DataGridTextColumn Header="用时" Width="58" MinWidth="54" Binding="{Binding UseTime, StringFormat=0.00}"/>
                         <!-- 独立的"本次/全部"切换列：用原生 DataGridColumnHeader（本身就是 ButtonBase），
                              普通字符串表头 → 与其它列头字体/颜色/对齐完全一致；HeaderStyle 挂 Click 事件 -->
-                        <DataGridTemplateColumn Width="56" Header="本次">
+                        <DataGridTemplateColumn Width="52" Header="本次">
                             <DataGridTemplateColumn.HeaderStyle>
                                 <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
                                     <Setter Property="Cursor" Value="Hand"/>
@@ -533,20 +533,20 @@
                 <Border Grid.Row="1" Background="{DynamicResource CellBG}" BorderBrush="{DynamicResource GridLine}" BorderThickness="0,1,0,0">
                     <Grid x:Name="FootGrid">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="40"/>
-                            <ColumnDefinition Width="80"/>
-                            <ColumnDefinition Width="40"/>
-                            <ColumnDefinition Width="70"/>
-                            <ColumnDefinition Width="70"/>
-                            <ColumnDefinition Width="70"/>
-                            <ColumnDefinition Width="60"/>
-                            <ColumnDefinition Width="60"/>
-                            <ColumnDefinition Width="60"/>
-                            <ColumnDefinition Width="60"/>
-                            <ColumnDefinition Width="60"/>
+                            <ColumnDefinition Width="38"/>
+                            <ColumnDefinition Width="74"/>
+                            <ColumnDefinition Width="44"/>
+                            <ColumnDefinition Width="58"/>
+                            <ColumnDefinition Width="58"/>
+                            <ColumnDefinition Width="58"/>
+                            <ColumnDefinition Width="48"/>
+                            <ColumnDefinition Width="48"/>
+                            <ColumnDefinition Width="48"/>
                             <ColumnDefinition Width="50"/>
                             <ColumnDefinition Width="50"/>
-                            <ColumnDefinition Width="70"/>
+                            <ColumnDefinition Width="46"/>
+                            <ColumnDefinition Width="46"/>
+                            <ColumnDefinition Width="62"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" x:Name="TxtFootLabel" Text="今日"  Foreground="{DynamicResource AccentFG}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" Cursor="Hand" ToolTip="点击查看成绩趋势（按天/周/月）" MouseLeftButtonUp="TxtFootLabel_Click"/>
