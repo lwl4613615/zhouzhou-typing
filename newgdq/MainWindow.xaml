@@ -242,6 +242,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <ui:TitleBar Grid.Row="0" x:Name="AppTitleBar" Title=""
+                     ShowMaximize="False" ShowMinimize="False" ShowClose="False"
                      Background="{DynamicResource PanelBG}" Height="36"/>
     <DockPanel Grid.Row="1" LastChildFill="True">
 
@@ -263,13 +264,13 @@
             </tb:TaskbarIcon.ContextMenu>
         </tb:TaskbarIcon>
 
-        <!-- 1a. 折叠态展开条：导航隐藏时显示，点击重新展开 -->
-        <Border DockPanel.Dock="Left" x:Name="NavExpandStrip" Width="36" Visibility="Collapsed"
+        <!-- 1a. 折叠态展开条：窄条贴边小箭头，点击重新展开 -->
+        <Border DockPanel.Dock="Left" x:Name="NavExpandStrip" Width="16" Visibility="Collapsed"
                 Background="{DynamicResource PanelBG}"
                 BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,1,0">
-            <Button Style="{StaticResource NavIconBtn}" VerticalAlignment="Top" Margin="0,12,0,0"
-                    Click="NavToggle_Click" ToolTip="展开导航栏">
-                <ui:SymbolIcon Symbol="PanelLeftExpand24" FontSize="18"/>
+            <Button Style="{StaticResource NavIconBtn}" Width="16" Height="40"
+                    VerticalAlignment="Center" Click="NavToggle_Click" ToolTip="展开导航栏">
+                <ui:SymbolIcon Symbol="ChevronRight20" FontSize="13"/>
             </Button>
         </Border>
 
@@ -279,10 +280,11 @@
                 BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,1,0">
             <DockPanel LastChildFill="True">
                 <!-- 顶部品牌头 -->
-                <DockPanel DockPanel.Dock="Top" Margin="14,12,8,6" LastChildFill="True">
+                <DockPanel DockPanel.Dock="Top" Margin="14,12,6,6" LastChildFill="True">
                     <Button DockPanel.Dock="Right" Style="{StaticResource NavIconBtn}"
-                            VerticalAlignment="Top" Click="NavToggle_Click" ToolTip="收起导航栏">
-                        <ui:SymbolIcon Symbol="PanelLeftContract24" FontSize="18"/>
+                            Width="16" Height="40" VerticalAlignment="Center"
+                            Click="NavToggle_Click" ToolTip="收起导航栏">
+                        <ui:SymbolIcon Symbol="ChevronLeft20" FontSize="13"/>
                     </Button>
                     <Border Width="32" Height="32" CornerRadius="8" Background="{DynamicResource AccentFG}">
                         <ui:SymbolIcon Symbol="Keyboard24" FontSize="18" Foreground="#1A1F2B"
