@@ -7,29 +7,39 @@
 
 ## 项目概览
 
-- **州州跟打器**（newgdq）：WPF / .NET Framework 4.8 中文跟打练习软件
+> 📌 **本文件在 `main` 与 `net10` 两个分支都维护，内容保持一致**（改动后请同步到另一分支，见下方「双轨发布」）。
+
+- **州州跟打器**（newgdq）：WPF 中文跟打练习软件，**双轨并行**：
+  - `main` 线 → **.NET Framework 4.8** + HandyControl（老机器兼容）
+  - `net10` 线 → **.NET 10** + WPF-UI（现代 UI，主力开发线）
 - 主工程：`newgdq/newgdq.csproj`；解决方案：`newgdq.slnx`
-- 依赖（NuGet）：HandyControl 3.5.1、OxyPlot 2.2.0、System.Data.SQLite.Core 1.0.118、Hardcodet.NotifyIcon.Wpf 1.1.0
+- 依赖（NuGet）：HandyControl 3.5.1（仅 main）/ WPF-UI 4.3.0（仅 net10）、OxyPlot 2.2.0、System.Data.SQLite.Core 1.0.118、Hardcodet.NotifyIcon.Wpf 1.1.0
 - DPI：`app.manifest` 启用 PerMonitorV2 + UTF-8；WPF 文本输入走 **TSF** 而非 IMM32
 
 ---
 
 ## 构建
 
-每次改动代码后请重新编译 Release 验证：
+每次改动代码后请重新编译 Release 验证。**按当前分支选对应命令**：
 
 ```powershell
+# main 线（.NET Framework 4.8，老式 MSBuild）
 $msbuild = "C:\Program Files\Microsoft Visual Studio\18\Enterprise\MSBuild\Current\Bin\MSBuild.exe"
 & $msbuild "newgdq\newgdq.csproj" /p:Configuration=Release /t:Rebuild /v:minimal /nologo
+
+# net10 线（.NET 10，SDK 式 dotnet）
+dotnet build newgdq/newgdq.csproj -c Release -v minimal
 ```
 
-成功输出：`newgdq -> ...\bin\Release\newgdq.exe`
+成功输出：`newgdq -> ...\bin\Release\newgdq.exe`（net10 为 `newgdq.dll` + 同名 exe 启动器）。
+
+> ⚠️ **切分支后先清 `newgdq/obj`**：net10 的 SDK restore 产物（`project.assets.json`）会让 4.8 的 MSBuild 报 *"does not reference .NETFramework v4.8"*；反之亦然。切线前 `Remove-Item newgdq\obj -Recurse -Force` 再编译。
 
 ---
 
 ## Git 流程
 
-- 分支 `main`，远程 `origin`
+- 远程 `origin`；两条长期分支 `main`（4.8）与 `net10`（.NET 10），维护规则见下方「双轨发布」
 - 提交信息用中文，遵循 `类型: 摘要` 前缀（feat / fix / release / docs 等）
 - 发布版本时：同步 bump `newgdq/Properties/AssemblyInfo.cs` 的 `AssemblyVersion` / `AssemblyFileVersion`，并更新 `README.md`
 
