@@ -169,7 +169,7 @@ namespace newgdq.Views
                 foreach (var c in pick) sb.Append(c);
             string text = sb.ToString();
             string title = $"错字针对练习 · {pick.Count}字×{repeat}遍";
-            main.LoadPracticeText(text, title);
+            if (!main.LoadPracticeText(text, title)) return;   // 用户在"覆盖确认"里取消 → 不关窗
             HandyControl.Controls.Growl.Success($"已生成 {text.Length} 字练习，去主窗开打");
             Close();
         }

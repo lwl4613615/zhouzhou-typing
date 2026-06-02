@@ -1628,14 +1628,28 @@ namespace newgdq
         }
 
         /// <summary>错字本闭环：把给定文本作为针对练习载入跟打区并激活主窗。</summary>
-        public void LoadPracticeText(string text, string title)
+        /// <returns>用户是否确认载入（正打到一半时取消则返回 false，原内容保留）。</returns>
+        public bool LoadPracticeText(string text, string title)
         {
-            if (string.IsNullOrEmpty(text)) return;
+            if (string.IsNullOrEmpty(text)) return false;
+            // 正打到一半（已开始、未结束、有输入但没打满）时先确认，避免覆盖丢失当前进度
+            bool inProgress = _session.Started && !_session.Finished
+                              && _session.LastInputLen > 0
+                              && _session.LastInputLen < _session.TypeText.Length;
+            if (inProgress)
+            {
+                var r = HandyControl.Controls.MessageBox.Show(
+                    "当前正在跟打「" + (string.IsNullOrEmpty(_session.Title) ? "未命名" : _session.Title) +
+                    "」，还没打完。\n载入错字练习会覆盖当前内容，未结算的进度将丢失。\n\n确定要切换吗？\n\n[ Esc 取消 ]",
+                    "切换到错字练习", System.Windows.MessageBoxButton.OKCancel, System.Windows.MessageBoxImage.Warning);
+                if (r != System.Windows.MessageBoxResult.OK) return false;
+            }
             _currentSegNo = 0;   // 独立练习，不归属任何发文段
             LoadArticle(text, title);
             if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
             Activate();
             TbxInput.Focus();
+            return true;
         }
 
         private void MenuItem_OpenTrend_Click(object sender, RoutedEventArgs e)
