@@ -166,6 +166,8 @@
                             <ui:Button Content="应用到当前" Padding="12,4" MinWidth="100" Click="BtnPresetApply_Click"/>
                         </StackPanel>
                         <ListBox x:Name="LbxPresets" SelectionChanged="LbxPresets_SelectionChanged"
+                                 Background="{DynamicResource AltRowBG}" Foreground="{DynamicResource ValueFG}"
+                                 BorderBrush="{DynamicResource GridLine}" BorderThickness="1"
                                  DisplayMemberPath="Name"/>
                     </DockPanel>
 
