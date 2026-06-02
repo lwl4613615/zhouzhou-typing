@@ -1651,7 +1651,7 @@ namespace newgdq
         }
 
         /// <summary>关闭内嵌分析页，恢复跟打区。</summary>
-        private void CloseAnalysis()
+        public void CloseAnalysis()
         {
             if (AnalysisHost == null || AnalysisHost.Visibility != Visibility.Visible) return;
             AnalysisHost.Visibility    = Visibility.Collapsed;
@@ -1668,7 +1668,7 @@ namespace newgdq
 
         private void MenuItem_OpenErrorBook_Click(object sender, RoutedEventArgs e)
         {
-            new Views.ErrorBookWindow(this).Show();
+            ShowAnalysis(new Views.ErrorBookView(), "错字本");
         }
 
         /// <summary>错字本闭环：把给定文本作为针对练习载入跟打区并激活主窗。</summary>
