@@ -4,9 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using OxyPlot;
-using OxyPlot.Axes;
-using OxyPlot.Series;
 using newgdq.Services;
 
 namespace newgdq.Views
@@ -82,7 +79,6 @@ namespace newgdq.Views
             var top = stats.OrderByDescending(s => s.Count).Take(10).ToList();
             if (top.Count == 0)
             {
-                PlotErr.Model = null;
                 PlotErr.Visibility = Visibility.Collapsed;
                 if (TxtChartEmpty != null) TxtChartEmpty.Visibility = Visibility.Visible;
                 return;
@@ -91,69 +87,55 @@ namespace newgdq.Views
             if (TxtChartEmpty != null) TxtChartEmpty.Visibility = Visibility.Collapsed;
 
             var fg = (this.FindResource("ValueFG") as System.Windows.Media.SolidColorBrush)?.Color;
-            var axisColor = fg.HasValue
-                ? OxyColor.FromArgb(0x99, fg.Value.R, fg.Value.G, fg.Value.B)
-                : OxyColors.Gray;
-            var textColor = fg.HasValue
-                ? OxyColor.FromRgb(fg.Value.R, fg.Value.G, fg.Value.B)
-                : OxyColors.Gray;
+            var textCol = fg.HasValue
+                ? new ScottPlot.Color(fg.Value.R, fg.Value.G, fg.Value.B)
+                : ScottPlot.Colors.Gray;
+            var axisCol = textCol.WithAlpha(0x99);
 
-            var model = new PlotModel
-            {
-                PlotAreaBorderColor = OxyColors.Transparent,
-                TextColor    = textColor,
-                TitleColor   = textColor,
-                Background   = OxyColors.Transparent,
-                PlotMargins  = new OxyThickness(0),
-                Padding      = new OxyThickness(0),
-            };
-            var bar = new BarSeries
-            {
-                StrokeColor = OxyColors.Transparent,
-                LabelPlacement = LabelPlacement.Inside,
-                LabelFormatString = "{0}",
-                TextColor = OxyColors.White,
-            };
+            var plot = PlotErr.Plot;
+            plot.Clear();
+
             int max = top.Max(s => s.Count);
             // 表格倒序，柱图从下往上，反转使最高项在顶部
             var ordered = top.AsEnumerable().Reverse().ToList();
-            foreach (var s in ordered)
+
+            var bars = new List<ScottPlot.Bar>();
+            for (int i = 0; i < ordered.Count; i++)
             {
+                var s = ordered[i];
                 double t = max > 0 ? (double)s.Count / max : 0;
-                var col = OxyColor.FromRgb(
+                var col = new ScottPlot.Color(
                     (byte)(0x42 + (0xEF - 0x42) * t),
                     (byte)(0xC3 + (0x44 - 0xC3) * t),
                     (byte)(0x6E + (0x36 - 0x6E) * t));
-                bar.Items.Add(new BarItem { Value = s.Count, Color = col });
+                bars.Add(new ScottPlot.Bar
+                {
+                    Position = i,
+                    Value = s.Count,
+                    FillColor = col,
+                    Orientation = ScottPlot.Orientation.Horizontal,
+                });
             }
+            plot.Add.Bars(bars);
 
-            var categoryAxis = new CategoryAxis
-            {
-                Position = AxisPosition.Left,
-                TextColor = textColor,
-                AxislineColor = axisColor,
-                TicklineColor = axisColor,
-                FontSize = 13,
-            };
-            foreach (var s in ordered)
-                categoryAxis.Labels.Add(s.Correct + "→" + ShowCharShort(s.Typed));
+            // Y 轴类别标签
+            var ticks = new ScottPlot.TickGenerators.NumericManual();
+            for (int i = 0; i < ordered.Count; i++)
+                ticks.AddMajor(i, ordered[i].Correct + "→" + ShowCharShort(ordered[i].Typed));
+            plot.Axes.Left.TickGenerator = ticks;
 
-            var valueAxis = new LinearAxis
-            {
-                Position = AxisPosition.Bottom,
-                Minimum = 0,
-                MajorGridlineStyle = LineStyle.Dot,
-                MajorGridlineColor = axisColor,
-                MinorTickSize = 0,
-                TextColor = textColor,
-                AxislineColor = axisColor,
-                TicklineColor = axisColor,
-            };
+            // 样式：透明背景、隐网格、中文字体、轴色
+            plot.FigureBackground.Color = ScottPlot.Colors.Transparent;
+            plot.DataBackground.Color = ScottPlot.Colors.Transparent;
+            plot.Axes.Color(axisCol);
+            plot.Axes.Left.TickLabelStyle.ForeColor = textCol;
+            plot.Axes.Left.TickLabelStyle.FontName = "Microsoft YaHei";
+            plot.Axes.Left.TickLabelStyle.FontSize = 13;
+            plot.Axes.Bottom.TickLabelStyle.ForeColor = textCol;
+            plot.HideGrid();
+            plot.Axes.SetLimits(0, max * 1.12, -0.6, ordered.Count - 0.4);
 
-            model.Axes.Add(categoryAxis);
-            model.Axes.Add(valueAxis);
-            model.Series.Add(bar);
-            PlotErr.Model = model;
+            PlotErr.Refresh();
         }
 
         /// <summary>柱图轴标用的紧凑“打成字”显示。</summary>
