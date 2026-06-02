@@ -86,6 +86,9 @@ namespace newgdq.Models
         // 发文窗口"本次发送字数"上次填写值。默认 25。
         [DataMember(EmitDefaultValue = false)] public int? LastSendCount { get; set; }
 
+        // 发文窗"自定义文章"上次选择的本地文件夹。
+        [DataMember(EmitDefaultValue = false)] public string LastCustomFolder { get; set; }
+
         // 成绩趋势：目标速度（字/分）。null 或 0 = 未设目标，趋势窗只看进步不做达标判定。
         [DataMember(EmitDefaultValue = false)] public double? GoalSpeed { get; set; }
     }

@@ -49,6 +49,11 @@ namespace newgdq.Views
             // 恢复上次"本次发送字数"（默认 25）
             int lastCount = SettingsService.Instance.LastSendCount ?? 25;
             if (lastCount > 0) TbxSendCount.Text = lastCount.ToString();
+
+            // 恢复上次"自定义文章"文件夹
+            var lastFolder = SettingsService.Instance.LastCustomFolder;
+            if (!string.IsNullOrEmpty(lastFolder) && Directory.Exists(lastFolder))
+                BuildCustomTree(lastFolder);
         }
 
         /// <summary>当前用户选择的文段类型；返回 null 表示"自动按是否含中文标点判断"。</summary>
@@ -194,13 +199,132 @@ namespace newgdq.Views
             }
         }
 
-        // ===== Tab 2 自定义 =====
-        private void TbxCustom_TextChanged(object sender, TextChangedEventArgs e)
+        // ===== Tab 2 自定义文章：本地 TXT 文件树 =====
+        private void BtnPickFolder_Click(object sender, RoutedEventArgs e)
         {
-            if (TbxCustomBody == null || TbxCustomTitle == null) return;  // XAML 加载中
-            _currentText = TbxCustomBody.Text ?? "";
-            _currentTitle = string.IsNullOrEmpty(TbxCustomTitle.Text) ? "自定义文章" : TbxCustomTitle.Text;
-            RefreshInfo();
+            using (var dlg = new System.Windows.Forms.FolderBrowserDialog())
+            {
+                dlg.Description = "选择存放 TXT 文章的文件夹";
+                var last = SettingsService.Instance.LastCustomFolder;
+                if (!string.IsNullOrEmpty(last) && Directory.Exists(last))
+                    dlg.SelectedPath = last;
+                if (dlg.ShowDialog() != System.Windows.Forms.DialogResult.OK) return;
+                SettingsService.Instance.LastCustomFolder = dlg.SelectedPath;
+                SettingsService.Save();
+                BuildCustomTree(dlg.SelectedPath);
+            }
+        }
+
+        private void BtnRefreshTree_Click(object sender, RoutedEventArgs e)
+        {
+            var folder = SettingsService.Instance.LastCustomFolder;
+            if (string.IsNullOrEmpty(folder) || !Directory.Exists(folder))
+            {
+                Services.Toast.Info("请先选择文件夹");
+                return;
+            }
+            BuildCustomTree(folder);
+        }
+
+        /// <summary>以 root 为根重建文件树（只显示子目录与 .txt 文件，子目录懒加载）。</summary>
+        private void BuildCustomTree(string root)
+        {
+            TxtCustomFolder.Text = root;
+            TrvCustom.Items.Clear();
+            try
+            {
+                var rootNode = CreateDirNode(root, System.IO.Path.GetFileName(root.TrimEnd('\\', '/')) is var n && string.IsNullOrEmpty(n) ? root : n);
+                rootNode.IsExpanded = true;
+                PopulateDir(rootNode);
+                TrvCustom.Items.Add(rootNode);
+            }
+            catch (Exception ex)
+            {
+                Services.Toast.Error("读取文件夹失败：" + ex.Message);
+            }
+        }
+
+        private TreeViewItem CreateDirNode(string fullPath, string display)
+        {
+            var item = new TreeViewItem { Header = "📁 " + display, Tag = new DirTag(fullPath) };
+            item.Items.Add("__dummy__");           // 占位，触发可展开
+            item.Expanded += DirNode_Expanded;
+            return item;
+        }
+
+        private TreeViewItem CreateFileNode(string fullPath)
+        {
+            return new TreeViewItem
+            {
+                Header = System.IO.Path.GetFileName(fullPath),
+                Tag = fullPath                       // 文件节点：Tag 为字符串路径
+            };
+        }
+
+        private void DirNode_Expanded(object sender, RoutedEventArgs e)
+        {
+            if (!(sender is TreeViewItem item) || !(item.Tag is DirTag tag)) return;
+            if (tag.Loaded) return;
+            tag.Loaded = true;
+            item.Items.Clear();
+            PopulateDir(item);
+        }
+
+        private void PopulateDir(TreeViewItem dirItem)
+        {
+            var tag = dirItem.Tag as DirTag;
+            if (tag == null) return;
+            tag.Loaded = true;
+            try
+            {
+                foreach (var dir in Directory.EnumerateDirectories(tag.Path).OrderBy(p => p))
+                {
+                    try
+                    {
+                        var di = new DirectoryInfo(dir);
+                        if ((di.Attributes & (FileAttributes.Hidden | FileAttributes.System)) != 0) continue;
+                        dirItem.Items.Add(CreateDirNode(dir, di.Name));
+                    }
+                    catch { /* 跳过无权限目录 */ }
+                }
+                foreach (var file in Directory.EnumerateFiles(tag.Path, "*.txt").OrderBy(p => p))
+                    dirItem.Items.Add(CreateFileNode(file));
+            }
+            catch (Exception ex)
+            {
+                Services.Toast.Error("展开失败：" + ex.Message);
+            }
+        }
+
+        private void TrvCustom_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            if (!(e.NewValue is TreeViewItem item) || !(item.Tag is string path)) return; // 目录节点 Tag 是 DirTag
+            try
+            {
+                string text = ArticleLoader.LoadFromFile(path);
+                if (string.IsNullOrWhiteSpace(text))
+                {
+                    Services.Toast.Warning("文件内容为空");
+                    return;
+                }
+                _currentText = text;
+                _currentTitle = System.IO.Path.GetFileNameWithoutExtension(path);
+                TxtCustomPreview.Text = text.Length > 400 ? text.Substring(0, 400) + " ..." : text;
+                RefreshInfo();
+            }
+            catch (Exception ex)
+            {
+                TxtCustomPreview.Text = "无法读取该文件：" + ex.Message;
+                Services.Toast.Error("读取失败：" + ex.Message);
+            }
+        }
+
+        /// <summary>目录节点标记（区分文件节点的字符串 Tag），记录路径与懒加载状态。</summary>
+        private sealed class DirTag
+        {
+            public string Path;
+            public bool Loaded;
+            public DirTag(string path) { Path = path; }
         }
 
         // ===== Tab 3 剪切板 =====
