@@ -94,7 +94,57 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- ===== 左侧导航栏样式（D/E 现代化重构：顶部菜单 → 左侧导航） ===== -->
+        <!-- 导航分组标题 -->
+        <Style x:Key="NavSection" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource LabelFG}"/>
+            <Setter Property="Opacity" Value="0.55"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="12,10,0,3"/>
+        </Style>
+        <!-- 导航行按钮：图标 + 文字，整行可点，hover 高亮 -->
+        <Style x:Key="NavRowBtn" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource ValueFG}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" CornerRadius="5" Margin="4,1" Padding="8,0"
+                                Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="{DynamicResource MarkerHoverBG}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.7"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!-- 侧栏内嵌下拉 Menu：去边框、透明底，顶层项看起来像导航行 -->
+        <Style x:Key="NavMenu" TargetType="Menu">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        </Style>
+        <Style x:Key="NavMenuTop" TargetType="MenuItem">
+            <Setter Property="Foreground" Value="{DynamicResource ValueFG}"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Padding" Value="8,0"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
     </Window.Resources>
+
 
     <Grid>
         <Grid.RowDefinitions>
@@ -127,138 +177,208 @@
             </tb:TaskbarIcon.ContextMenu>
         </tb:TaskbarIcon>
 
-        <!-- 1. 顶部菜单栏 -->
-        <Menu DockPanel.Dock="Top" Background="{DynamicResource PanelBG}" x:Name="MainMenu">
-            <MenuItem Header="菜单">
-                <MenuItem.Icon><ui:SymbolIcon Symbol="Navigation24" FontSize="16"/></MenuItem.Icon>
-                <MenuItem Header="发文..."    InputGestureText="F2" Click="MenuItem_OpenSendText_Click">
-                    <MenuItem.Icon><ui:SymbolIcon Symbol="DocumentAdd24" FontSize="16"/></MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="外观..." Click="MenuItem_OpenSettings_Click">
-                    <MenuItem.Icon><ui:SymbolIcon Symbol="Color24" FontSize="16"/></MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="界面缩放" x:Name="MnuUiScale">
-                    <MenuItem.Icon><ui:SymbolIcon Symbol="ZoomIn24" FontSize="16"/></MenuItem.Icon>
-                    <MenuItem Header="放大  (Ctrl + 滚轮上)" InputGestureText="Ctrl+加号" Click="MenuItem_ScaleUp_Click"/>
-                    <MenuItem Header="缩小  (Ctrl + 滚轮下)" InputGestureText="Ctrl+减号" Click="MenuItem_ScaleDown_Click"/>
-                    <Separator/>
-                    <MenuItem Header="100%" Tag="1.0"  IsCheckable="True" Click="MenuItem_ScaleSet_Click"/>
-                    <MenuItem Header="125%" Tag="1.25" IsCheckable="True" Click="MenuItem_ScaleSet_Click"/>
-                    <MenuItem Header="150%" Tag="1.5"  IsCheckable="True" Click="MenuItem_ScaleSet_Click"/>
-                    <MenuItem Header="175%" Tag="1.75" IsCheckable="True" Click="MenuItem_ScaleSet_Click"/>
-                    <MenuItem Header="200%" Tag="2.0"  IsCheckable="True" Click="MenuItem_ScaleSet_Click"/>
-                    <MenuItem Header="225%" Tag="2.25" IsCheckable="True" Click="MenuItem_ScaleSet_Click"/>
-                    <MenuItem Header="250%" Tag="2.5"  IsCheckable="True" Click="MenuItem_ScaleSet_Click"/>
-                </MenuItem>
-                <MenuItem Header="暂停"   InputGestureText="F8" x:Name="MnuPause" Click="MenuItem_Pause_Click">
-                    <MenuItem.Icon><ui:SymbolIcon Symbol="Pause24" FontSize="16"/></MenuItem.Icon>
-                </MenuItem>
-                <Separator/>
-                <MenuItem Header="复制成绩" InputGestureText="F9"     Click="MenuItem_CopyResult_Click">
-                    <MenuItem.Icon><ui:SymbolIcon Symbol="Copy24" FontSize="16"/></MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="退出"     Click="MenuItem_Exit_Click">
-                    <MenuItem.Icon><ui:SymbolIcon Symbol="ArrowExit20" FontSize="16"/></MenuItem.Icon>
-                </MenuItem>
-            </MenuItem>
-            <MenuItem Header="功能">
-                <MenuItem.Icon><ui:SymbolIcon Symbol="Apps24" FontSize="16"/></MenuItem.Icon>
-                <MenuItem Header="文章处理">
-                    <MenuItem.Icon><ui:SymbolIcon Symbol="TextAlignLeft24" FontSize="16"/></MenuItem.Icon>
-                    <MenuItem Header="将目前文章乱序"     InputGestureText="Ctrl+Q" Click="MenuItem_ShuffleArticle_Click"/>
-                    <MenuItem Header="英文标点换中文标点" InputGestureText="Ctrl+W" Click="MenuItem_En2CnPunct_Click"/>
-                    <MenuItem Header="删除空格（包含全角）"   Click="MenuItem_StripSpace_Click"/>
-                </MenuItem>
-                <MenuItem Header="内部测速">
-                    <MenuItem.Icon><ui:SymbolIcon Symbol="Timer24" FontSize="16"/></MenuItem.Icon>
-                    <MenuItem Header="10字测试"     Tag="10字测试.txt"     Click="MenuItem_LoadInternal_Click"/>
-                    <Separator/>
-                    <MenuItem Header="常用单字前五百" Tag="常用单字前五百.txt" Click="MenuItem_LoadInternal_Click"/>
-                    <MenuItem Header="常用单字中五百" Tag="常用单字中五百.txt" Click="MenuItem_LoadInternal_Click"/>
-                    <MenuItem Header="常用单字后五百" Tag="常用单字后五百.txt" Click="MenuItem_LoadInternal_Click"/>
-                    <MenuItem Header="常用词组前三百" Tag="常用词组前三百.txt" Click="MenuItem_LoadInternal_Click"/>
-                    <MenuItem Header="岳阳楼记"       Tag="岳阳楼记.txt"       Click="MenuItem_LoadInternal_Click"/>
-                    <MenuItem Header="为人民服务节选" Tag="为人民服务节选.txt" Click="MenuItem_LoadInternal_Click"/>
-                    <MenuItem Header="前1500单字"     Tag="前1500单字.txt"     Click="MenuItem_LoadInternal_Click"/>
-                </MenuItem>
-                <Separator/>
-                <MenuItem Header="发送图片成绩" InputGestureText="Ctrl+T" Click="MenuItem_SendImageScore_Click">
-                    <MenuItem.Icon><ui:SymbolIcon Symbol="Image24" FontSize="16"/></MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="平均成绩..." Click="MenuItem_OpenAverage_Click">
-                    <MenuItem.Icon><ui:SymbolIcon Symbol="DataHistogram24" FontSize="16"/></MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="成绩趋势..." Click="MenuItem_OpenTrend_Click"
-                          ToolTip="按天/周/月看均速趋势，和过去的自己比；可设目标速度（仅参考线，达不到不责备）">
-                    <MenuItem.Icon><ui:SymbolIcon Symbol="DataTrending24" FontSize="16"/></MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="错字本..." Click="MenuItem_OpenErrorBook_Click"
-                          ToolTip="按本次/本日/本周/本月/本年查看高频错字排行">
-                    <MenuItem.Icon><ui:SymbolIcon Symbol="ErrorCircle24" FontSize="16"/></MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="击键评定..." InputGestureText="Ctrl+B" Click="MenuItem_OpenJjCheck_Click">
-                    <MenuItem.Icon><ui:SymbolIcon Symbol="Keyboard24" FontSize="16"/></MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="速度分析..." InputGestureText="Ctrl+E" Click="MenuItem_OpenSpeedAnalysis_Click">
-                    <MenuItem.Icon><ui:SymbolIcon Symbol="TopSpeed24" FontSize="16"/></MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="跟打报告..." InputGestureText="Ctrl+G" Click="MenuItem_OpenReport_Click">
-                    <MenuItem.Icon><ui:SymbolIcon Symbol="Document24" FontSize="16"/></MenuItem.Icon>
-                </MenuItem>
-                <Separator/>
-                <MenuItem Header="键位练习" Click="MenuItem_OpenShuangPin_Click"
-                          ToolTip="小鹤双拼 / 自然码 声母韵母键位练习（内嵌面板）">
-                    <MenuItem.Icon><ui:SymbolIcon Symbol="BookOpen24" FontSize="16"/></MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="自然码辅助码说明..." Click="MenuItem_AuxCodeHelp_Click"
-                          ToolTip="讲清自然码「声+韵+形」辅助码怎么打（偏旁声母）">
-                    <MenuItem.Icon><ui:SymbolIcon Symbol="Info24" FontSize="16"/></MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="小鹤双拼辅助码说明..." Click="MenuItem_XhAuxCodeHelp_Click"
-                          ToolTip="打开小鹤双拼官方帮助页面">
-                    <MenuItem.Icon><ui:SymbolIcon Symbol="Info24" FontSize="16"/></MenuItem.Icon>
-                </MenuItem>
-                <Separator/>
-                <MenuItem Header="测试自定义 bm.txt..." Click="MenuItem_TestBmFile_Click"
-                          ToolTip="选一个 bm.txt 文件，验证格式是否合法 + 显示统计信息&#10;不会替换当前词典，仅用于自检">
-                    <MenuItem.Icon><ui:SymbolIcon Symbol="DocumentSearch24" FontSize="16"/></MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="词组模式" x:Name="MnuSmartCi" IsCheckable="True"
-                          ToolTip="开：按最长词组划下划线 + 理论码长按词算；关：无下划线，只查单字"
-                          Click="MnuSmartCi_Click"/>
-            </MenuItem>
-            <MenuItem Header="发文">
-                <MenuItem.Icon><ui:SymbolIcon Symbol="Send24" FontSize="16"/></MenuItem.Icon>
-                <MenuItem Header="发文状态" InputGestureText="Ctrl+F2" Click="MenuItem_SendStatus_Click">
-                    <MenuItem.Icon><ui:SymbolIcon Symbol="DataUsage24" FontSize="16"/></MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="发下一段" InputGestureText="F6 / Ctrl+R" Click="MenuItem_SendNext_Click">
-                    <MenuItem.Icon><ui:SymbolIcon Symbol="ArrowNext24" FontSize="16"/></MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="乱序重抽" Click="MenuItem_SendShuffle_Click">
-                    <MenuItem.Icon><ui:SymbolIcon Symbol="ArrowShuffle24" FontSize="16"/></MenuItem.Icon>
-                </MenuItem>
-            </MenuItem>
-            <MenuItem Header="帮助">
-                <MenuItem.Icon><ui:SymbolIcon Symbol="QuestionCircle24" FontSize="16"/></MenuItem.Icon>
-                <MenuItem Header="快捷键列表" Click="MenuItem_Hotkeys_Click">
-                    <MenuItem.Icon><ui:SymbolIcon Symbol="Keyboard24" FontSize="16"/></MenuItem.Icon>
-                </MenuItem>
-                <Separator/>
-                <MenuItem Header="访问 项目主页" Click="MenuItem_Homepage_Click">
-                    <MenuItem.Icon><ui:SymbolIcon Symbol="Home24" FontSize="16"/></MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="加入 QQ 交流群" Click="MenuItem_JoinQQ_Click">
-                    <MenuItem.Icon><ui:SymbolIcon Symbol="People24" FontSize="16"/></MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="关于 州州跟打器..." Click="MenuItem_About_Click">
-                    <MenuItem.Icon><ui:SymbolIcon Symbol="Info24" FontSize="16"/></MenuItem.Icon>
-                </MenuItem>
-            </MenuItem>
-            <MenuItem Header="复位" Click="MenuItem_Reset_Click">
-                <MenuItem.Icon><ui:SymbolIcon Symbol="ArrowReset24" FontSize="16"/></MenuItem.Icon>
-            </MenuItem>
-        </Menu>
+        <!-- 1. 左侧导航栏（D/E 现代化重构：顶部菜单 → 左侧导航；复用全部原 Click 处理器） -->
+        <Border DockPanel.Dock="Left" x:Name="NavRail" Width="162"
+                Background="{DynamicResource PanelBG}"
+                BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,1,0">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <StackPanel Margin="0,4,0,8">
+                    <!-- 操作 -->
+                    <TextBlock Text="操作" Style="{StaticResource NavSection}"/>
+                    <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_OpenSendText_Click" ToolTip="F2">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="DocumentAdd24" FontSize="16" Margin="0,0,10,0"/>
+                            <TextBlock Text="发文" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_SendNext_Click" ToolTip="F6 / Ctrl+R">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="ArrowNext24" FontSize="16" Margin="0,0,10,0"/>
+                            <TextBlock Text="发下一段" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_SendShuffle_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="ArrowShuffle24" FontSize="16" Margin="0,0,10,0"/>
+                            <TextBlock Text="乱序重抽" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_SendStatus_Click" ToolTip="Ctrl+F2">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="DataUsage24" FontSize="16" Margin="0,0,10,0"/>
+                            <TextBlock Text="发文状态" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_Pause_Click" ToolTip="F8">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Pause24" FontSize="16" Margin="0,0,10,0"/>
+                            <TextBlock Text="暂停 / 继续" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_CopyResult_Click" ToolTip="F9">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Copy24" FontSize="16" Margin="0,0,10,0"/>
+                            <TextBlock Text="复制成绩" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_Reset_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="ArrowReset24" FontSize="16" Margin="0,0,10,0"/>
+                            <TextBlock Text="复位" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <!-- 分析 -->
+                    <TextBlock Text="分析" Style="{StaticResource NavSection}"/>
+                    <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_OpenTrend_Click"
+                            ToolTip="按天/周/月看均速趋势，和过去的自己比">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="DataTrending24" FontSize="16" Margin="0,0,10,0"/>
+                            <TextBlock Text="成绩趋势" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_OpenAverage_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="DataHistogram24" FontSize="16" Margin="0,0,10,0"/>
+                            <TextBlock Text="平均成绩" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_OpenJjCheck_Click" ToolTip="Ctrl+B">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Keyboard24" FontSize="16" Margin="0,0,10,0"/>
+                            <TextBlock Text="击键评定" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_OpenSpeedAnalysis_Click" ToolTip="Ctrl+E">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="TopSpeed24" FontSize="16" Margin="0,0,10,0"/>
+                            <TextBlock Text="速度分析" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_OpenReport_Click" ToolTip="Ctrl+G">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Document24" FontSize="16" Margin="0,0,10,0"/>
+                            <TextBlock Text="跟打报告" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_OpenErrorBook_Click"
+                            ToolTip="按本次/本日/本周/本月/本年查看高频错字排行">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="ErrorCircle24" FontSize="16" Margin="0,0,10,0"/>
+                            <TextBlock Text="错字本" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_SendImageScore_Click" ToolTip="Ctrl+T">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Image24" FontSize="16" Margin="0,0,10,0"/>
+                            <TextBlock Text="发送图片成绩" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <!-- 文章 / 词典 -->
+                    <TextBlock Text="文章 / 词典" Style="{StaticResource NavSection}"/>
+                    <Menu Style="{StaticResource NavMenu}">
+                        <MenuItem Style="{StaticResource NavMenuTop}" Header="文章处理">
+                            <MenuItem.Icon><ui:SymbolIcon Symbol="TextAlignLeft24" FontSize="16"/></MenuItem.Icon>
+                            <MenuItem Header="将目前文章乱序"     InputGestureText="Ctrl+Q" Click="MenuItem_ShuffleArticle_Click"/>
+                            <MenuItem Header="英文标点换中文标点" InputGestureText="Ctrl+W" Click="MenuItem_En2CnPunct_Click"/>
+                            <MenuItem Header="删除空格（包含全角）"   Click="MenuItem_StripSpace_Click"/>
+                        </MenuItem>
+                    </Menu>
+                    <Menu Style="{StaticResource NavMenu}">
+                        <MenuItem Style="{StaticResource NavMenuTop}" Header="内部测速">
+                            <MenuItem.Icon><ui:SymbolIcon Symbol="Timer24" FontSize="16"/></MenuItem.Icon>
+                            <MenuItem Header="10字测试"     Tag="10字测试.txt"     Click="MenuItem_LoadInternal_Click"/>
+                            <Separator/>
+                            <MenuItem Header="常用单字前五百" Tag="常用单字前五百.txt" Click="MenuItem_LoadInternal_Click"/>
+                            <MenuItem Header="常用单字中五百" Tag="常用单字中五百.txt" Click="MenuItem_LoadInternal_Click"/>
+                            <MenuItem Header="常用单字后五百" Tag="常用单字后五百.txt" Click="MenuItem_LoadInternal_Click"/>
+                            <MenuItem Header="常用词组前三百" Tag="常用词组前三百.txt" Click="MenuItem_LoadInternal_Click"/>
+                            <MenuItem Header="岳阳楼记"       Tag="岳阳楼记.txt"       Click="MenuItem_LoadInternal_Click"/>
+                            <MenuItem Header="为人民服务节选" Tag="为人民服务节选.txt" Click="MenuItem_LoadInternal_Click"/>
+                            <MenuItem Header="前1500单字"     Tag="前1500单字.txt"     Click="MenuItem_LoadInternal_Click"/>
+                        </MenuItem>
+                    </Menu>
+                    <Menu Style="{StaticResource NavMenu}">
+                        <MenuItem Style="{StaticResource NavMenuTop}" Header="词典 / 检测">
+                            <MenuItem.Icon><ui:SymbolIcon Symbol="DocumentSearch24" FontSize="16"/></MenuItem.Icon>
+                            <MenuItem Header="词组模式" x:Name="MnuSmartCi" IsCheckable="True"
+                                      ToolTip="开：按最长词组划下划线 + 理论码长按词算；关：无下划线，只查单字"
+                                      Click="MnuSmartCi_Click"/>
+                            <MenuItem Header="测试自定义 bm.txt..." Click="MenuItem_TestBmFile_Click"
+                                      ToolTip="选一个 bm.txt 文件，验证格式是否合法 + 显示统计信息&#10;不会替换当前词典，仅用于自检"/>
+                        </MenuItem>
+                    </Menu>
+
+                    <!-- 学习 -->
+                    <TextBlock Text="学习" Style="{StaticResource NavSection}"/>
+                    <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_OpenShuangPin_Click"
+                            ToolTip="小鹤双拼 / 自然码 声母韵母键位练习（内嵌面板）">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="BookOpen24" FontSize="16" Margin="0,0,10,0"/>
+                            <TextBlock Text="键位练习" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Menu Style="{StaticResource NavMenu}">
+                        <MenuItem Style="{StaticResource NavMenuTop}" Header="辅助码说明">
+                            <MenuItem.Icon><ui:SymbolIcon Symbol="Info24" FontSize="16"/></MenuItem.Icon>
+                            <MenuItem Header="自然码辅助码说明..." Click="MenuItem_AuxCodeHelp_Click"
+                                      ToolTip="讲清自然码「声+韵+形」辅助码怎么打（偏旁声母）"/>
+                            <MenuItem Header="小鹤双拼辅助码说明..." Click="MenuItem_XhAuxCodeHelp_Click"
+                                      ToolTip="打开小鹤双拼官方帮助页面"/>
+                        </MenuItem>
+                    </Menu>
+
+                    <!-- 设置 / 帮助 -->
+                    <TextBlock Text="设置 / 帮助" Style="{StaticResource NavSection}"/>
+                    <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_OpenSettings_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Color24" FontSize="16" Margin="0,0,10,0"/>
+                            <TextBlock Text="外观" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Menu Style="{StaticResource NavMenu}">
+                        <MenuItem Style="{StaticResource NavMenuTop}" Header="界面缩放" x:Name="MnuUiScale">
+                            <MenuItem.Icon><ui:SymbolIcon Symbol="ZoomIn24" FontSize="16"/></MenuItem.Icon>
+                            <MenuItem Header="放大  (Ctrl + 滚轮上)" InputGestureText="Ctrl+加号" Click="MenuItem_ScaleUp_Click"/>
+                            <MenuItem Header="缩小  (Ctrl + 滚轮下)" InputGestureText="Ctrl+减号" Click="MenuItem_ScaleDown_Click"/>
+                            <Separator/>
+                            <MenuItem Header="100%" Tag="1.0"  IsCheckable="True" Click="MenuItem_ScaleSet_Click"/>
+                            <MenuItem Header="125%" Tag="1.25" IsCheckable="True" Click="MenuItem_ScaleSet_Click"/>
+                            <MenuItem Header="150%" Tag="1.5"  IsCheckable="True" Click="MenuItem_ScaleSet_Click"/>
+                            <MenuItem Header="175%" Tag="1.75" IsCheckable="True" Click="MenuItem_ScaleSet_Click"/>
+                            <MenuItem Header="200%" Tag="2.0"  IsCheckable="True" Click="MenuItem_ScaleSet_Click"/>
+                            <MenuItem Header="225%" Tag="2.25" IsCheckable="True" Click="MenuItem_ScaleSet_Click"/>
+                            <MenuItem Header="250%" Tag="2.5"  IsCheckable="True" Click="MenuItem_ScaleSet_Click"/>
+                        </MenuItem>
+                    </Menu>
+                    <Menu Style="{StaticResource NavMenu}">
+                        <MenuItem Style="{StaticResource NavMenuTop}" Header="帮助">
+                            <MenuItem.Icon><ui:SymbolIcon Symbol="QuestionCircle24" FontSize="16"/></MenuItem.Icon>
+                            <MenuItem Header="快捷键列表" Click="MenuItem_Hotkeys_Click">
+                                <MenuItem.Icon><ui:SymbolIcon Symbol="Keyboard24" FontSize="16"/></MenuItem.Icon>
+                            </MenuItem>
+                            <Separator/>
+                            <MenuItem Header="访问 项目主页" Click="MenuItem_Homepage_Click">
+                                <MenuItem.Icon><ui:SymbolIcon Symbol="Home24" FontSize="16"/></MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="加入 QQ 交流群" Click="MenuItem_JoinQQ_Click">
+                                <MenuItem.Icon><ui:SymbolIcon Symbol="People24" FontSize="16"/></MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="关于 州州跟打器..." Click="MenuItem_About_Click">
+                                <MenuItem.Icon><ui:SymbolIcon Symbol="Info24" FontSize="16"/></MenuItem.Icon>
+                            </MenuItem>
+                        </MenuItem>
+                    </Menu>
+                    <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_Exit_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="ArrowExit20" FontSize="16" Margin="0,0,10,0"/>
+                            <TextBlock Text="退出" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
 
         <!-- 2. 段号刻度尺已废弃（用户反馈无用） -->
 
