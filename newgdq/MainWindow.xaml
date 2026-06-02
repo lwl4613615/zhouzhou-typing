@@ -9,7 +9,7 @@
         xmlns:local="clr-namespace:newgdq"
         xmlns:views="clr-namespace:newgdq.Views"
         mc:Ignorable="d"
-        Title="州州跟打器" Height="680" Width="940" MinHeight="620" MinWidth="640"
+        Title="州州跟打器" Height="680" Width="940" MinHeight="620" MinWidth="900"
         FontFamily="微软雅黑" FontSize="12"
         Icon="pack://application:,,,/Resources/myicon.ico"
         Background="{DynamicResource RegionBrush}"
