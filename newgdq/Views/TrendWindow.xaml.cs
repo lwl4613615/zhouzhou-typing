@@ -6,10 +6,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using newgdq.Services;
-using OxyPlot;
-using OxyPlot.Annotations;
-using OxyPlot.Axes;
-using OxyPlot.Series;
 
 namespace newgdq.Views
 {
@@ -169,76 +165,55 @@ namespace newgdq.Views
 
         private void BuildChart(List<HistoryRepository.TrendBucket> buckets, double goal)
         {
-            var model = new PlotModel
-            {
-                Background          = OxyColors.Transparent,
-                PlotAreaBorderColor = OxyColors.Transparent,
-                TextColor           = OxyColor.FromRgb(0x94, 0xA3, 0xB8),
-                DefaultFont         = "微软雅黑",
-                DefaultFontSize     = 11,
-                PlotMargins         = new OxyThickness(44, 8, 12, 28),
-                Padding             = new OxyThickness(0),
-            };
-            var grid = OxyColor.FromArgb(0x33, 0xFF, 0xFF, 0xFF);
+            var plot = Chart.Plot;
+            plot.Clear();
 
-            var catAxis = new CategoryAxis
-            {
-                Position = AxisPosition.Bottom,
-                AxislineColor = grid, AxislineThickness = 1,
-                TicklineColor = grid,
-                GapWidth = 0,
-                FontSize = 10,
-            };
-            foreach (var b in buckets) catAxis.Labels.Add(b.Label);
-            model.Axes.Add(catAxis);
+            var textCol = new ScottPlot.Color(0x94, 0xA3, 0xB8);
+            var gridCol = new ScottPlot.Color(0xFF, 0xFF, 0xFF).WithAlpha(0x33);
+            var lineCol = new ScottPlot.Color(0xFF, 0xD5, 0x4F);
 
-            var valAxis = new LinearAxis
-            {
-                Position = AxisPosition.Left,
-                Minimum = 0,
-                AxislineColor = grid, AxislineThickness = 1,
-                MajorGridlineStyle = LineStyle.Solid, MajorGridlineColor = grid,
-                TickStyle = TickStyle.Outside, MajorTickSize = 3, FontSize = 10,
-                StringFormat = "0",
-            };
-            model.Axes.Add(valAxis);
+            int n = buckets.Count;
+            var xs = new double[Math.Max(n, 1)];
+            var ys = new double[Math.Max(n, 1)];
+            for (int i = 0; i < n; i++) { xs[i] = i; ys[i] = buckets[i].AvgSpeed; }
+            if (n == 0) { xs[0] = 0; ys[0] = 0; }
 
-            // 均速折线
-            var line = new LineSeries
-            {
-                Color = OxyColor.FromRgb(0xFF, 0xD5, 0x4F),
-                StrokeThickness = 2.5,
-                MarkerType = MarkerType.Circle,
-                MarkerSize = 4,
-                MarkerFill = OxyColor.FromRgb(0xFF, 0xD5, 0x4F),
-                InterpolationAlgorithm = InterpolationAlgorithms.CanonicalSpline,
-                LineJoin = LineJoin.Round,
-            };
-            for (int i = 0; i < buckets.Count; i++)
-                line.Points.Add(new DataPoint(i, buckets[i].AvgSpeed));
-            if (line.Points.Count == 0)
-                line.Points.Add(new DataPoint(0, 0));
-            model.Series.Add(line);
+            var scatter = plot.Add.Scatter(xs, ys);
+            scatter.Color = lineCol;
+            scatter.LineWidth = 2.5f;
+            scatter.MarkerSize = 7;
+            scatter.MarkerColor = lineCol;
+
+            // X 轴类别标签
+            var ticks = new ScottPlot.TickGenerators.NumericManual();
+            for (int i = 0; i < n; i++)
+                ticks.AddMajor(i, buckets[i].Label);
+            plot.Axes.Bottom.TickGenerator = ticks;
 
             // 目标参考线（虚线，柔和绿）
             if (goal > 0)
             {
-                model.Annotations.Add(new LineAnnotation
-                {
-                    Type = LineAnnotationType.Horizontal,
-                    Y = goal,
-                    Color = OxyColor.FromRgb(0x66, 0xBB, 0x6A),
-                    StrokeThickness = 1.5,
-                    LineStyle = LineStyle.Dash,
-                    Text = $"目标 {goal:0}",
-                    TextColor = OxyColor.FromRgb(0x66, 0xBB, 0x6A),
-                    FontSize = 10,
-                    TextHorizontalAlignment = OxyPlot.HorizontalAlignment.Left,
-                    TextVerticalAlignment = OxyPlot.VerticalAlignment.Bottom,
-                });
+                var goalCol = new ScottPlot.Color(0x66, 0xBB, 0x6A);
+                var hl = plot.Add.HorizontalLine(goal);
+                hl.Color = goalCol;
+                hl.LineWidth = 1.5f;
+                hl.LinePattern = ScottPlot.LinePattern.Dashed;
+                hl.LabelText = $"目标 {goal:0}";
+                hl.LabelOppositeAxis = false;
             }
 
-            Chart.Model = model;
+            plot.FigureBackground.Color = ScottPlot.Colors.Transparent;
+            plot.DataBackground.Color = ScottPlot.Colors.Transparent;
+            plot.Axes.Color(textCol);
+            plot.Axes.Bottom.TickLabelStyle.ForeColor = textCol;
+            plot.Axes.Bottom.TickLabelStyle.FontName = "Microsoft YaHei";
+            plot.Axes.Bottom.TickLabelStyle.FontSize = 10;
+            plot.Axes.Left.TickLabelStyle.ForeColor = textCol;
+            plot.Axes.Left.TickLabelStyle.FontSize = 10;
+            plot.Grid.MajorLineColor = gridCol;
+            plot.Axes.SetLimitsY(0, Math.Max(ys.Max(), goal) * 1.12 + 1);
+
+            Chart.Refresh();
         }
 
         private string GranularityWord()

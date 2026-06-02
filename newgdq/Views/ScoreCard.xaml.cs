@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -49,60 +50,48 @@ namespace newgdq.Views
 
         private void BuildMiniChart(TypingSession s, double totalSec)
         {
-            var model = new OxyPlot.PlotModel
-            {
-                Background          = OxyPlot.OxyColors.Transparent,
-                PlotAreaBorderColor = OxyPlot.OxyColors.Transparent,
-                TextColor           = OxyPlot.OxyColor.FromRgb(0x94, 0xA3, 0xB8),
-                DefaultFont         = "微软雅黑",
-                DefaultFontSize     = 10,
-                PlotMargins         = new OxyPlot.OxyThickness(36, 6, 8, 22),
-                Padding             = new OxyPlot.OxyThickness(0),
-            };
-            var grid = OxyPlot.OxyColor.FromArgb(0x33, 0xFF, 0xFF, 0xFF);
-            model.Axes.Add(new OxyPlot.Axes.LinearAxis
-            {
-                Position = OxyPlot.Axes.AxisPosition.Bottom,
-                Minimum = 0,
-                AxislineColor = grid, AxislineThickness = 1,
-                MajorGridlineStyle = OxyPlot.LineStyle.Solid, MajorGridlineColor = grid,
-                TickStyle = OxyPlot.Axes.TickStyle.Outside, MajorTickSize = 3, FontSize = 9,
-                StringFormat = "0",
-            });
-            model.Axes.Add(new OxyPlot.Axes.LinearAxis
-            {
-                Position = OxyPlot.Axes.AxisPosition.Left,
-                Minimum = 0,
-                AxislineColor = grid, AxislineThickness = 1,
-                MajorGridlineStyle = OxyPlot.LineStyle.Solid, MajorGridlineColor = grid,
-                TickStyle = OxyPlot.Axes.TickStyle.Outside, MajorTickSize = 3, FontSize = 9,
-                StringFormat = "0",
-            });
-            // 速度走势：从 Report 每个事件累计计算 instant speed = (累计字数 / 累计时间) * 60
-            var area = new OxyPlot.Series.AreaSeries
-            {
-                Color           = OxyPlot.OxyColor.FromRgb(0xFF, 0xD5, 0x4F),
-                StrokeThickness = 2,
-                Fill            = OxyPlot.OxyColor.FromArgb(0x66, 0xFF, 0xD5, 0x4F),
-                InterpolationAlgorithm = OxyPlot.InterpolationAlgorithms.CanonicalSpline,
-                LineJoin = OxyPlot.LineJoin.Round,
-                MarkerType = OxyPlot.MarkerType.None,
-            };
+            var plot = MiniChart.Plot;
+            plot.Clear();
+
+            var textCol = new ScottPlot.Color(0x94, 0xA3, 0xB8);
+            var gridCol = new ScottPlot.Color(0xFF, 0xFF, 0xFF).WithAlpha(0x33);
+            var lineCol = new ScottPlot.Color(0xFF, 0xD5, 0x4F);
+
+            var xs = new System.Collections.Generic.List<double>();
+            var ys = new System.Collections.Generic.List<double>();
             foreach (var ev in s.Report)
             {
                 if (ev.NowTime <= 0) continue;
                 double sp = ev.End * 60.0 / ev.NowTime;
                 if (sp > 999) sp = 999;
-                area.Points.Add(new OxyPlot.DataPoint(ev.NowTime, sp));
+                xs.Add(ev.NowTime);
+                ys.Add(sp);
             }
-            if (area.Points.Count == 0)
+            if (xs.Count == 0)
             {
-                // 至少一个点防 OxyPlot 异常
-                area.Points.Add(new OxyPlot.DataPoint(0, 0));
-                area.Points.Add(new OxyPlot.DataPoint(totalSec > 0 ? totalSec : 1, 0));
+                xs.Add(0); ys.Add(0);
+                xs.Add(totalSec > 0 ? totalSec : 1); ys.Add(0);
             }
-            model.Series.Add(area);
-            MiniChart.Model = model;
+
+            var scatter = plot.Add.Scatter(xs.ToArray(), ys.ToArray());
+            scatter.Color = lineCol;
+            scatter.LineWidth = 2f;
+            scatter.MarkerSize = 0;
+            scatter.FillY = true;
+            scatter.FillYColor = lineCol.WithAlpha(0x66);
+
+            plot.FigureBackground.Color = ScottPlot.Colors.Transparent;
+            plot.DataBackground.Color = ScottPlot.Colors.Transparent;
+            plot.Axes.Color(textCol);
+            plot.Axes.Bottom.TickLabelStyle.ForeColor = textCol;
+            plot.Axes.Bottom.TickLabelStyle.FontSize = 9;
+            plot.Axes.Left.TickLabelStyle.ForeColor = textCol;
+            plot.Axes.Left.TickLabelStyle.FontSize = 9;
+            plot.Grid.MajorLineColor = gridCol;
+            plot.Axes.SetLimitsY(0, ys.Count > 0 ? Math.Max(ys.Max() * 1.12, 1) : 1);
+            plot.Axes.SetLimitsX(0, xs.Count > 0 ? Math.Max(xs.Max(), 1) : 1);
+
+            MiniChart.Refresh();
         }
 
         private void BuildHeat(TypingSession s, int total)

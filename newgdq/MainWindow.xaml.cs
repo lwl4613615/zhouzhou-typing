@@ -44,9 +44,10 @@ namespace newgdq
 
         // 速度曲线窗口
         // 嵌入式速度曲线（TogChart 切换可见性）
-        private OxyPlot.PlotModel _chartModel;
-        private OxyPlot.Series.AreaSeries _chartSpeed;
-        private OxyPlot.Series.ScatterSeries _chartFinishMark;
+        private readonly System.Collections.Generic.List<ScottPlot.Coordinates> _chartPts = new System.Collections.Generic.List<ScottPlot.Coordinates>();
+        private ScottPlot.Plottables.Scatter _chartSpeed;
+        private ScottPlot.Plottables.Scatter _chartFinishMark;
+        private bool _chartBuilt;
 
         // 重数色 (与原版 Glob.BmColors 一致)
         private static readonly Brush[] RankBrushes =
@@ -495,7 +496,7 @@ namespace newgdq
         private void TogChart_Toggled(object sender, RoutedEventArgs e)
         {
             bool on = TogChart.IsChecked == true;
-            if (on && _chartModel == null) BuildInlineChart();
+            if (on && !_chartBuilt) BuildInlineChart();
             ChartCol.Width          = on ? new GridLength(180) : new GridLength(0);
             ChartSplitterCol.Width  = on ? new GridLength(4)   : new GridLength(0);
         }
@@ -506,101 +507,77 @@ namespace newgdq
             var bgBrush   = this.TryFindResource("PanelBG")  as SolidColorBrush ?? new SolidColorBrush(Color.FromRgb(0x1E,0x1E,0x1E));
             var fgBrush   = this.TryFindResource("LabelFG")  as SolidColorBrush ?? new SolidColorBrush(Color.FromRgb(0x88,0x88,0x88));
             var gridLine  = this.TryFindResource("GridLine") as SolidColorBrush ?? new SolidColorBrush(Color.FromArgb(0x22,0xFF,0xFF,0xFF));
-            var bgColor   = OxyPlot.OxyColor.FromArgb(0xFF, bgBrush.Color.R,  bgBrush.Color.G,  bgBrush.Color.B);
-            var fgColor   = OxyPlot.OxyColor.FromArgb(0xFF, fgBrush.Color.R,  fgBrush.Color.G,  fgBrush.Color.B);
-            var gridColor = OxyPlot.OxyColor.FromArgb(0x55, gridLine.Color.R, gridLine.Color.G, gridLine.Color.B);
+            var bgColor   = new ScottPlot.Color(bgBrush.Color.R, bgBrush.Color.G, bgBrush.Color.B);
+            var fgColor   = new ScottPlot.Color(fgBrush.Color.R, fgBrush.Color.G, fgBrush.Color.B);
+            var gridColor = new ScottPlot.Color(gridLine.Color.R, gridLine.Color.G, gridLine.Color.B).WithAlpha(0x55);
 
-            _chartModel = new OxyPlot.PlotModel
-            {
-                Background          = bgColor,
-                PlotAreaBorderColor = OxyPlot.OxyColors.Transparent,
-                TextColor           = fgColor,
-                DefaultFont         = "微软雅黑",
-                DefaultFontSize     = 11,
-                PlotMargins         = new OxyPlot.OxyThickness(42, 8, 10, 24),
-                Padding             = new OxyPlot.OxyThickness(0),
-                Title               = null,
-            };
-            _chartModel.Axes.Add(new OxyPlot.Axes.LinearAxis
-            {
-                Position           = OxyPlot.Axes.AxisPosition.Bottom,
-                Title              = "用时(s)",
-                TitleFontSize      = 10,
-                AxislineColor      = gridColor,
-                AxislineThickness  = 1,
-                MajorGridlineStyle = OxyPlot.LineStyle.Solid,
-                MajorGridlineColor = gridColor,
-                MinorGridlineStyle = OxyPlot.LineStyle.Dot,
-                MinorGridlineColor = OxyPlot.OxyColor.FromArgb(0x33, gridLine.Color.R, gridLine.Color.G, gridLine.Color.B),
-                Minimum            = 0,
-                IntervalLength     = 60,
-                TickStyle          = OxyPlot.Axes.TickStyle.Outside,
-                MajorTickSize      = 4,
-                MinorTickSize      = 2,
-                FontSize           = 10,
-            });
-            _chartModel.Axes.Add(new OxyPlot.Axes.LinearAxis
-            {
-                Position           = OxyPlot.Axes.AxisPosition.Left,
-                Title              = "速度(字/分)",
-                TitleFontSize      = 10,
-                AxislineColor      = gridColor,
-                AxislineThickness  = 1,
-                MajorGridlineStyle = OxyPlot.LineStyle.Solid,
-                MajorGridlineColor = gridColor,
-                MinorGridlineStyle = OxyPlot.LineStyle.None,
-                Minimum            = 0,
-                TickStyle          = OxyPlot.Axes.TickStyle.Outside,
-                MajorTickSize      = 4,
-                FontSize           = 10,
-                StringFormat       = "0",
-            });
-            _chartSpeed = new OxyPlot.Series.AreaSeries
-            {
-                Title           = "速度",
-                Color           = OxyPlot.OxyColor.FromRgb(0xFF, 0xB0, 0x2E),
-                StrokeThickness = 1.6,
-                MarkerType      = OxyPlot.MarkerType.None,
-                Fill            = OxyPlot.OxyColor.FromArgb(0x55, 0xFF, 0xB0, 0x2E),
-                InterpolationAlgorithm = OxyPlot.InterpolationAlgorithms.CanonicalSpline,
-                LineJoin        = OxyPlot.LineJoin.Round,
-            };
-            _chartModel.Series.Add(_chartSpeed);
-            InlineChart.Model = _chartModel;
+            var plot = InlineChart.Plot;
+            plot.Clear();
+            _chartPts.Clear();
+
+            _chartSpeed = plot.Add.Scatter(_chartPts);
+            _chartSpeed.Color = new ScottPlot.Color(0xFF, 0xB0, 0x2E);
+            _chartSpeed.LineWidth = 1.6f;
+            _chartSpeed.MarkerSize = 0;
+            _chartSpeed.FillY = true;
+            _chartSpeed.FillYColor = new ScottPlot.Color(0xFF, 0xB0, 0x2E).WithAlpha(0x55);
+
+            plot.FigureBackground.Color = bgColor;
+            plot.DataBackground.Color = bgColor;
+            plot.Axes.Color(fgColor);
+            plot.Axes.Bottom.Label.Text = "用时(s)";
+            plot.Axes.Bottom.Label.FontSize = 10;
+            plot.Axes.Bottom.Label.ForeColor = fgColor;
+            plot.Axes.Left.Label.Text = "速度(字/分)";
+            plot.Axes.Left.Label.FontSize = 10;
+            plot.Axes.Left.Label.ForeColor = fgColor;
+            plot.Axes.Bottom.TickLabelStyle.ForeColor = fgColor;
+            plot.Axes.Bottom.TickLabelStyle.FontName = "Microsoft YaHei";
+            plot.Axes.Bottom.TickLabelStyle.FontSize = 10;
+            plot.Axes.Left.TickLabelStyle.ForeColor = fgColor;
+            plot.Axes.Left.TickLabelStyle.FontName = "Microsoft YaHei";
+            plot.Axes.Left.TickLabelStyle.FontSize = 10;
+            plot.Grid.MajorLineColor = gridColor;
+            plot.Axes.SetLimits(0, 60, 0, 100);
+
+            _chartBuilt = true;
+            InlineChart.Refresh();
         }
 
         private void InlineChartReset()
         {
-            if (_chartSpeed == null) return;
-            _chartSpeed.Points.Clear();
-            if (_chartFinishMark != null) { _chartModel.Series.Remove(_chartFinishMark); _chartFinishMark = null; }
-            _chartModel.InvalidatePlot(true);
+            if (!_chartBuilt) return;
+            _chartPts.Clear();
+            if (_chartFinishMark != null) { InlineChart.Plot.Remove(_chartFinishMark); _chartFinishMark = null; }
+            InlineChart.Plot.Axes.SetLimits(0, 60, 0, 100);
+            InlineChart.Refresh();
         }
 
         private int _chartAddCounter;
         private void InlineChartAddPoint(double sec, double speed)
         {
-            if (_chartSpeed == null) return;
-            _chartSpeed.Points.Add(new OxyPlot.DataPoint(sec, speed));
+            if (!_chartBuilt) return;
+            _chartPts.Add(new ScottPlot.Coordinates(sec, speed));
             // 限点：最多 600 点 + 每 5 点才刷一次避免 GC 压力
-            if (_chartSpeed.Points.Count > 600) _chartSpeed.Points.RemoveAt(0);
-            if ((++_chartAddCounter % 5) == 0) _chartModel.InvalidatePlot(true);
+            if (_chartPts.Count > 600) _chartPts.RemoveAt(0);
+            if ((++_chartAddCounter % 5) == 0)
+            {
+                InlineChart.Plot.Axes.AutoScale();
+                InlineChart.Refresh();
+            }
         }
 
         private void InlineChartMarkFinish()
         {
-            if (_chartSpeed == null || _chartSpeed.Points.Count == 0) return;
-            var last = _chartSpeed.Points[_chartSpeed.Points.Count - 1];
-            _chartFinishMark = new OxyPlot.Series.ScatterSeries
-            {
-                MarkerType   = OxyPlot.MarkerType.Circle,
-                MarkerSize   = 6,
-                MarkerFill   = OxyPlot.OxyColor.FromRgb(0xFF, 0xD2, 0x4C),
-                MarkerStroke = OxyPlot.OxyColors.White,
-            };
-            _chartFinishMark.Points.Add(new OxyPlot.Series.ScatterPoint(last.X, last.Y));
-            _chartModel.Series.Add(_chartFinishMark);
-            _chartModel.InvalidatePlot(true);
+            if (!_chartBuilt || _chartPts.Count == 0) return;
+            var last = _chartPts[_chartPts.Count - 1];
+            _chartFinishMark = InlineChart.Plot.Add.Scatter(
+                new double[] { last.X }, new double[] { last.Y });
+            _chartFinishMark.MarkerSize = 8;
+            _chartFinishMark.MarkerShape = ScottPlot.MarkerShape.FilledCircle;
+            _chartFinishMark.MarkerColor = new ScottPlot.Color(0xFF, 0xD2, 0x4C);
+            _chartFinishMark.LineWidth = 0;
+            InlineChart.Refresh();
         }
 
         // ===== 跟打地图（嵌入式 Canvas + Polyline）=====

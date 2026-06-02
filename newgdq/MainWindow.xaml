@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:hc="https://handyorg.github.io/handycontrol"
-        xmlns:oxy="http://oxyplot.org/wpf"
+        xmlns:sp="clr-namespace:ScottPlot.WPF;assembly=ScottPlot.WPF"
         xmlns:tb="http://www.hardcodet.net/taskbar"
         xmlns:local="clr-namespace:newgdq"
         xmlns:views="clr-namespace:newgdq.Views"
@@ -411,10 +411,7 @@
 
                 <!-- 左：嵌入式速度曲线（TogChart 切换可见性） -->
                 <Border Grid.Column="0" Background="{DynamicResource AltRowBG}" BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,0,0">
-                    <oxy:PlotView x:Name="InlineChart" Background="Transparent"
-                                  RenderOptions.EdgeMode="Unspecified"
-                                  TextOptions.TextFormattingMode="Ideal"
-                                  TextOptions.TextRenderingMode="ClearType"/>
+                    <sp:WpfPlot x:Name="InlineChart"/>
                 </Border>
                 <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Stretch"
                               ResizeDirection="Columns" ResizeBehavior="PreviousAndNext"

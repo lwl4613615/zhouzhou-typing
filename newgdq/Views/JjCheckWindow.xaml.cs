@@ -1,9 +1,6 @@
 using System;
 using System.Linq;
 using System.Windows;
-using OxyPlot;
-using OxyPlot.Axes;
-using OxyPlot.Series;
 using newgdq.Services;
 
 namespace newgdq.Views
@@ -32,7 +29,8 @@ namespace newgdq.Views
             if (total == 0)
             {
                 TxtTitle.Text = "暂无历史数据。先打几段试试 ~";
-                Plot.Model = null;
+                Plot.Plot.Clear();
+                Plot.Refresh();
                 return;
             }
 
@@ -64,51 +62,44 @@ namespace newgdq.Views
                 : $"击键评定：{(jjC + jjC_):0.000}（基准 {jjC} 键/秒，达标占比 {jjC_:P1}）";
             TxtTitle.Text = $"总共跟打 {total} 段 · {scoreText}";
 
-            // OxyPlot 柱图
-            var model = new PlotModel
-            {
-                PlotAreaBorderColor = OxyColors.Transparent,
-                TextColor    = OxyColors.LightGray,
-                TitleColor   = OxyColors.LightGray,
-                Background   = OxyColors.Transparent,
-            };
-            var bar = new BarSeries
-            {
-                FillColor = OxyColor.FromRgb(0x4F, 0xC3, 0xF7),
-                StrokeColor = OxyColors.Transparent,
-                LabelPlacement = LabelPlacement.Outside,
-                LabelFormatString = "{0:P1}",
-                TextColor = OxyColors.LightGray,
-            };
+            // ScottPlot 横向柱图
+            var plot = Plot.Plot;
+            plot.Clear();
+
+            var fore = ScottPlot.Colors.LightGray;
+            var axisCol = ScottPlot.Colors.Gray;
+            var fill = new ScottPlot.Color(0x4F, 0xC3, 0xF7);
+
+            var bars = new System.Collections.Generic.List<ScottPlot.Bar>();
+            // 表格从上到下为 4..12+，柱图反转位置使 4 在顶部
             for (int i = 0; i < 9; i++)
-                bar.Items.Add(new BarItem { Value = pcts[i] });
-
-            var categoryAxis = new CategoryAxis
             {
-                Position = AxisPosition.Left,
-                TextColor = OxyColors.LightGray,
-                AxislineColor = OxyColors.Gray,
-                TicklineColor = OxyColors.Gray,
-            };
+                bars.Add(new ScottPlot.Bar
+                {
+                    Position = 8 - i,
+                    Value = pcts[i],
+                    FillColor = fill,
+                    Orientation = ScottPlot.Orientation.Horizontal,
+                });
+            }
+            plot.Add.Bars(bars);
+
+            var ticks = new ScottPlot.TickGenerators.NumericManual();
             for (int i = 0; i < 9; i++)
-                categoryAxis.Labels.Add((i + 4 == 12 ? "12+" : (i + 4).ToString()) + " 键/秒");
+                ticks.AddMajor(8 - i, (i + 4 == 12 ? "12+" : (i + 4).ToString()) + " 键/秒");
+            plot.Axes.Left.TickGenerator = ticks;
 
-            var valueAxis = new LinearAxis
-            {
-                Position = AxisPosition.Bottom,
-                Minimum = 0,
-                MajorGridlineStyle = LineStyle.Dot,
-                MajorGridlineColor = OxyColors.DimGray,
-                StringFormat = "P0",
-                TextColor = OxyColors.LightGray,
-                AxislineColor = OxyColors.Gray,
-                TicklineColor = OxyColors.Gray,
-            };
+            double maxPct = pcts.Max();
+            plot.FigureBackground.Color = ScottPlot.Colors.Transparent;
+            plot.DataBackground.Color = ScottPlot.Colors.Transparent;
+            plot.Axes.Color(axisCol);
+            plot.Axes.Left.TickLabelStyle.ForeColor = fore;
+            plot.Axes.Left.TickLabelStyle.FontName = "Microsoft YaHei";
+            plot.Axes.Bottom.TickLabelStyle.ForeColor = fore;
+            plot.HideGrid();
+            plot.Axes.SetLimits(0, Math.Max(maxPct * 1.15, 0.05), -0.6, 8.4);
 
-            model.Axes.Add(categoryAxis);
-            model.Axes.Add(valueAxis);
-            model.Series.Add(bar);
-            Plot.Model = model;
+            Plot.Refresh();
         }
 
         private void BtnCopy_Click(object sender, RoutedEventArgs e)
