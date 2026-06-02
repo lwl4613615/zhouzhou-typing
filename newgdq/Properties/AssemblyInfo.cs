@@ -2,7 +2,13 @@
 using System.Resources;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Windows;
+
+// 本程序集为纯 Windows 桌面应用（WPF）。手写 AssemblyInfo 时 SDK 不会自动生成
+// 平台标注，故此处显式声明仅支持 Windows 7.0+，使 CA1416 据此确认 Growl /
+// MessageBox / SystemSounds / Screen 等 Win7+ API 安全（补全平台契约，而非屏蔽警告）。
+[assembly: SupportedOSPlatform("Windows7.0")]
 
 // 有关程序集的一般信息由以下
 // 控制。更改这些特性值可修改
