@@ -536,6 +536,12 @@
                             <Setter Property="Height" Value="26"/>
                             <Setter Property="Padding" Value="4,2"/>
                         </Style>
+                        <!-- 单元格内容居中：与列头对齐方式保持一致 -->
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            <Setter Property="TextBlock.TextAlignment" Value="Center"/>
+                        </Style>
                     </DataGrid.Resources>
                     <DataGrid.RowStyle>
                         <Style TargetType="DataGridRow">
