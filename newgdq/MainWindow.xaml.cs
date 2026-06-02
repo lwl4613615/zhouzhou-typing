@@ -1536,38 +1536,26 @@ namespace newgdq
 
         private void MenuItem_Hotkeys_Click(object sender, RoutedEventArgs e)
         {
-            System.Windows.MessageBox.Show(
-                "—— 全局热键（任何窗口都生效）——\n" +
-                "F2   打开发文窗口\n" +
-                "F3   重打当前段\n" +
-                "F6   发下一段\n" +
-                "F8   暂停 / 继续\n\n" +
-                "—— 主窗激活时的快捷键 ——\n" +
-                "F9         复制最新一段成绩\n" +
-                "Ctrl+R     发下一段（同 F6）\n" +
-                "Ctrl+U     重打当前段（同 F3）\n" +
-                "Ctrl+J     乱序重抽（发下一段）\n" +
-                "Ctrl+F2    打开发文状态窗\n" +
-                "Ctrl+←/→   上一段 / 下一段（跳段）\n" +
-                "Ctrl+T     发送图片成绩\n" +
-                "Ctrl+B     击键评定\n" +
-                "Ctrl+E     速度分析\n" +
-                "Ctrl+G     跟打报告\n" +
-                "Ctrl+Q     将目前文章乱序\n" +
-                "Ctrl+W     英文标点换中文\n\n" +
-                "提示：输入框失焦会自动暂停；回到输入框敲任意键自动继续。",
-                "快捷键列表");
+            new Views.HotkeysWindow(this).ShowDialog();
         }
 
         private void MenuItem_Homepage_Click(object sender, RoutedEventArgs e)
         {
-            try { System.Diagnostics.Process.Start(PROJECT_URL); }
-            catch (Exception ex) { Services.Toast.Error(ex.Message); }
+            OpenUrl(PROJECT_URL);
         }
 
         private void MenuItem_JoinQQ_Click(object sender, RoutedEventArgs e)
         {
-            try { System.Diagnostics.Process.Start(QQ_GROUP_URL); }
+            OpenUrl(QQ_GROUP_URL);
+        }
+
+        /// <summary>用系统默认浏览器打开 URL。.NET Core+ 必须 UseShellExecute=true，否则直接传 URL 会报"找不到文件"。</summary>
+        private static void OpenUrl(string url)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(url) { UseShellExecute = true });
+            }
             catch (Exception ex) { Services.Toast.Error(ex.Message); }
         }
 
@@ -1709,8 +1697,7 @@ namespace newgdq
 
         private void MenuItem_XhAuxCodeHelp_Click(object sender, RoutedEventArgs e)
         {
-            try { System.Diagnostics.Process.Start("https://flypy.cc/help/#/xh"); }
-            catch (Exception ex) { Services.Toast.Error(ex.Message); }
+            OpenUrl("https://flypy.cc/help/#/xh");
         }
 
         private void EnterPracticeMode()

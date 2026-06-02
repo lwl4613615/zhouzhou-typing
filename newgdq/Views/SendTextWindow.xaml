@@ -165,10 +165,13 @@
                             <ui:Button Content="删除"     Padding="12,4" MinWidth="60" Margin="0,0,4,0" Click="BtnPresetDelete_Click"/>
                             <ui:Button Content="应用到当前" Padding="12,4" MinWidth="100" Click="BtnPresetApply_Click"/>
                         </StackPanel>
-                        <ListBox x:Name="LbxPresets" SelectionChanged="LbxPresets_SelectionChanged"
-                                 Background="{DynamicResource AltRowBG}" Foreground="{DynamicResource ValueFG}"
-                                 BorderBrush="{DynamicResource GridLine}" BorderThickness="1"
-                                 DisplayMemberPath="Name"/>
+                        <Border BorderBrush="{DynamicResource GridLine}" BorderThickness="1"
+                                Background="{DynamicResource AltRowBG}">
+                            <ListBox x:Name="LbxPresets" SelectionChanged="LbxPresets_SelectionChanged"
+                                     Background="Transparent" Foreground="{DynamicResource ValueFG}"
+                                     BorderThickness="0"
+                                     DisplayMemberPath="Name"/>
+                        </Border>
                     </DockPanel>
 
                     <!-- 右：编辑 -->

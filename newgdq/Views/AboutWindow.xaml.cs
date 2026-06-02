@@ -21,7 +21,10 @@ namespace newgdq.Views
 
         private void LnkProject_Click(object sender, RoutedEventArgs e)
         {
-            try { System.Diagnostics.Process.Start(PROJECT_URL); }
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(PROJECT_URL) { UseShellExecute = true });
+            }
             catch (Exception ex) { Services.Toast.Error(ex.Message); }
         }
 
