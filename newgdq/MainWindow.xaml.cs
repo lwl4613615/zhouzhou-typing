@@ -2073,10 +2073,10 @@ namespace newgdq
             {
                 int i = realLen - 1;
                 char inp = rawInput[i];
-                bool inpIsImeJunk = inp == ' ' || inp == '\u3000'
-                                    || (inp >= 'a' && inp <= 'z')
-                                    || (inp >= 'A' && inp <= 'Z')
-                                    || (inp >= '0' && inp <= '9');
+                // 拼音合成串恒为 ASCII：字母 / 数字 / 空格 / 分隔符（微软拼音用单引号 ' 分隔音节，
+                // 也可能出现 ; 等）。合成进行中只要原文该位是中文，尾部任意 ASCII 都按合成占位剥离，
+                // 避免把 "yuan'lai" 残留的 "yuan'" 当成已上屏字符逐字判红。
+                bool inpIsImeJunk = inp < 128;
                 bool srcIsCjk = i < _session.TypeText.Length && _session.TypeText[i] > 127;
                 if (srcIsCjk && inpIsImeJunk) realLen--;
                 else break;
