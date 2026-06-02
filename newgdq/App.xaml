@@ -8,6 +8,8 @@
             <ResourceDictionary.MergedDictionaries>
                 <!-- 默认 Dark；启动时 App.OnStartup 会按 settings.json 中 ThemeName 替换 -->
                 <ResourceDictionary Source="pack://application:,,,/newgdq;component/Themes/Dark.xaml"/>
+                <!-- 共享样式（圆角卡片 / 排版层级）；切主题时不被移除 -->
+                <ResourceDictionary Source="pack://application:,,,/newgdq;component/Themes/Shared.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

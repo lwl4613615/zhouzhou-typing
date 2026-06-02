@@ -196,7 +196,9 @@
         <!-- 2. 段号刻度尺已废弃（用户反馈无用） -->
 
         <!-- 3. 信息条（两行紧贴：上=标签 / 下=值，每个数据独占一列） -->
-        <Border DockPanel.Dock="Top" x:Name="InfoBar" Background="{DynamicResource PanelBG}" Padding="0">
+        <Border DockPanel.Dock="Top" x:Name="InfoBar" Background="{DynamicResource PanelBG}"
+                CornerRadius="6" Margin="6,6,6,2" Padding="2,0" ClipToBounds="True"
+                BorderBrush="{DynamicResource GridLine}" BorderThickness="1">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="18"/>
@@ -232,9 +234,9 @@
                 <TextBlock Grid.Row="1" Grid.Column="1" x:Name="TxtTitle"      Text="-"      Style="{StaticResource LblValue}"/>
                 <TextBlock Grid.Row="1" Grid.Column="2" x:Name="TxtWordCount"  Text="0/0字"  Style="{StaticResource LblValue}"/>
                 <TextBlock Grid.Row="1" Grid.Column="3" x:Name="TxtGroup"      Text="重0 呆 0s 键准 100%"      Style="{StaticResource LblValue}" FontSize="11"/>
-                <TextBlock Grid.Row="1" Grid.Column="4" x:Name="TxtSpeed"      Text="0.00"   Style="{StaticResource LblValue}"/>
-                <TextBlock Grid.Row="1" Grid.Column="5" x:Name="TxtJj"         Text="0.00"   Style="{StaticResource LblValue}"/>
-                <TextBlock Grid.Row="1" Grid.Column="6" x:Name="TxtMc"         Text="0.00"   Style="{StaticResource LblValue}"/>
+                <TextBlock Grid.Row="1" Grid.Column="4" x:Name="TxtSpeed"      Text="0.00"   Style="{StaticResource LblValueKey}" FontSize="15"/>
+                <TextBlock Grid.Row="1" Grid.Column="5" x:Name="TxtJj"         Text="0.00"   Style="{StaticResource LblValueKey}" FontSize="15"/>
+                <TextBlock Grid.Row="1" Grid.Column="6" x:Name="TxtMc"         Text="0.00"   Style="{StaticResource LblValueKey}"/>
                 <TextBlock Grid.Row="1" Grid.Column="7" x:Name="TxtSign"       Text="微信 synhxb"    Style="{StaticResource LblValue}"
                            Cursor="Hand" ToolTip="点击复制微信号"
                            MouseLeftButtonUp="TxtSign_LeftClick"/>
@@ -333,7 +335,8 @@
 
             <!-- 状态条（对照区与输入区之间） -->
             <Border Grid.Row="0" Background="{DynamicResource CellBG}"
-                    BorderBrush="{DynamicResource StatusBarBorder}" BorderThickness="0,1,0,1">
+                    CornerRadius="6" Margin="6,2,6,2" ClipToBounds="True"
+                    BorderBrush="{DynamicResource StatusBarBorder}" BorderThickness="1">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="18"/>
@@ -350,8 +353,8 @@
                         <ColumnDefinition Width="80"/>   <!-- 理论码长 -->
                         <ColumnDefinition Width="200"/>  <!-- 累计 -->
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Row="0" Grid.Column="0" x:Name="TxtTime"      Text="00:00.00" Style="{StaticResource LblText}"/>
-                    <TextBlock Grid.Row="0" Grid.Column="1" x:Name="TxtCount1"    Text="0/0"      Style="{StaticResource LblText}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="0" x:Name="TxtTime"      Text="00:00.00" Style="{StaticResource LblValue}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1" x:Name="TxtCount1"    Text="0/0"      Style="{StaticResource LblValue}"/>
                     <!-- 中间上行：编码提示三小格 (重数色块 + 字 + 码) -->
                     <Grid Grid.Row="0" Grid.Column="2" x:Name="BmTipBox" Visibility="Collapsed">
                         <Grid.ColumnDefinitions>
@@ -379,13 +382,13 @@
                         <TextBlock x:Name="TxtProgress" Text="-" Foreground="{DynamicResource ValueFG}"
                                    FontSize="10" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Grid>
-                    <TextBlock Grid.Row="0" Grid.Column="3" x:Name="TxtKeysCount" Text="0" Style="{StaticResource LblText}"/>
-                    <TextBlock Grid.Row="0" Grid.Column="4" x:Name="TxtHg"  Text="0" Style="{StaticResource LblText}"/>
-                    <TextBlock Grid.Row="0" Grid.Column="5" x:Name="TxtCz"  Text="0" Style="{StaticResource LblText}"/>
-                    <TextBlock Grid.Row="0" Grid.Column="6" x:Name="TxtRightLast" Text="0:0" Style="{StaticResource LblText}"/>
-                    <TextBlock Grid.Row="0" Grid.Column="7" x:Name="TxtTheoryMc" Text="-" Style="{StaticResource LblText}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="3" x:Name="TxtKeysCount" Text="0" Style="{StaticResource LblValueKey}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="4" x:Name="TxtHg"  Text="0" Style="{StaticResource LblValue}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="5" x:Name="TxtCz"  Text="0" Style="{StaticResource LblValue}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="6" x:Name="TxtRightLast" Text="0:0" Style="{StaticResource LblValue}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="7" x:Name="TxtTheoryMc" Text="-" Style="{StaticResource LblValue}"/>
                     <TextBlock Grid.Row="0" Grid.Column="8" x:Name="TxtTotalInfo" Text="0/0/1天/0"
-                               Style="{StaticResource LblText}" HorizontalAlignment="Right" Margin="0,0,8,0"/>
+                               Style="{StaticResource LblValue}" HorizontalAlignment="Right" Margin="0,0,8,0"/>
                     <TextBlock Grid.Row="1" Grid.Column="0" Text="时间" Style="{StaticResource LblText}" FontSize="10"/>
                     <TextBlock Grid.Row="1" Grid.Column="1" x:Name="TxtCount1Pct" Text="0%" Style="{StaticResource LblText}" FontSize="10"/>
                     <TextBlock Grid.Row="1" Grid.Column="3" Text="击键" Style="{StaticResource LblText}" FontSize="10"/>

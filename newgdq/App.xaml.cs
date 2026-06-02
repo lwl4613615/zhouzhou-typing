@@ -101,7 +101,9 @@ namespace newgdq
             for (int i = dicts.Count - 1; i >= 0; i--)
             {
                 var s = dicts[i].Source?.ToString() ?? "";
-                if (s.IndexOf("newgdq;component/Themes/", StringComparison.OrdinalIgnoreCase) >= 0)
+                // 仅移除 Dark/Light 主题色字典；Shared.xaml 等共享样式保留不动
+                if (s.IndexOf("Themes/Dark.xaml", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    s.IndexOf("Themes/Light.xaml", StringComparison.OrdinalIgnoreCase) >= 0)
                     dicts.RemoveAt(i);
             }
             dicts.Insert(0, newDict);
