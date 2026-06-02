@@ -470,7 +470,7 @@
                           RowBackground="{DynamicResource PanelBG}"
                           AlternatingRowBackground="{DynamicResource AltRowBG}"
                           Foreground="{DynamicResource ValueFG}"
-                          ScrollViewer.VerticalScrollBarVisibility="Visible"
+                          ScrollViewer.VerticalScrollBarVisibility="Auto"
                           ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                           ScrollViewer.CanContentScroll="True"
                           RowHeight="26" FontSize="12" FontFamily="微软雅黑">
