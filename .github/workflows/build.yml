@@ -2,10 +2,10 @@ name: build
 
 on:
   push:
-    branches: [ main ]
-    tags:     [ 'v*' ]
+    branches: [ net10 ]
+    tags:     [ 'v1.*' ]
   pull_request:
-    branches: [ main ]
+    branches: [ net10 ]
   workflow_dispatch:
 
 permissions:
@@ -18,17 +18,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v2
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
 
-      - name: Setup NuGet
-        uses: NuGet/setup-nuget@v2
-
-      - name: Restore NuGet packages
-        run: nuget restore newgdq/packages.config -PackagesDirectory packages
+      - name: Restore
+        run: dotnet restore newgdq/newgdq.csproj
 
       - name: Build (Release)
-        run: msbuild newgdq/newgdq.csproj /t:Build /p:Configuration=Release /v:minimal /nologo
+        run: dotnet build newgdq/newgdq.csproj -c Release --no-restore -v minimal
 
       - name: Package zip
         id: pack
@@ -39,7 +38,7 @@ jobs:
           } else {
             "ci-$($env:GITHUB_SHA.Substring(0,7))"
           }
-          $zip = "zhouzhou-typing-v$version.zip"
+          $zip = "zhouzhou-typing-net10-v$version.zip"
           $out = "newgdq\bin\Release"
           $stage = "stage"
           if (Test-Path $stage) { Remove-Item -Recurse -Force $stage }
@@ -56,7 +55,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: zhouzhou-typing-${{ steps.pack.outputs.version }}
+          name: zhouzhou-typing-net10-${{ steps.pack.outputs.version }}
           path: ${{ steps.pack.outputs.zip }}
 
       - name: Create GitHub Release
