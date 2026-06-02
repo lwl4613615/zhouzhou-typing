@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -325,11 +325,11 @@ namespace newgdq
             try
             {
                 if (newgdq.Services.ClipboardHelper.TrySetText(WECHAT_ID))
-                    HandyControl.Controls.Growl.Success("已复制微信号：" + WECHAT_ID);
+                    Services.Toast.Success("已复制微信号：" + WECHAT_ID);
                 else
-                    HandyControl.Controls.Growl.Warning("剪贴板被其他程序占用，请稍后再试");
+                    Services.Toast.Warning("剪贴板被其他程序占用，请稍后再试");
             }
-            catch (Exception ex) { HandyControl.Controls.Growl.Error(ex.Message); }
+            catch (Exception ex) { Services.Toast.Error(ex.Message); }
         }
 
         private static bool TryParseColor(string hex, out Color c)
@@ -622,7 +622,7 @@ namespace newgdq
             if ((DateTime.Now - _lastInputAt).TotalMinutes >= th.Value)
             {
                 Repeat();
-                HandyControl.Controls.Growl.Info($"已超过 {th.Value} 分钟无输入，自动重打");
+                Services.Toast.Info($"已超过 {th.Value} 分钟无输入，自动重打");
             }
         }
 
@@ -869,12 +869,12 @@ namespace newgdq
                     $"词组条目：{tmp.PhraseCount}\n\n" +
                     $"格式要求：每行 \"编码 字1 字2 ...\"（空格/Tab 分隔，UTF-8 编码）。\n" +
                     $"本次测试不会替换内置词典，仅为校验。";
-                HandyControl.Controls.MessageBox.Show(msg, "bm.txt 校验结果");
+                System.Windows.MessageBox.Show(msg, "bm.txt 校验结果");
             }
             catch (Exception ex)
             {
                 sw.Stop();
-                HandyControl.Controls.MessageBox.Show(
+                System.Windows.MessageBox.Show(
                     $"✗ 加载失败\n\n{ex.Message}\n\n请检查文件是否为 UTF-8 编码、格式是否正确（每行 \"编码 字1 字2 ...\"）。",
                     "bm.txt 校验失败");
             }
@@ -1096,7 +1096,7 @@ namespace newgdq
             }
             catch (Exception ex)
             {
-                HandyControl.Controls.Growl.Error("载入失败：" + ex.Message);
+                Services.Toast.Error("载入失败：" + ex.Message);
             }
         }
 
@@ -1298,7 +1298,7 @@ namespace newgdq
         {
             if (_sending.State.Active)
             {
-                var r = HandyControl.Controls.MessageBox.Show(
+                var r = System.Windows.MessageBox.Show(
                     "已经在发文中（" + (_sending.State.Title ?? "-") + "）。\n是否重新开始一段新的发文？\n\n[ Esc 取消 ]",
                     "发文确认", System.Windows.MessageBoxButton.OKCancel, System.Windows.MessageBoxImage.Question);
                 if (r != System.Windows.MessageBoxResult.OK) return;
@@ -1345,7 +1345,7 @@ namespace newgdq
         {
             if (!_sending.State.Active)
             {
-                HandyControl.Controls.Growl.Info("尚未开启发文，请先菜单 → 发文 → 发文...");
+                Services.Toast.Info("尚未开启发文，请先菜单 → 发文 → 发文...");
                 return;
             }
             _sending.State.IsRandom = true;
@@ -1378,7 +1378,7 @@ namespace newgdq
         {
             if (!CanResumeSending())
             {
-                HandyControl.Controls.Growl.Info("没有可继续的发文（已发完或尚未开始）");
+                Services.Toast.Info("没有可继续的发文（已发完或尚未开始）");
                 return;
             }
             CancelAutoAdvance();          // 双保险：清掉任何残留的挂起续发
@@ -1401,7 +1401,7 @@ namespace newgdq
             string seg = _sending.JumpToSeg(target);
             if (seg == null)
             {
-                HandyControl.Controls.Growl.Info("当前模式不支持跳段（乱序）");
+                Services.Toast.Info("当前模式不支持跳段（乱序）");
                 return;
             }
             LoadArticle(seg, $"{_sending.State.Title} · 第 {target} 段");
@@ -1427,13 +1427,13 @@ namespace newgdq
         {
             if (!_sending.State.Active)
             {
-                HandyControl.Controls.Growl.Info("尚未开启发文，请先菜单 → 发文 → 发文...");
+                Services.Toast.Info("尚未开启发文，请先菜单 → 发文 → 发文...");
                 return;
             }
             string seg = _sending.NextSegment();
             if (seg == null)
             {
-                HandyControl.Controls.Growl.Success("全部发送完毕");
+                Services.Toast.Success("全部发送完毕");
                 _sending.Stop();
                 return;
             }
@@ -1473,7 +1473,7 @@ namespace newgdq
                 TxtTheoryMc.Text = "-";
                 ClearPhraseUnderlines();
                 RefreshBmTips();
-                HandyControl.Controls.Growl.Info("单字模式");
+                Services.Toast.Info("单字模式");
                 return;
             }
             ApplyPhraseUnderlines();
@@ -1491,7 +1491,7 @@ namespace newgdq
             if (!_dict.Loaded)
             {
                 TxtTheoryMc.Text = "?";
-                HandyControl.Controls.Growl.Warning("词典未加载");
+                Services.Toast.Warning("词典未加载");
                 return;
             }
             if (_session.TypeText.Length == 0)
@@ -1512,7 +1512,7 @@ namespace newgdq
 
         private void MenuItem_Hotkeys_Click(object sender, RoutedEventArgs e)
         {
-            HandyControl.Controls.MessageBox.Show(
+            System.Windows.MessageBox.Show(
                 "—— 全局热键（任何窗口都生效）——\n" +
                 "F2   打开发文窗口\n" +
                 "F3   重打当前段\n" +
@@ -1538,13 +1538,13 @@ namespace newgdq
         private void MenuItem_Homepage_Click(object sender, RoutedEventArgs e)
         {
             try { System.Diagnostics.Process.Start(PROJECT_URL); }
-            catch (Exception ex) { HandyControl.Controls.Growl.Error(ex.Message); }
+            catch (Exception ex) { Services.Toast.Error(ex.Message); }
         }
 
         private void MenuItem_JoinQQ_Click(object sender, RoutedEventArgs e)
         {
             try { System.Diagnostics.Process.Start(QQ_GROUP_URL); }
-            catch (Exception ex) { HandyControl.Controls.Growl.Error(ex.Message); }
+            catch (Exception ex) { Services.Toast.Error(ex.Message); }
         }
 
         // ===== 文章处理（菜单 → 功能 → 文章处理）=====
@@ -1552,7 +1552,7 @@ namespace newgdq
         private void MenuItem_ShuffleArticle_Click(object sender, RoutedEventArgs e)
         {
             if (_session.TypeText.Length == 0)
-            { HandyControl.Controls.Growl.Info("当前无文段"); return; }
+            { Services.Toast.Info("当前无文段"); return; }
             string shuffled = Services.TextProcessor.Shuffle(_session.TypeText);
             LoadArticle(shuffled, _session.Title + "（已乱序）");
         }
@@ -1560,7 +1560,7 @@ namespace newgdq
         private void MenuItem_En2CnPunct_Click(object sender, RoutedEventArgs e)
         {
             if (_session.TypeText.Length == 0)
-            { HandyControl.Controls.Growl.Info("当前无文段"); return; }
+            { Services.Toast.Info("当前无文段"); return; }
             string converted = Services.TextProcessor.En2Cn(_session.TypeText);
             LoadArticle(converted, _session.Title);
         }
@@ -1568,7 +1568,7 @@ namespace newgdq
         private void MenuItem_StripSpace_Click(object sender, RoutedEventArgs e)
         {
             if (_session.TypeText.Length == 0)
-            { HandyControl.Controls.Growl.Info("当前无文段"); return; }
+            { Services.Toast.Info("当前无文段"); return; }
             string stripped = Services.TextProcessor.TickBlock(_session.TypeText);
             LoadArticle(stripped, _session.Title);
         }
@@ -1578,18 +1578,18 @@ namespace newgdq
         private void MenuItem_CopyResult_Click(object sender, RoutedEventArgs e)
         {
             if (History.Count == 0)
-            { HandyControl.Controls.Growl.Info("没有可复制的成绩，先打一段"); return; }
+            { Services.Toast.Info("没有可复制的成绩，先打一段"); return; }
             var r = History[0];
             string s = $"第{r.Seg}段 速度{r.Speed:0.00} 罚五{r.Speed2:0.00} 击键{r.Jj:0.00} 码长{r.Mc:0.00} " +
                        $"回改{r.Hg} 错字{r.Cz} 键数{r.Js} 打词{r.DaCi} 用时{r.UseTime:0.00}s · {r.Title}";
             try
             {
                 if (newgdq.Services.ClipboardHelper.TrySetText(s))
-                    HandyControl.Controls.Growl.Success("最新成绩已复制");
+                    Services.Toast.Success("最新成绩已复制");
                 else
-                    HandyControl.Controls.Growl.Warning("剪贴板被其他程序占用，请稍后再试");
+                    Services.Toast.Warning("剪贴板被其他程序占用，请稍后再试");
             }
-            catch (Exception ex) { HandyControl.Controls.Growl.Error(ex.Message); }
+            catch (Exception ex) { Services.Toast.Error(ex.Message); }
         }
 
         private void MenuItem_Exit_Click(object sender, RoutedEventArgs e) => this.Close();
@@ -1615,7 +1615,7 @@ namespace newgdq
                               && _session.LastInputLen < _session.TypeText.Length;
             if (inProgress)
             {
-                var r = HandyControl.Controls.MessageBox.Show(
+                var r = System.Windows.MessageBox.Show(
                     "当前正在跟打「" + (string.IsNullOrEmpty(_session.Title) ? "未命名" : _session.Title) +
                     "」，还没打完。\n载入错字练习会覆盖当前内容，未结算的进度将丢失。\n\n确定要切换吗？\n\n[ Esc 取消 ]",
                     "切换到错字练习", System.Windows.MessageBoxButton.OKCancel, System.Windows.MessageBoxImage.Warning);
@@ -1641,7 +1641,7 @@ namespace newgdq
         private void MenuItem_SendImageScore_Click(object sender, RoutedEventArgs e)
         {
             if (History.Count == 0)
-            { HandyControl.Controls.Growl.Info("没有可发送的成绩，先打一段"); return; }
+            { Services.Toast.Info("没有可发送的成绩，先打一段"); return; }
             AutoCopyResultImage();
         }
 
@@ -1665,7 +1665,7 @@ namespace newgdq
         {
             if (_session.TypeText.Length == 0 && _session.Report.Count == 0)
             {
-                HandyControl.Controls.Growl.Info("当前没有可分析的跟打数据，先打一段试试");
+                Services.Toast.Info("当前没有可分析的跟打数据，先打一段试试");
                 return;
             }
             var win = new Views.ReportWindow(_session, this);
@@ -1686,7 +1686,7 @@ namespace newgdq
         private void MenuItem_XhAuxCodeHelp_Click(object sender, RoutedEventArgs e)
         {
             try { System.Diagnostics.Process.Start("https://flypy.cc/help/#/xh"); }
-            catch (Exception ex) { HandyControl.Controls.Growl.Error(ex.Message); }
+            catch (Exception ex) { Services.Toast.Error(ex.Message); }
         }
 
         private void EnterPracticeMode()
@@ -1723,7 +1723,7 @@ namespace newgdq
         {
             if (_session.TypeText.Length == 0 && _session.Report.Count == 0)
             {
-                HandyControl.Controls.Growl.Info("当前没有可分析的跟打数据，先打一段试试");
+                Services.Toast.Info("当前没有可分析的跟打数据，先打一段试试");
                 return;
             }
             new Views.SpeedAnalysisWindow(_session, this).Show();
@@ -1734,13 +1734,13 @@ namespace newgdq
         {
             if (!_sending.State.Active)
             {
-                HandyControl.Controls.Growl.Info("尚未开启发文，请先菜单 → 发文 → 发文...");
+                Services.Toast.Info("尚未开启发文，请先菜单 → 发文 → 发文...");
                 return;
             }
             var segs = _sending.EnumerateSegments(previewLen: 14, maxCount: 300);
             if (segs.Count == 0)
             {
-                HandyControl.Controls.Growl.Info("当前模式不支持段号跳转（乱序/词组模式按性质无法预先确定段号）");
+                Services.Toast.Info("当前模式不支持段号跳转（乱序/词组模式按性质无法预先确定段号）");
                 return;
             }
 
@@ -1757,7 +1757,7 @@ namespace newgdq
                 mi.Click += (s2, e2) =>
                 {
                     string seg = _sending.JumpToSeg(captured);
-                    if (seg == null) { HandyControl.Controls.Growl.Warning("跳转失败"); return; }
+                    if (seg == null) { Services.Toast.Warning("跳转失败"); return; }
                     LoadArticle(seg, $"{_sending.State.Title} · 第 {captured} 段");
                     _currentSegNo = captured;
                 };
@@ -1792,7 +1792,7 @@ namespace newgdq
             _repeatCount = 0;
             _currentSegNo = 0;
             RefreshExtraStatus();
-            HandyControl.Controls.Growl.Info("已复位");
+            Services.Toast.Info("已复位");
         }
 
         // ===== 暂停 / 继续（与原版一致：菜单点 或 输入框失焦则暂停；敢一个键自动继续）=====
@@ -2303,7 +2303,7 @@ namespace newgdq
 
             if (blockedByLimit)
             {
-                HandyControl.Controls.Growl.Warning($"速度 {speed:0.00} 低于阈值，未入历史（菜单 → 外观 → 个签 Tab 改阈值）");
+                Services.Toast.Warning($"速度 {speed:0.00} 低于阈值，未入历史（菜单 → 外观 → 个签 Tab 改阈值）");
             }
             else
             {
@@ -2317,14 +2317,11 @@ namespace newgdq
                         pbLine = $"距纪录就差 {oldBest - speed:0.0} 字/分，加油！\n";
                 }
 
-                HandyControl.Controls.Growl.Success(new HandyControl.Data.GrowlInfo
-                {
-                    Message = pbLine +
+                Services.Toast.Success(
+                    pbLine +
                         $"完成！速度 {speed:0.00}（错一罚五 {speed2:0.00}）| 击键 {jj:0.00} | 码长 {mc:0.00} | 用时 {sec:0.00}s\n" +
                         $"错字 {_session.Cz} | 回改 {_session.Hg} | 键数 {_session.Keys} | 打词 {_session.Words} | 选重 {_session.Reselect} | 拼回 {_session.Enter} | 左:右 {_session.LeftHand}:{_session.RightHand}",
-                    WaitTime = pbLine.Length > 0 ? 4 : 2,   // 破纪录/接近多停一会儿
-                    ShowDateTime = false,
-                });
+                    pbLine.Length > 0 ? 4 : 2);   // 破纪录/接近多停一会儿
 
                 // 图片成绩：完成自动截 ReportWindow 复制到剪贴板
                 if (TogImage != null && TogImage.IsChecked == true)
@@ -2385,7 +2382,7 @@ namespace newgdq
                             try { System.Windows.Clipboard.SetImage(frozen); ok = true; }
                             catch { System.Threading.Thread.Sleep(80); }
                         }
-                        if (ok) HandyControl.Controls.Growl.Success("成绩图已自动复制到剪贴板");
+                        if (ok) Services.Toast.Success("成绩图已自动复制到剪贴板");
                     }
                     catch (Exception ex) { System.Diagnostics.Debug.WriteLine("AutoCopyResultImage render: " + ex); }
                 }), System.Windows.Threading.DispatcherPriority.Loaded);

@@ -190,7 +190,7 @@ namespace newgdq.Views
             var row = Grid.SelectedItem as Row;
             if (row == null || string.IsNullOrEmpty(row.Correct))
             {
-                HandyControl.Controls.Growl.Info("请先在表格中选中一行");
+                Services.Toast.Info("请先在表格中选中一行");
                 return null;
             }
             return row.Correct;
@@ -201,7 +201,7 @@ namespace newgdq.Views
             string c = SelectedCorrect();
             if (c == null) return;
             ErrorBookRepository.MarkMastered(c, true);
-            HandyControl.Controls.Growl.Success($"「{c}」已标为掌握，再错会重新出现");
+            Services.Toast.Success($"「{c}」已标为掌握，再错会重新出现");
             Refresh();
         }
 
@@ -209,12 +209,12 @@ namespace newgdq.Views
         {
             string c = SelectedCorrect();
             if (c == null) return;
-            var r = HandyControl.Controls.MessageBox.Show(
+            var r = System.Windows.MessageBox.Show(
                 $"彻底删除「{c}」的全部错字记录？此操作不可撤销。",
                 "删除错字", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
             if (r != MessageBoxResult.OK) return;
             int n = ErrorBookRepository.DeleteChar(c);
-            HandyControl.Controls.Growl.Success($"已删除「{c}」的 {n} 条记录");
+            Services.Toast.Success($"已删除「{c}」的 {n} 条记录");
             Refresh();
         }
 
@@ -238,13 +238,13 @@ namespace newgdq.Views
             string text = string.Concat(CurrentErrorChars());
             if (string.IsNullOrEmpty(text))
             {
-                HandyControl.Controls.Growl.Info("当前范围没有错字可复制");
+                Services.Toast.Info("当前范围没有错字可复制");
                 return;
             }
             if (newgdq.Services.ClipboardHelper.TrySetText(text))
-                HandyControl.Controls.Growl.Success($"已复制 {text.Length} 个错字");
+                Services.Toast.Success($"已复制 {text.Length} 个错字");
             else
-                HandyControl.Controls.Growl.Warning("剪贴板被其他程序占用，请稍后再试");
+                Services.Toast.Warning("剪贴板被其他程序占用，请稍后再试");
         }
 
         /// <summary>错字闭环：取高频错字组成重复练习段，直接送进主窗跟打区。</summary>
@@ -253,13 +253,13 @@ namespace newgdq.Views
             var chars = CurrentErrorChars();
             if (chars.Count == 0)
             {
-                HandyControl.Controls.Growl.Info("当前范围没有错字可练");
+                Services.Toast.Info("当前范围没有错字可练");
                 return;
             }
             var main = Owner as newgdq.MainWindow;
             if (main == null)
             {
-                HandyControl.Controls.Growl.Warning("无法定位主窗口，请从主窗菜单打开错字本");
+                Services.Toast.Warning("无法定位主窗口，请从主窗菜单打开错字本");
                 return;
             }
             // 取高频前 N 个，重复凑成约 80 字的练习段（逐遍重打弱点字）
@@ -272,7 +272,7 @@ namespace newgdq.Views
             string text = sb.ToString();
             string title = $"错字针对练习 · {pick.Count}字×{repeat}遍";
             if (!main.LoadPracticeText(text, title)) return;   // 用户在"覆盖确认"里取消 → 不关窗
-            HandyControl.Controls.Growl.Success($"已生成 {text.Length} 字练习，去主窗开打");
+            Services.Toast.Success($"已生成 {text.Length} 字练习，去主窗开打");
             Close();
         }
 
@@ -280,12 +280,12 @@ namespace newgdq.Views
         {
             var range = CurrentRange();
             string name = (CmbRange.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "本范围";
-            var r = HandyControl.Controls.MessageBox.Show(
+            var r = System.Windows.MessageBox.Show(
                 $"确定清空「{name}」范围内的错字记录？此操作不可撤销。",
                 "清空错字本", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
             if (r != MessageBoxResult.OK) return;
             int n = ErrorBookRepository.Clear(range);
-            HandyControl.Controls.Growl.Success($"已清空 {n} 条记录");
+            Services.Toast.Success($"已清空 {n} 条记录");
             Refresh();
         }
 

@@ -77,9 +77,9 @@ namespace newgdq.Views
                 $"速度 {TxtSpeed.Text} | 错一罚五 {TxtSpeed2.Text} | 击键 {TxtJj.Text} | 码长 {TxtMc.Text}\n" +
                 $"用时 {TxtSec.Text}s | {TxtCounts.Text}";
             if (newgdq.Services.ClipboardHelper.TrySetText(s))
-                HandyControl.Controls.Growl.Success("已复制到剪贴板");
+                Services.Toast.Success("已复制到剪贴板");
             else
-                HandyControl.Controls.Growl.Warning("剪贴板被其他程序占用，请稍后再试");
+                Services.Toast.Warning("剪贴板被其他程序占用，请稍后再试");
         }
 
         private System.Windows.Media.Imaging.BitmapSource RenderWindowImage()
@@ -107,7 +107,7 @@ namespace newgdq.Views
             try
             {
                 var img = RenderWindowImage();
-                if (img == null) { HandyControl.Controls.Growl.Warning("没有可截取的内容"); return; }
+                if (img == null) { Services.Toast.Warning("没有可截取的内容"); return; }
                 // 防 OpenClipboard 0x800401D0：被其他进程占用时重试
                 bool ok = false;
                 for (int retry = 0; retry < 4 && !ok; retry++)
@@ -115,10 +115,10 @@ namespace newgdq.Views
                     try { Clipboard.SetImage(img); ok = true; }
                     catch { System.Threading.Thread.Sleep(80); }
                 }
-                if (ok) HandyControl.Controls.Growl.Success("成绩图已复制到剪贴板");
-                else HandyControl.Controls.Growl.Warning("剪贴板被占用，复制失败，请重试");
+                if (ok) Services.Toast.Success("成绩图已复制到剪贴板");
+                else Services.Toast.Warning("剪贴板被占用，复制失败，请重试");
             }
-            catch (Exception ex) { HandyControl.Controls.Growl.Error(ex.Message); }
+            catch (Exception ex) { Services.Toast.Error(ex.Message); }
         }
 
         private void BtnSaveImage_Click(object sender, RoutedEventArgs e)
@@ -126,7 +126,7 @@ namespace newgdq.Views
             try
             {
                 var img = RenderWindowImage();
-                if (img == null) { HandyControl.Controls.Growl.Warning("没有可截取的内容"); return; }
+                if (img == null) { Services.Toast.Warning("没有可截取的内容"); return; }
                 var dlg = new Microsoft.Win32.SaveFileDialog
                 {
                     Filter = "PNG 图片|*.png",
@@ -136,9 +136,9 @@ namespace newgdq.Views
                 var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
                 encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(img));
                 using (var fs = System.IO.File.Create(dlg.FileName)) encoder.Save(fs);
-                HandyControl.Controls.Growl.Success("已保存：" + dlg.FileName);
+                Services.Toast.Success("已保存：" + dlg.FileName);
             }
-            catch (Exception ex) { HandyControl.Controls.Growl.Error(ex.Message); }
+            catch (Exception ex) { Services.Toast.Error(ex.Message); }
         }
 
         private void BtnClose_Click(object sender, RoutedEventArgs e) => Close();

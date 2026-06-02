@@ -102,9 +102,9 @@ namespace newgdq.Views
         private SendPreset BuildPresetFromForm()
         {
             string name = (TbxPresetName.Text ?? "").Trim();
-            if (string.IsNullOrEmpty(name)) { HandyControl.Controls.Growl.Warning("请填名称"); return null; }
+            if (string.IsNullOrEmpty(name)) { Services.Toast.Warning("请填名称"); return null; }
             if (!int.TryParse(TbxPresetCount.Text, out int count) || count <= 0)
-            { HandyControl.Controls.Growl.Warning("每段字数无效"); return null; }
+            { Services.Toast.Warning("每段字数无效"); return null; }
             int.TryParse(TbxPresetStartSeg.Text, out int startSeg); if (startSeg <= 0) startSeg = 1;
             int.TryParse(TbxPresetMark.Text, out int mark);         if (mark < 0)    mark = 0;
             return new SendPreset
@@ -129,13 +129,13 @@ namespace newgdq.Views
             SettingsService.Save();
             ReloadPresets();
             LbxPresets.SelectedItem = p;
-            HandyControl.Controls.Growl.Success("已保存预设：" + p.Name);
+            Services.Toast.Success("已保存预设：" + p.Name);
         }
 
         private void BtnPresetUpdate_Click(object sender, RoutedEventArgs e)
         {
             if (!(LbxPresets.SelectedItem is SendPreset old))
-            { HandyControl.Controls.Growl.Info("先在左侧选一个预设"); return; }
+            { Services.Toast.Info("先在左侧选一个预设"); return; }
             var p = BuildPresetFromForm(); if (p == null) return;
             var list = SettingsService.Instance.SendPresets;
             int idx = list.IndexOf(old);
@@ -144,24 +144,24 @@ namespace newgdq.Views
             SettingsService.Save();
             ReloadPresets();
             LbxPresets.SelectedItem = p;
-            HandyControl.Controls.Growl.Success("已更新：" + p.Name);
+            Services.Toast.Success("已更新：" + p.Name);
         }
 
         private void BtnPresetDelete_Click(object sender, RoutedEventArgs e)
         {
             if (!(LbxPresets.SelectedItem is SendPreset p))
-            { HandyControl.Controls.Growl.Info("先在左侧选一个预设"); return; }
+            { Services.Toast.Info("先在左侧选一个预设"); return; }
             SettingsService.Instance.SendPresets.Remove(p);
             SettingsService.Save();
             ReloadPresets();
-            HandyControl.Controls.Growl.Success("已删除：" + p.Name);
+            Services.Toast.Success("已删除：" + p.Name);
         }
 
         /// <summary>把选中预设的参数灌到主参数区（Tab 1-3 共用的发文参数输入框）。</summary>
         private void BtnPresetApply_Click(object sender, RoutedEventArgs e)
         {
             if (!(LbxPresets.SelectedItem is SendPreset p))
-            { HandyControl.Controls.Growl.Info("先在左侧选一个预设"); return; }
+            { Services.Toast.Info("先在左侧选一个预设"); return; }
             TbxSendCount.Text  = p.CountPerSeg.ToString();
             TbxStartSeg.Text   = p.StartSeg.ToString();
             TbxSendStart.Text  = p.Mark.ToString();
@@ -170,7 +170,7 @@ namespace newgdq.Views
             ChkNoRepeat.IsChecked = p.RandomNoRepeat;
             ChkOneEnd.IsChecked   = p.OneSentenceEnd;
             ChkTickOut.IsChecked  = p.TickOut;
-            HandyControl.Controls.Growl.Success("已套用：" + p.Name + "（参数已填入面板，回到前面 Tab 检查或直接 开启发文）");
+            Services.Toast.Success("已套用：" + p.Name + "（参数已填入面板，回到前面 Tab 检查或直接 开启发文）");
         }
 
         // ===== Tab 1 自带文章 =====
@@ -190,7 +190,7 @@ namespace newgdq.Views
             }
             catch (Exception ex)
             {
-                HandyControl.Controls.Growl.Error("载入失败：" + ex.Message);
+                Services.Toast.Error("载入失败：" + ex.Message);
             }
         }
 
@@ -252,15 +252,15 @@ namespace newgdq.Views
         {
             if (string.IsNullOrEmpty(_currentText))
             {
-                HandyControl.Controls.Growl.Warning("请先选择/输入文章");
+                Services.Toast.Warning("请先选择/输入文章");
                 return;
             }
             string text = ChkTickOut.IsChecked == true ? TextProcessor.TickBlock(_currentText) : _currentText;
-            if (text.Length == 0) { HandyControl.Controls.Growl.Warning("文章为空"); return; }
+            if (text.Length == 0) { Services.Toast.Warning("文章为空"); return; }
 
             if (!int.TryParse(TbxSendCount.Text, out int countPerSeg) || countPerSeg <= 0)
             {
-                HandyControl.Controls.Growl.Warning("发送字数无效");
+                Services.Toast.Warning("发送字数无效");
                 return;
             }
             // 记住本次发送字数，下次打开沿用
@@ -270,7 +270,7 @@ namespace newgdq.Views
             int.TryParse(TbxStartSeg.Text, out int startSeg);
             if (startSeg <= 0) startSeg = 1;
             if (mark < 0) mark = 0;
-            if (mark >= text.Length) { HandyControl.Controls.Growl.Warning("起始位置超出范围"); return; }
+            if (mark >= text.Length) { Services.Toast.Warning("起始位置超出范围"); return; }
 
             var state = new SendingState
             {
@@ -305,11 +305,11 @@ namespace newgdq.Views
         {
             if (string.IsNullOrEmpty(_currentText))
             {
-                HandyControl.Controls.Growl.Warning("请先选择/输入文章");
+                Services.Toast.Warning("请先选择/输入文章");
                 return;
             }
             string text = ChkTickOut.IsChecked == true ? TextProcessor.TickBlock(_currentText) : _currentText;
-            if (text.Length == 0) { HandyControl.Controls.Growl.Warning("文章为空"); return; }
+            if (text.Length == 0) { Services.Toast.Warning("文章为空"); return; }
 
             var state = new SendingState
             {

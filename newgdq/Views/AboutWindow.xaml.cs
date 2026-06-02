@@ -22,7 +22,7 @@ namespace newgdq.Views
         private void LnkProject_Click(object sender, RoutedEventArgs e)
         {
             try { System.Diagnostics.Process.Start(PROJECT_URL); }
-            catch (Exception ex) { HandyControl.Controls.Growl.Error(ex.Message); }
+            catch (Exception ex) { Services.Toast.Error(ex.Message); }
         }
 
         private void BtnContact_Click(object sender, RoutedEventArgs e)
@@ -45,11 +45,11 @@ namespace newgdq.Views
             try
             {
                 if (newgdq.Services.ClipboardHelper.TrySetText(WECHAT_ID))
-                    HandyControl.Controls.Growl.Success("已复制微信号：" + WECHAT_ID);
+                    Services.Toast.Success("已复制微信号：" + WECHAT_ID);
                 else
-                    HandyControl.Controls.Growl.Warning("剪贴板被其他程序占用，请稍后再试");
+                    Services.Toast.Warning("剪贴板被其他程序占用，请稍后再试");
             }
-            catch (Exception ex) { HandyControl.Controls.Growl.Error(ex.Message); }
+            catch (Exception ex) { Services.Toast.Error(ex.Message); }
         }
 
         private void BtnClose_Click(object sender, RoutedEventArgs e) => Close();

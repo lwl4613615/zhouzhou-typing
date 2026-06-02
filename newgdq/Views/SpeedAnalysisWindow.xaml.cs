@@ -123,9 +123,9 @@ namespace newgdq.Views
                 $"【速度分析】{TxtTitle.Text}\n" +
                 $"实际 {TxtSpeed.Text} | 错一罚五 {TxtSpeed2.Text} | 理想 {TxtIdeal.Text} | 用时 {TxtSec.Text}s";
             if (newgdq.Services.ClipboardHelper.TrySetText(s))
-                HandyControl.Controls.Growl.Success("已复制");
+                Services.Toast.Success("已复制");
             else
-                HandyControl.Controls.Growl.Warning("剪贴板被其他程序占用，请稍后再试");
+                Services.Toast.Warning("剪贴板被其他程序占用，请稍后再试");
         }
 
         private void BtnClose_Click(object sender, RoutedEventArgs e) => Close();

@@ -105,9 +105,9 @@ namespace newgdq.Views
         private void BtnCopy_Click(object sender, RoutedEventArgs e)
         {
             if (newgdq.Services.ClipboardHelper.TrySetText(TxtTitle.Text))
-                HandyControl.Controls.Growl.Success("已复制");
+                Services.Toast.Success("已复制");
             else
-                HandyControl.Controls.Growl.Warning("剪贴板被其他程序占用，请稍后再试");
+                Services.Toast.Warning("剪贴板被其他程序占用，请稍后再试");
         }
 
         private void BtnClose_Click(object sender, RoutedEventArgs e) => Close();

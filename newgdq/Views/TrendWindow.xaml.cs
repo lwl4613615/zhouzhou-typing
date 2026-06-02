@@ -239,15 +239,15 @@ namespace newgdq.Views
         private void BtnCopy_Click(object sender, RoutedEventArgs e)
         {
             var buckets = HistoryRepository.LoadTrend(CurrentGranularity(), CurrentLimit());
-            if (buckets.Count == 0) { HandyControl.Controls.Growl.Info("暂无可复制的趋势数据"); return; }
+            if (buckets.Count == 0) { Services.Toast.Info("暂无可复制的趋势数据"); return; }
             var sb = new StringBuilder();
             sb.AppendLine($"【成绩趋势 · {GranularityWord()}】");
             foreach (var b in buckets)
                 sb.AppendLine($"{b.Label}  均速 {b.AvgSpeed:0.0}  罚五 {b.AvgSpeed2:0.0}  击键 {b.AvgJj:0.00}  错字率 {b.ErrRate * 100:0.0}%  ({b.Segs}段)");
             if (newgdq.Services.ClipboardHelper.TrySetText(sb.ToString()))
-                HandyControl.Controls.Growl.Success("趋势已复制");
+                Services.Toast.Success("趋势已复制");
             else
-                HandyControl.Controls.Growl.Warning("剪贴板被其他程序占用，请稍后再试");
+                Services.Toast.Warning("剪贴板被其他程序占用，请稍后再试");
         }
 
         private void BtnClose_Click(object sender, RoutedEventArgs e) => Close();

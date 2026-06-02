@@ -174,7 +174,7 @@ namespace newgdq.Views
             }
             catch (Exception ex)
             {
-                HandyControl.Controls.Growl.Error("拾色器打开失败：" + ex.Message);
+                Services.Toast.Error("拾色器打开失败：" + ex.Message);
             }
         }
 
@@ -207,7 +207,7 @@ namespace newgdq.Views
             SettingsService.Save();
             if (!string.Equals(oldTheme, s.ThemeName, StringComparison.OrdinalIgnoreCase))
             {
-                HandyControl.Controls.Growl.Info("主题已保存，重启程序后完全生效");
+                Services.Toast.Info("主题已保存，重启程序后完全生效");
             }
             DialogResult = true;
             Close();
