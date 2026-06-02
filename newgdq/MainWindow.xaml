@@ -197,7 +197,7 @@
 
         <!-- 3. 信息条（两行紧贴：上=标签 / 下=值，每个数据独占一列） -->
         <Border DockPanel.Dock="Top" x:Name="InfoBar" Background="{DynamicResource PanelBG}"
-                CornerRadius="6" Margin="6,6,6,2" Padding="2,0" ClipToBounds="True"
+                CornerRadius="0" Margin="0" Padding="2,0" ClipToBounds="True"
                 BorderThickness="0">
             <Grid>
                 <Grid.RowDefinitions>
