@@ -7,9 +7,15 @@
         AllowsTransparency="True"
         ShowInTaskbar="False"
         Topmost="True"
-        Background="{DynamicResource GlassBG}"
+        Background="Transparent"
         Foreground="{DynamicResource ValueFG}">
-    <Border BorderBrush="{DynamicResource GridLine}" BorderThickness="1" CornerRadius="4" Padding="6">
+    <!-- 外层 Margin 给投影留空间；圆角 + 柔和阴影，更现代的浮层观感 -->
+    <Border Background="{DynamicResource GlassBG}"
+            BorderBrush="{DynamicResource GridLine}" BorderThickness="1"
+            CornerRadius="10" Padding="12,9" Margin="12">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="18" ShadowDepth="3" Direction="270" Opacity="0.45" Color="#000000"/>
+        </Border.Effect>
         <StackPanel Orientation="Vertical">
             <TextBlock x:Name="TxtTitle" Text="编码提示" FontSize="11" Foreground="{DynamicResource LabelFG}" Margin="0,0,0,4"/>
             <TextBlock x:Name="TxtContent" Text="-" FontSize="14" FontFamily="Consolas, 微软雅黑"

@@ -1736,7 +1736,17 @@ namespace newgdq
             MapPanel.Visibility       = Visibility.Collapsed;
             MainContentRoot.Visibility = Visibility.Collapsed;
             PracticePanel.Visibility  = Visibility.Visible;
+            FadeIn(PracticePanel);
             PracticePanel.FocusForInput();
+        }
+
+        /// <summary>给元素做一次 0→1 透明度淡入过渡。</summary>
+        private static void FadeIn(System.Windows.UIElement el, double seconds = 0.18)
+        {
+            if (el == null) return;
+            var anim = new System.Windows.Media.Animation.DoubleAnimation(0, 1,
+                new Duration(System.TimeSpan.FromSeconds(seconds)));
+            el.BeginAnimation(System.Windows.UIElement.OpacityProperty, anim);
         }
 
         private void PracticePanel_BackRequested(object sender, EventArgs e) => ExitPracticeMode();
@@ -1747,6 +1757,7 @@ namespace newgdq
             _practiceMode = false;
             PracticePanel.Visibility   = Visibility.Collapsed;
             MainContentRoot.Visibility = Visibility.Visible;
+            FadeIn(MainContentRoot);
             InfoBar.Visibility         = Visibility.Visible;
             MarkerBar.Visibility       = Visibility.Visible;
             // 节奏热力条（MapPanel）恢复到“节奏”开关的原状态

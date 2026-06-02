@@ -37,7 +37,7 @@ namespace newgdq.Views
         {
             if (_owner == null) return;
             Left = _owner.Left + (_owner.Width - Width) / 2;
-            Top  = _owner.Top + _owner.Height + 4;
+            Top  = _owner.Top + _owner.Height - 8;
         }
 
         /// <summary>
