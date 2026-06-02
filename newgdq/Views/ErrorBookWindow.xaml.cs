@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using newgdq.Services;
@@ -115,19 +116,24 @@ namespace newgdq.Views
             Refresh();
         }
 
-        private void BtnCopyChars_Click(object sender, RoutedEventArgs e)
+        /// <summary>当前范围内去重错字，按总错次倒序（受“隐藏已掌握”过滤）。</summary>
+        private List<string> CurrentErrorChars()
         {
             var stats = ErrorBookRepository.QueryRanking(CurrentRange());
             bool hide = ChkHideMastered == null || ChkHideMastered.IsChecked == true;
             if (hide)
                 stats = stats.Where(s => !s.Mastered && s.Streak < ErrorBookRepository.MasterStreak).ToList();
-            // 去重错字（按正确字），按总次数倒序，便于直接拿去练
-            var chars = stats
+            return stats
                 .GroupBy(s => s.Correct)
                 .OrderByDescending(g => g.Sum(x => x.Count))
                 .Select(g => g.Key)
-                .Where(c => !string.IsNullOrWhiteSpace(c));
-            string text = string.Concat(chars);
+                .Where(c => !string.IsNullOrWhiteSpace(c))
+                .ToList();
+        }
+
+        private void BtnCopyChars_Click(object sender, RoutedEventArgs e)
+        {
+            string text = string.Concat(CurrentErrorChars());
             if (string.IsNullOrEmpty(text))
             {
                 HandyControl.Controls.Growl.Info("当前范围没有错字可复制");
@@ -137,6 +143,35 @@ namespace newgdq.Views
                 HandyControl.Controls.Growl.Success($"已复制 {text.Length} 个错字");
             else
                 HandyControl.Controls.Growl.Warning("剪贴板被其他程序占用，请稍后再试");
+        }
+
+        /// <summary>错字闭环：取高频错字组成重复练习段，直接送进主窗跟打区。</summary>
+        private void BtnGenPractice_Click(object sender, RoutedEventArgs e)
+        {
+            var chars = CurrentErrorChars();
+            if (chars.Count == 0)
+            {
+                HandyControl.Controls.Growl.Info("当前范围没有错字可练");
+                return;
+            }
+            var main = Owner as newgdq.MainWindow;
+            if (main == null)
+            {
+                HandyControl.Controls.Growl.Warning("无法定位主窗口，请从主窗菜单打开错字本");
+                return;
+            }
+            // 取高频前 N 个，重复凑成约 80 字的练习段（逐遍重打弱点字）
+            const int MaxChars = 30;
+            var pick = chars.Take(MaxChars).ToList();
+            int repeat = Math.Max(2, Math.Min(6, (int)Math.Ceiling(80.0 / pick.Count)));
+            var sb = new StringBuilder();
+            for (int r = 0; r < repeat; r++)
+                foreach (var c in pick) sb.Append(c);
+            string text = sb.ToString();
+            string title = $"错字针对练习 · {pick.Count}字×{repeat}遍";
+            main.LoadPracticeText(text, title);
+            HandyControl.Controls.Growl.Success($"已生成 {text.Length} 字练习，去主窗开打");
+            Close();
         }
 
         private void BtnClear_Click(object sender, RoutedEventArgs e)

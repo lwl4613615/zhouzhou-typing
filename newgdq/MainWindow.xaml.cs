@@ -1627,6 +1627,17 @@ namespace newgdq
             new Views.ErrorBookWindow(this).Show();
         }
 
+        /// <summary>错字本闭环：把给定文本作为针对练习载入跟打区并激活主窗。</summary>
+        public void LoadPracticeText(string text, string title)
+        {
+            if (string.IsNullOrEmpty(text)) return;
+            _currentSegNo = 0;   // 独立练习，不归属任何发文段
+            LoadArticle(text, title);
+            if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
+            Activate();
+            TbxInput.Focus();
+        }
+
         private void MenuItem_OpenTrend_Click(object sender, RoutedEventArgs e)
         {
             new Views.TrendWindow(this).Show();

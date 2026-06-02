@@ -35,6 +35,8 @@
                     ToolTip="彻底删除选中字的全部错字记录"/>
             <Button Content="复制错字" Width="84" Margin="6,0" Click="BtnCopyChars_Click"
                     ToolTip="复制当前范围内去重后的错字，可粘到发文窗当练习语料"/>
+            <Button Content="生成练习" Width="84" Margin="6,0" Click="BtnGenPractice_Click"
+                    ToolTip="把当前范围的高频错字组成重复练习段，直接送入主窗跟打区开打"/>
             <Button Content="清空本范围" Width="84" Margin="6,0" Click="BtnClear_Click"/>
             <Button Content="关闭" Width="72" Margin="6,0" Click="BtnClose_Click"/>
         </StackPanel>
