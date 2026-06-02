@@ -52,9 +52,6 @@ namespace newgdq
             Services.SettingsService.Load();
             ApplyTheme(Services.SettingsService.Instance.ThemeName);
 
-            // ScottPlot 全局默认字体设为中文可渲染字体，避免图表中文标题/标签变方块乱码
-            ScottPlot.Fonts.Default = "Microsoft YaHei";
-
             // 全局界面缩放：确定初始倍数并钩住所有窗口，使各窗体字体/控件一起缩放
             Services.UiScaleManager.Initialize();
 

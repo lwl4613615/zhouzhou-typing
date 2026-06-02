@@ -1,6 +1,9 @@
 using System;
 using System.Linq;
 using System.Windows;
+using OxyPlot;
+using OxyPlot.Axes;
+using OxyPlot.Series;
 using newgdq.Models;
 
 namespace newgdq.Views
@@ -69,52 +72,54 @@ namespace newgdq.Views
 
         private void BuildPlot(double tNormal, double tStall, double tHg, double tErr)
         {
-            var plot = Plot.Plot;
-            plot.Clear();
-
-            var labels = new[] { "正常打字", "卡顿/停留", "回改用时", "错字罚时 (推算)" };
-            var values = new[] { tNormal, tStall, tHg, tErr };
-            var colors = new[]
+            var model = new PlotModel
             {
-                new ScottPlot.Color(0x66, 0xBB, 0x6A), // 正常 绿
-                new ScottPlot.Color(0xEF, 0x53, 0x50), // 卡顿 红
-                new ScottPlot.Color(0xFF, 0xCA, 0x28), // 回改 黄
-                new ScottPlot.Color(0xAB, 0x47, 0xBC), // 错罚 紫
+                PlotAreaBorderColor = OxyColors.Transparent,
+                TextColor    = OxyColors.LightGray,
+                Background   = OxyColors.Transparent,
             };
 
-            var fore = ScottPlot.Colors.LightGray;
-            var axisCol = ScottPlot.Colors.Gray;
-            double max = values.Max();
-
-            var bars = new System.Collections.Generic.List<ScottPlot.Bar>();
-            // 表格从上到下，柱图需反转位置使第一项在顶部
-            for (int i = 0; i < values.Length; i++)
+            var bar = new BarSeries
             {
-                bars.Add(new ScottPlot.Bar
-                {
-                    Position = values.Length - 1 - i,
-                    Value = values[i],
-                    FillColor = colors[i],
-                    Orientation = ScottPlot.Orientation.Horizontal,
-                });
-            }
-            plot.Add.Bars(bars);
+                StrokeColor = OxyColors.Transparent,
+                LabelPlacement = LabelPlacement.Outside,
+                LabelFormatString = "{0:0.00}s",
+                TextColor = OxyColors.LightGray,
+            };
+            // 颜色与含义对应
+            bar.Items.Add(new BarItem { Value = tNormal, Color = OxyColor.FromRgb(0x66, 0xBB, 0x6A) }); // 正常 绿
+            bar.Items.Add(new BarItem { Value = tStall,  Color = OxyColor.FromRgb(0xEF, 0x53, 0x50) }); // 卡顿 红
+            bar.Items.Add(new BarItem { Value = tHg,     Color = OxyColor.FromRgb(0xFF, 0xCA, 0x28) }); // 回改 黄
+            bar.Items.Add(new BarItem { Value = tErr,    Color = OxyColor.FromRgb(0xAB, 0x47, 0xBC) }); // 错罚 紫
 
-            var ticks = new ScottPlot.TickGenerators.NumericManual();
-            for (int i = 0; i < labels.Length; i++)
-                ticks.AddMajor(values.Length - 1 - i, labels[i]);
-            plot.Axes.Left.TickGenerator = ticks;
+            var category = new CategoryAxis
+            {
+                Position = AxisPosition.Left,
+                TextColor = OxyColors.LightGray,
+                AxislineColor = OxyColors.Gray,
+                TicklineColor = OxyColors.Gray,
+            };
+            category.Labels.Add("正常打字");
+            category.Labels.Add("卡顿/停留");
+            category.Labels.Add("回改用时");
+            category.Labels.Add("错字罚时 (推算)");
 
-            plot.FigureBackground.Color = ScottPlot.Colors.Transparent;
-            plot.DataBackground.Color = ScottPlot.Colors.Transparent;
-            plot.Axes.Color(axisCol);
-            plot.Axes.Left.TickLabelStyle.ForeColor = fore;
-            plot.Axes.Left.TickLabelStyle.FontName = "Microsoft YaHei";
-            plot.Axes.Bottom.TickLabelStyle.ForeColor = fore;
-            plot.HideGrid();
-            plot.Axes.SetLimits(0, Math.Max(max * 1.15, 0.1), -0.6, values.Length - 0.4);
+            var value = new LinearAxis
+            {
+                Position = AxisPosition.Bottom,
+                Minimum = 0,
+                MajorGridlineStyle = LineStyle.Dot,
+                MajorGridlineColor = OxyColors.DimGray,
+                StringFormat = "0.0s",
+                TextColor = OxyColors.LightGray,
+                AxislineColor = OxyColors.Gray,
+                TicklineColor = OxyColors.Gray,
+            };
 
-            Plot.Refresh();
+            model.Axes.Add(category);
+            model.Axes.Add(value);
+            model.Series.Add(bar);
+            Plot.Model = model;
         }
 
         private void BtnCopy_Click(object sender, RoutedEventArgs e)

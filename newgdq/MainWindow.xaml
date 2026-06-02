@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-        xmlns:sp="clr-namespace:ScottPlot.WPF;assembly=ScottPlot.WPF"
+        xmlns:sp="http://oxyplot.org/wpf"
         xmlns:tb="http://www.hardcodet.net/taskbar"
         xmlns:local="clr-namespace:newgdq"
         xmlns:views="clr-namespace:newgdq.Views"
@@ -422,7 +422,7 @@
 
                 <!-- 左：嵌入式速度曲线（TogChart 切换可见性） -->
                 <Border Grid.Column="0" Background="{DynamicResource AltRowBG}" BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,0,0">
-                    <sp:WpfPlot x:Name="InlineChart"/>
+                    <sp:PlotView x:Name="InlineChart" Background="Transparent"/>
                 </Border>
                 <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Stretch"
                               ResizeDirection="Columns" ResizeBehavior="PreviousAndNext"
