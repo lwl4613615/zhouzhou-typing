@@ -1632,8 +1632,39 @@ namespace newgdq
 
         private void MenuItem_OpenAverage_Click(object sender, RoutedEventArgs e)
         {
-            new Views.AverageWindow(this).Show();
+            ShowAnalysis(new Views.AverageView(), "平均成绩");
         }
+
+        // ===== E：分析页内嵌承载（覆盖主跟打区，与双拼练习面板同模式） =====
+        /// <summary>在主内容区内嵌显示一个分析视图，隐藏跟打区/信息条/标记栏。</summary>
+        private void ShowAnalysis(System.Windows.UIElement view, string title)
+        {
+            PauseType();   // 查看分析期间暂停跟打计时
+            AnalysisTitle.Text       = title;
+            AnalysisContent.Content  = view;
+            MainContentRoot.Visibility = Visibility.Collapsed;
+            InfoBar.Visibility         = Visibility.Collapsed;
+            MarkerBar.Visibility       = Visibility.Collapsed;
+            MapPanel.Visibility        = Visibility.Collapsed;
+            AnalysisHost.Visibility    = Visibility.Visible;
+            FadeIn(AnalysisHost);
+        }
+
+        /// <summary>关闭内嵌分析页，恢复跟打区。</summary>
+        private void CloseAnalysis()
+        {
+            if (AnalysisHost == null || AnalysisHost.Visibility != Visibility.Visible) return;
+            AnalysisHost.Visibility    = Visibility.Collapsed;
+            AnalysisContent.Content    = null;
+            MainContentRoot.Visibility = Visibility.Visible;
+            FadeIn(MainContentRoot);
+            InfoBar.Visibility         = Visibility.Visible;
+            MarkerBar.Visibility       = Visibility.Visible;
+            MapPanel.Visibility = (TogMap != null && TogMap.IsChecked == true)
+                ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void AnalysisBack_Click(object sender, RoutedEventArgs e) => CloseAnalysis();
 
         private void MenuItem_OpenErrorBook_Click(object sender, RoutedEventArgs e)
         {
@@ -1710,7 +1741,7 @@ namespace newgdq
 
         private void MenuItem_OpenJjCheck_Click(object sender, RoutedEventArgs e)
         {
-            new Views.JjCheckWindow(this).Show();
+            ShowAnalysis(new Views.JjCheckView(), "击键评定");
         }
 
         // ===== 双拼键位练习（内嵌面板） =====

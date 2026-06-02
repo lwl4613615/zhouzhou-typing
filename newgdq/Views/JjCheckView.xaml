@@ -1,0 +1,16 @@
+<UserControl x:Class="newgdq.Views.JjCheckView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:sp="http://oxyplot.org/wpf"
+        FontFamily="微软雅黑" FontSize="12"
+        Foreground="{DynamicResource PrimaryTextBrush}">
+    <DockPanel Margin="16" LastChildFill="True">
+        <TextBlock DockPanel.Dock="Top" x:Name="TxtTitle"
+                   FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ValueFG}" Margin="0,0,0,8"/>
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+            <ui:Button Content="复制评定" Width="90" Margin="6,0" Click="BtnCopy_Click"/>
+        </StackPanel>
+        <sp:PlotView x:Name="Plot" Background="Transparent"/>
+    </DockPanel>
+</UserControl>

@@ -953,6 +953,28 @@
 
             <!-- 双拼键位练习面板（默认隐藏，菜单 功能 → 双拼键位练习 切换） -->
             <views:ShuangPinPracticeControl x:Name="PracticePanel" Visibility="Collapsed"/>
+
+            <!-- 分析页内嵌承载层（E：分析窗口收编为内嵌页，覆盖主跟打区） -->
+            <Border x:Name="AnalysisHost" Visibility="Collapsed" Background="{DynamicResource PanelBG}">
+                <DockPanel LastChildFill="True">
+                    <Border DockPanel.Dock="Top" Background="{DynamicResource CellBG}"
+                            BorderBrush="{DynamicResource GridLine}" BorderThickness="0,0,0,1" Padding="10,6">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <ui:Button Appearance="Secondary" Padding="10,4" Click="AnalysisBack_Click"
+                                       ToolTip="返回跟打">
+                                <StackPanel Orientation="Horizontal">
+                                    <ui:SymbolIcon Symbol="ArrowLeft24" FontSize="16" Margin="0,0,6,0"/>
+                                    <TextBlock Text="返回" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </ui:Button>
+                            <TextBlock x:Name="AnalysisTitle" Text="" Margin="14,0,0,0"
+                                       FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center"
+                                       Foreground="{DynamicResource ValueFG}"/>
+                        </StackPanel>
+                    </Border>
+                    <ContentControl x:Name="AnalysisContent"/>
+                </DockPanel>
+            </Border>
         </Grid>
     </DockPanel>
     </Grid>
