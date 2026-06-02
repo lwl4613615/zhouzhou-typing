@@ -2073,12 +2073,13 @@ namespace newgdq
             {
                 int i = realLen - 1;
                 char inp = rawInput[i];
-                // 拼音合成串恒为 ASCII：字母 / 数字 / 空格 / 分隔符（微软拼音用单引号 ' 分隔音节，
-                // 也可能出现 ; 等）。合成进行中只要原文该位是中文，尾部任意 ASCII 都按合成占位剥离，
-                // 避免把 "yuan'lai" 残留的 "yuan'" 当成已上屏字符逐字判红。
+                // 拼音合成串恒为 ASCII：字母 / 数字 / 空格 / 分隔符（微软拼音用单引号 ' 分隔音节）。
+                // 剥离条件：尾部是 ASCII，且 (原文该位是中文) 或 (位置已超出原文长度——多出来的 ASCII
+                // 只能是未上屏拼音)。后者关键：合成串把输入撑过原文长度时，尾部越界会让旧逻辑立即
+                // break，残留整串逐字染红（微软拼音多音节 shu'ru'kuang' 尤其容易触发）。
                 bool inpIsImeJunk = inp < 128;
-                bool srcIsCjk = i < _session.TypeText.Length && _session.TypeText[i] > 127;
-                if (srcIsCjk && inpIsImeJunk) realLen--;
+                bool srcIsCjkOrBeyond = i >= _session.TypeText.Length || _session.TypeText[i] > 127;
+                if (srcIsCjkOrBeyond && inpIsImeJunk) realLen--;
                 else break;
             }
             var input = realLen < rawInput.Length ? rawInput.Substring(0, realLen) : rawInput;

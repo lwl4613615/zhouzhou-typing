@@ -62,6 +62,20 @@ namespace newgdq
             Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? ".",
             "newgdq.log");
 
+        /// <summary>诊断开关：true 时把 IME/输入比对的实时状态写入 newgdq.log（排错用，平时关）。</summary>
+        public static bool DiagIme = false;
+
+        /// <summary>诊断日志：仅 DiagIme 为 true 时写入，失败静默。</summary>
+        public static void Diag(string tag, string msg)
+        {
+            if (!DiagIme) return;
+            try
+            {
+                File.AppendAllText(LogPath, $"[{DateTime.Now:HH:mm:ss.fff}] [{tag}] {msg}\r\n");
+            }
+            catch { }
+        }
+
         private static void LogException(string source, Exception ex)
         {
             try
