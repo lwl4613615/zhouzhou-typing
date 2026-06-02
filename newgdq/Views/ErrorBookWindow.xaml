@@ -54,7 +54,8 @@
             <DataGrid x:Name="Grid" Grid.Column="0" AutoGenerateColumns="False" IsReadOnly="True"
                       HeadersVisibility="Column" GridLinesVisibility="Horizontal"
                       CanUserAddRows="False" CanUserDeleteRows="False"
-                      Background="Transparent" RowBackground="Transparent">
+                      Background="Transparent" RowBackground="Transparent"
+                      SelectionChanged="Grid_SelectionChanged">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="正确字" Binding="{Binding Correct}" Width="70"/>
                     <DataGridTextColumn Header="打成了" Binding="{Binding TypedShow}" Width="80"/>
@@ -68,11 +69,25 @@
             <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Center"
                           VerticalAlignment="Stretch" Background="Transparent"/>
 
-            <!-- TOP 错字柱状图 -->
+            <!-- 右侧：TOP 柱状图（上） + 错字溯源（下） -->
             <Border Grid.Column="2" Margin="4,0,0,0" Background="{DynamicResource AltRowBG}" CornerRadius="6">
                 <DockPanel Margin="6">
                     <TextBlock DockPanel.Dock="Top" Text="错字 TOP 10" FontWeight="Bold"
                                Foreground="{DynamicResource ValueFG}" Margin="4,2,0,4"/>
+
+                    <!-- 错字溯源：点选左侧某字，列出它来自哪些文章 -->
+                    <Border DockPanel.Dock="Bottom" BorderBrush="{DynamicResource GridLine}"
+                            BorderThickness="0,1,0,0" Margin="0,6,0,0" Padding="0,6,0,0">
+                        <StackPanel>
+                            <TextBlock x:Name="TxtSrcTitle" Text="错字溯源（点选左侧某字查看）"
+                                       FontWeight="Bold" Foreground="{DynamicResource ValueFG}" Margin="4,0,0,4"/>
+                            <ScrollViewer MaxHeight="130" VerticalScrollBarVisibility="Auto">
+                                <TextBlock x:Name="TxtSrc" Text="—" TextWrapping="Wrap"
+                                           Foreground="{DynamicResource ValueFG}" Margin="4,0"/>
+                            </ScrollViewer>
+                        </StackPanel>
+                    </Border>
+
                     <TextBlock x:Name="TxtChartEmpty" DockPanel.Dock="Bottom" Visibility="Collapsed"
                                Text="暂无错字数据" Foreground="{DynamicResource ValueFG}"
                                HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,20"/>

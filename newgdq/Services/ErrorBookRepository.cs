@@ -67,6 +67,10 @@ CREATE TABLE IF NOT EXISTS error_log (
   title     TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_error_log_when ON error_log(when_utc);
+-- 覆盖索引：聚合排行的 WHERE(when_utc) + GROUP BY(correct,typed) 可直接走索引，避免全表扫描。
+CREATE INDEX IF NOT EXISTS idx_error_log_when_correct ON error_log(when_utc, correct, typed);
+-- 溯源查询按 correct 过滤 + 按 title 分组。
+CREATE INDEX IF NOT EXISTS idx_error_log_correct ON error_log(correct, when_utc);
 
 CREATE TABLE IF NOT EXISTS char_stat (
   correct        TEXT    PRIMARY KEY,
@@ -240,6 +244,61 @@ LIMIT @lim;";
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine("[ErrorBookRepository.QueryRanking] " + ex.Message);
+            }
+            return list;
+        }
+
+        /// <summary>错字溯源一条：来源文章标题 + 在该文章里错的次数 + 最近一次时间。</summary>
+        public sealed class ErrorSource
+        {
+            public string Title { get; set; }
+            public int Count { get; set; }
+            public DateTime LastTime { get; set; }
+        }
+
+        /// <summary>查某个正确字在指定时间范围内的来源文章分布（按错次倒序）。</summary>
+        public static List<ErrorSource> QuerySources(string correct, ErrorRange range, int limit = 30)
+        {
+            var list = new List<ErrorSource>();
+            if (!_initialized || string.IsNullOrEmpty(correct)) return list;
+            try
+            {
+                using (var conn = new SQLiteConnection(ConnStr))
+                {
+                    conn.Open();
+                    using (var cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"
+SELECT COALESCE(NULLIF(title, ''), '(未命名)') AS t,
+       COUNT(*) AS cnt, MAX(when_utc) AS last_t
+FROM error_log
+WHERE correct = @c AND when_utc >= @lb
+GROUP BY t
+ORDER BY cnt DESC, last_t DESC
+LIMIT @lim;";
+                        cmd.Parameters.AddWithValue("@c", correct);
+                        cmd.Parameters.AddWithValue("@lb", RangeLowerBound(range).ToString("o"));
+                        cmd.Parameters.AddWithValue("@lim", limit);
+                        using (var rd = cmd.ExecuteReader())
+                        {
+                            while (rd.Read())
+                            {
+                                DateTime lt;
+                                if (rd.IsDBNull(2) || !DateTime.TryParse(rd.GetString(2), out lt)) lt = DateTime.Now;
+                                list.Add(new ErrorSource
+                                {
+                                    Title    = rd.IsDBNull(0) ? "(未命名)" : rd.GetString(0),
+                                    Count    = (int)rd.GetInt64(1),
+                                    LastTime = lt,
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("[ErrorBookRepository.QuerySources] " + ex.Message);
             }
             return list;
         }

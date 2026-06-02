@@ -177,6 +177,31 @@ namespace newgdq.Views
 
         private void ChkHideMastered_Changed(object sender, RoutedEventArgs e) => Refresh();
 
+        /// <summary>选中某行 → 查该字来源文章分布，显示在右侧"错字溯源"区。</summary>
+        private void Grid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (TxtSrc == null || TxtSrcTitle == null) return;
+            var row = Grid.SelectedItem as Row;
+            if (row == null || string.IsNullOrEmpty(row.Correct))
+            {
+                TxtSrcTitle.Text = "错字溯源（点选左侧某字查看）";
+                TxtSrc.Text = "—";
+                return;
+            }
+            var sources = ErrorBookRepository.QuerySources(row.Correct, CurrentRange());
+            int totalErr = sources.Sum(s => s.Count);
+            TxtSrcTitle.Text = $"「{row.Correct}」来源（共 {totalErr} 次，{sources.Count} 篇）";
+            if (sources.Count == 0)
+            {
+                TxtSrc.Text = "本范围内暂无来源记录";
+                return;
+            }
+            var sb = new StringBuilder();
+            foreach (var s in sources)
+                sb.AppendLine($"· {s.Title} ×{s.Count}（最近 {s.LastTime:MM-dd HH:mm}）");
+            TxtSrc.Text = sb.ToString().TrimEnd();
+        }
+
         /// <summary>取选中行的正确字；未选中返回 null 并提示。</summary>
         private string SelectedCorrect()
         {
