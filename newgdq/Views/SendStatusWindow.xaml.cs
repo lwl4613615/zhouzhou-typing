@@ -8,7 +8,7 @@ namespace newgdq.Views
 {
     /// <summary>发文状态浮窗（仿老版 SendTextStatic 风格）。
     /// 主窗启动发文时弹出，按 DispatcherTimer 1s 刷新；点 停止发文 → 关闭发文会话。</summary>
-    public partial class SendStatusWindow : HandyControl.Controls.Window
+    public partial class SendStatusWindow : Wpf.Ui.Controls.FluentWindow
     {
         private readonly MainWindow _owner;
         private readonly DispatcherTimer _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };

@@ -1,9 +1,9 @@
-﻿<hc:Window x:Class="newgdq.MainWindow"
+﻿<ui:FluentWindow x:Class="newgdq.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:hc="https://handyorg.github.io/handycontrol"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:sp="clr-namespace:ScottPlot.WPF;assembly=ScottPlot.WPF"
         xmlns:tb="http://www.hardcodet.net/taskbar"
         xmlns:local="clr-namespace:newgdq"
@@ -14,8 +14,8 @@
         Icon="pack://application:,,,/Resources/myicon.ico"
         Background="{DynamicResource RegionBrush}"
         Foreground="{DynamicResource PrimaryTextBrush}"
-        NonClientAreaBackground="{StaticResource PanelBG}"
-        NonClientAreaForeground="{DynamicResource AccentFG}"
+        ExtendsContentIntoTitleBar="True"
+        WindowBackdropType="None"
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <!-- 信息条标签 -->
@@ -72,7 +72,13 @@
         </Style>
     </Window.Resources>
 
-    <DockPanel LastChildFill="True">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <ui:TitleBar Grid.Row="0" Title="州州跟打器"/>
+    <DockPanel Grid.Row="1" LastChildFill="True">
 
 
         <!-- 托盘图标：左键点击还原；右键弹菜单 -->
@@ -528,4 +534,5 @@
             <views:ShuangPinPracticeControl x:Name="PracticePanel" Visibility="Collapsed"/>
         </Grid>
     </DockPanel>
-</hc:Window>
+    </Grid>
+</ui:FluentWindow>

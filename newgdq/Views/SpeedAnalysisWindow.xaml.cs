@@ -14,7 +14,7 @@ namespace newgdq.Views
     ///
     /// 老版 SpeedAn 用 8 项条纹图，新版精简为 4 项更易读；总速度对比同时显示。
     /// </summary>
-    public partial class SpeedAnalysisWindow : HandyControl.Controls.Window
+    public partial class SpeedAnalysisWindow : Wpf.Ui.Controls.FluentWindow
     {
         private readonly TypingSession _session;
 

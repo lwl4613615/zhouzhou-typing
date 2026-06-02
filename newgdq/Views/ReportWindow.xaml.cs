@@ -13,7 +13,7 @@ namespace newgdq.Views
     ///   - 长度 &lt; 0（回改）→ 黄底
     ///   - 本次用时 &gt; 平均 × 3 且为正向输入 → 红底（停留 / 卡顿点）
     /// </summary>
-    public partial class ReportWindow : HandyControl.Controls.Window
+    public partial class ReportWindow : Wpf.Ui.Controls.FluentWindow
     {
         private readonly TypingSession _session;
         private double _avgTotalTime;

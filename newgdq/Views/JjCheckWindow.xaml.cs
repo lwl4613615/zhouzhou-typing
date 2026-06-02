@@ -13,7 +13,7 @@ namespace newgdq.Views
     ///   - jjC_ = 等级 ≥ jjC 的累计占比
     ///   - 评定值 = jjC + jjC_，形如 "8.235"，表示"在 8 键/秒及以上稳定占 23.5%"
     /// </summary>
-    public partial class JjCheckWindow : HandyControl.Controls.Window
+    public partial class JjCheckWindow : Wpf.Ui.Controls.FluentWindow
     {
         public JjCheckWindow(Window owner)
         {

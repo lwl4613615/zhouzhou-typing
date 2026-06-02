@@ -14,7 +14,7 @@ namespace newgdq.Views
     /// 设计原则：主打"和过去的自己比"，目标速度只作参考虚线 + 完成度百分比，
     /// 达不到不做任何"未达标"红叉，避免挫败感。
     /// </summary>
-    public partial class TrendWindow : HandyControl.Controls.Window
+    public partial class TrendWindow : Wpf.Ui.Controls.FluentWindow
     {
         /// <summary>DataGrid 行视图模型。</summary>
         private sealed class Row
@@ -64,7 +64,7 @@ namespace newgdq.Views
             if (Grid == null || Chart == null) return;
 
             var buckets = HistoryRepository.LoadTrend(CurrentGranularity(), CurrentLimit());
-            double goal = NumGoal != null ? NumGoal.Value : 0;
+            double goal = NumGoal != null ? (NumGoal.Value ?? 0) : 0;
 
             BuildHeadline(buckets, goal);
             BuildRows(buckets, goal);
@@ -228,9 +228,9 @@ namespace newgdq.Views
 
         private void CmbGranularity_SelectionChanged(object sender, SelectionChangedEventArgs e) => Refresh();
 
-        private void NumGoal_ValueChanged(object sender, HandyControl.Data.FunctionEventArgs<double> e)
+        private void NumGoal_ValueChanged(object sender, Wpf.Ui.Controls.NumberBoxValueChangedEventArgs e)
         {
-            double g = NumGoal.Value;
+            double g = NumGoal.Value ?? 0;
             SettingsService.Instance.GoalSpeed = g > 0 ? g : (double?)null;
             try { SettingsService.Save(); } catch { }
             Refresh();

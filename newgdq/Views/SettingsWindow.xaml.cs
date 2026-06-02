@@ -12,7 +12,7 @@ namespace newgdq.Views
     /// 设置窗口 —— 字体 / 颜色 / 个签三个 Tab。
     /// "确定" → 写入 SettingsService.Instance + 调 owner.ApplyAppearance() + 持久化。
     /// </summary>
-    public partial class SettingsWindow : HandyControl.Controls.Window
+    public partial class SettingsWindow : Wpf.Ui.Controls.FluentWindow
     {
         private readonly MainWindow _owner;
 
@@ -135,7 +135,7 @@ namespace newgdq.Views
             UpdateAllPreviews();
         }
 
-        /// <summary>颜色预览块点击 → 弹 HandyControl 拾色器，把选中的颜色写回对应 TextBox。
+        /// <summary>颜色预览块点击 → 弹系统拾色器（WinForms ColorDialog），把选中的颜色写回对应 TextBox。
         /// XAML 里给 Border 设 Tag="TxtColorRight" 等，按名字反查 TextBox。</summary>
         private void Pvw_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
@@ -149,28 +149,18 @@ namespace newgdq.Views
             {
                 Color initial;
                 try { initial = (Color)ColorConverter.ConvertFromString(tbx.Text); } catch { initial = Colors.White; }
-                var picker = new HandyControl.Controls.ColorPicker
+                using (var dlg = new System.Windows.Forms.ColorDialog
                 {
-                    SelectedBrush = new SolidColorBrush(initial),
-                };
-                var win = new Window
+                    Color = System.Drawing.Color.FromArgb(initial.R, initial.G, initial.B),
+                    FullOpen = true,
+                })
                 {
-                    Title = "选择颜色",
-                    Owner = this,
-                    SizeToContent = SizeToContent.WidthAndHeight,
-                    ResizeMode = ResizeMode.NoResize,
-                    WindowStartupLocation = WindowStartupLocation.CenterOwner,
-                    Content = picker,
-                    ShowInTaskbar = false,
-                };
-                picker.Canceled += (s2, e2) => win.Close();
-                picker.Confirmed += (s2, e2) =>
-                {
-                    var c = picker.SelectedBrush.Color;
-                    tbx.Text = "#" + c.R.ToString("X2") + c.G.ToString("X2") + c.B.ToString("X2");
-                    win.Close();
-                };
-                win.ShowDialog();
+                    if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                    {
+                        var c = dlg.Color;
+                        tbx.Text = "#" + c.R.ToString("X2") + c.G.ToString("X2") + c.B.ToString("X2");
+                    }
+                }
             }
             catch (Exception ex)
             {

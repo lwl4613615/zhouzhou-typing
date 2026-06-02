@@ -1,14 +1,22 @@
-<hc:Window x:Class="newgdq.Views.JjCheckWindow"
+<ui:FluentWindow x:Class="newgdq.Views.JjCheckWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:hc="https://handyorg.github.io/handycontrol"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:sp="clr-namespace:ScottPlot.WPF;assembly=ScottPlot.WPF"
         Title="击键评定" Height="480" Width="640"
         Icon="pack://application:,,,/Resources/myicon.ico"
         FontFamily="微软雅黑" FontSize="12"
         Background="{DynamicResource RegionBrush}"
+        ExtendsContentIntoTitleBar="True"
+        WindowBackdropType="None"
         WindowStartupLocation="CenterOwner">
-    <DockPanel Margin="12" LastChildFill="True">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <ui:TitleBar Grid.Row="0" Title="击键评定"/>
+    <DockPanel Grid.Row="1" Margin="12" LastChildFill="True">
         <TextBlock DockPanel.Dock="Top" x:Name="TxtTitle"
                    FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ValueFG}" Margin="0,0,0,8"/>
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
@@ -17,4 +25,5 @@
         </StackPanel>
         <sp:WpfPlot x:Name="Plot"/>
     </DockPanel>
-</hc:Window>
+    </Grid>
+</ui:FluentWindow>

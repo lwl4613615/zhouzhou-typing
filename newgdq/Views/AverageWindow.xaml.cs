@@ -7,7 +7,7 @@ namespace newgdq.Views
     /// <summary>
     /// 平均成绩窗口 —— 从 SQLite 聚合所有历史段的平均值/极值/总数。
     /// </summary>
-    public partial class AverageWindow : HandyControl.Controls.Window
+    public partial class AverageWindow : Wpf.Ui.Controls.FluentWindow
     {
         public AverageWindow(Window owner)
         {

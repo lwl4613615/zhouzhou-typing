@@ -1,14 +1,22 @@
-<Window x:Class="newgdq.Views.SendTextWindow"
+<ui:FluentWindow x:Class="newgdq.Views.SendTextWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:hc="https://handyorg.github.io/handycontrol"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         Title="州州发文设置" Width="760" Height="540"
         Icon="pack://application:,,,/Resources/myicon.ico"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource RegionBrush}"
         Foreground="{DynamicResource PrimaryTextBrush}"
+        ExtendsContentIntoTitleBar="True"
+        WindowBackdropType="None"
         FontFamily="微软雅黑">
-    <DockPanel>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <ui:TitleBar Grid.Row="0" Title="州州发文设置"/>
+    <DockPanel Grid.Row="1">
 
         <!-- 底部公共操作区 -->
         <Border DockPanel.Dock="Bottom" Background="{DynamicResource PanelBG}" Padding="8,6" BorderBrush="{DynamicResource GridLine}" BorderThickness="0,1,0,0">
@@ -190,4 +198,5 @@
             </TabItem>
         </TabControl>
     </DockPanel>
-</Window>
+    </Grid>
+</ui:FluentWindow>

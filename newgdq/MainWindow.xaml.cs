@@ -18,7 +18,7 @@ namespace newgdq
     /// MainWindow.xaml 的交互逻辑。
     /// 业务状态全部交给 <see cref="TypingSession"/>，本类只负责 WPF 控件交互。
     /// </summary>
-    public partial class MainWindow : HandyControl.Controls.Window
+    public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
     {
         private readonly TypingSession _session = new TypingSession();
         private readonly List<Run>     _charRuns = new List<Run>();

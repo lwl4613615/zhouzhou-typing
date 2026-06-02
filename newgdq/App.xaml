@@ -1,7 +1,6 @@
 ﻿<Application x:Class="newgdq.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:hc="https://handyorg.github.io/handycontrol"
              xmlns:local="clr-namespace:newgdq"
              StartupUri="MainWindow.xaml">
     <Application.Resources>

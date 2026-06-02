@@ -5,7 +5,7 @@ using System.Windows.Documents;
 namespace newgdq.Views
 {
     /// <summary>关于窗口：项目信息 + 联系州州（按钮展开微信二维码 / 复制微信号）。</summary>
-    public partial class AboutWindow : HandyControl.Controls.Window
+    public partial class AboutWindow : Wpf.Ui.Controls.FluentWindow
     {
         private const string PROJECT_URL = "https://github.com/lwl4613615/zhouzhou-typing";
         private const string WECHAT_ID   = "synhxb";

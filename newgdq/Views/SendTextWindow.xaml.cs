@@ -15,7 +15,7 @@ namespace newgdq.Views
     /// 发文设置窗口（4 Tab）。
     /// 选好文章 + 参数 → 点"开启发文" → 关闭窗口 → 主窗口接收并加载第一段。
     /// </summary>
-    public partial class SendTextWindow : Window
+    public partial class SendTextWindow : Wpf.Ui.Controls.FluentWindow
     {
         /// <summary>窗口关闭时如果用户点了"开启发文"，此处填好待主窗口接收。</summary>
         public SendingState ResultState { get; private set; }

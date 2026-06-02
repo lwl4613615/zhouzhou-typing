@@ -12,7 +12,7 @@ namespace newgdq.Views
     /// 错字本窗口 —— 从独立 errorbook.db 按时间范围（本次/本日/本周/本月/本年/全部）
     /// 临时聚合"正确字→打成字"错误排行，帮用户定位高频错字。
     /// </summary>
-    public partial class ErrorBookWindow : HandyControl.Controls.Window
+    public partial class ErrorBookWindow : Wpf.Ui.Controls.FluentWindow
     {
         /// <summary>DataGrid 行视图模型。</summary>
         private sealed class Row

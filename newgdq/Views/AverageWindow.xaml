@@ -1,14 +1,22 @@
-<hc:Window x:Class="newgdq.Views.AverageWindow"
+<ui:FluentWindow x:Class="newgdq.Views.AverageWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:hc="https://handyorg.github.io/handycontrol"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         Title="平均成绩" Height="320" Width="520"
         Icon="pack://application:,,,/Resources/myicon.ico"
         FontFamily="微软雅黑" FontSize="12"
         Background="{DynamicResource RegionBrush}"
+        ExtendsContentIntoTitleBar="True"
+        WindowBackdropType="None"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize">
-    <DockPanel Margin="16" LastChildFill="True">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <ui:TitleBar Grid.Row="0" Title="平均成绩"/>
+    <DockPanel Grid.Row="1" Margin="16" LastChildFill="True">
         <TextBlock DockPanel.Dock="Top" x:Name="TxtTitle" FontSize="14" FontWeight="Bold"
                    Foreground="{DynamicResource ValueFG}" Margin="0,0,0,12"/>
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
@@ -42,4 +50,5 @@
             <TextBlock Grid.Row="5" Grid.Column="1" x:Name="TxtMisc"       VerticalAlignment="Center" Foreground="#90CAF9"/>
         </Grid>
     </DockPanel>
-</hc:Window>
+    </Grid>
+</ui:FluentWindow>

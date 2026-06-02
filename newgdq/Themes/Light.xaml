@@ -1,10 +1,14 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
 
     <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
-        <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
+        <ui:ThemesDictionary Theme="Light"/>
+        <ui:ControlsDictionary/>
     </ResourceDictionary.MergedDictionaries>
+
+    <!-- HandyControl 主题键的替身（WPF-UI 不提供同名键） -->
+    <SolidColorBrush x:Key="PrimaryTextBrush" Color="#0F172A"/>
 
     <!-- 浅色主题（薄雾灰 + 琥珀强调） -->
     <SolidColorBrush x:Key="PanelBG"   Color="#F7F9FC"/>

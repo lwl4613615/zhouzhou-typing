@@ -1,14 +1,22 @@
-<hc:Window x:Class="newgdq.Views.ErrorBookWindow"
+<ui:FluentWindow x:Class="newgdq.Views.ErrorBookWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:hc="https://handyorg.github.io/handycontrol"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:sp="clr-namespace:ScottPlot.WPF;assembly=ScottPlot.WPF"
         Title="错字本" Height="540" Width="880"
         Icon="pack://application:,,,/Resources/myicon.ico"
         FontFamily="微软雅黑" FontSize="12"
         Background="{DynamicResource RegionBrush}"
+        ExtendsContentIntoTitleBar="True"
+        WindowBackdropType="None"
         WindowStartupLocation="CenterOwner">
-    <DockPanel Margin="16" LastChildFill="True">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <ui:TitleBar Grid.Row="0" Title="错字本"/>
+    <DockPanel Grid.Row="1" Margin="16" LastChildFill="True">
         <!-- 顶部：时间范围 + 标题 -->
         <DockPanel DockPanel.Dock="Top" Margin="0,0,0,10">
             <ComboBox x:Name="CmbRange" Width="110" DockPanel.Dock="Left"
@@ -96,4 +104,5 @@
             </Border>
         </Grid>
     </DockPanel>
-</hc:Window>
+    </Grid>
+</ui:FluentWindow>
