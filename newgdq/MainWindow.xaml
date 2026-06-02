@@ -475,7 +475,7 @@
                           AlternatingRowBackground="{DynamicResource AltRowBG}"
                           Foreground="{DynamicResource ValueFG}"
                           ScrollViewer.VerticalScrollBarVisibility="Visible"
-                          ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                           ScrollViewer.CanContentScroll="True"
                           RowHeight="26" FontSize="12" FontFamily="微软雅黑">
                     <DataGrid.Resources>
@@ -503,24 +503,24 @@
                         </Style>
                     </DataGrid.RowStyle>
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="序"    Width="38" Binding="{Binding Index}"/>
-                        <DataGridTextColumn Header="时间"  Width="74" Binding="{Binding Time}"/>
-                        <DataGridTextColumn Header="段"    Width="44" Binding="{Binding Seg}"/>
-                        <DataGridTextColumn Header="速度"  Width="58" Binding="{Binding Speed, StringFormat=0.00}"/>
-                        <DataGridTextColumn Header="击键"  Width="58" Binding="{Binding Jj, StringFormat=0.00}"/>
-                        <DataGridTextColumn Header="码长"  Width="58" Binding="{Binding Mc, StringFormat=0.00}"/>
-                        <DataGridTextColumn Header="回改"  Width="48" Binding="{Binding Hg}"/>
-                        <DataGridTextColumn Header="错字"  Width="48" Binding="{Binding Cz}"/>
-                        <DataGridTextColumn Header="键数"  Width="48" Binding="{Binding Js}"/>
-                        <DataGridTextColumn Header="字数"  Width="50" Binding="{Binding Words}"/>
-                        <DataGridTextColumn Header="打词"  Width="50" Binding="{Binding DaCi}"/>
-                        <DataGridTextColumn Header="选重"  Width="46" Binding="{Binding Reselect}"/>
-                        <DataGridTextColumn Header="拼回"  Width="46" Binding="{Binding Enter}"/>
-                        <DataGridTextColumn Header="左:右" Width="62" Binding="{Binding LeftRight}"/>
-                        <DataGridTextColumn Header="用时" Width="58" MinWidth="54" Binding="{Binding UseTime, StringFormat=0.00}"/>
+                        <DataGridTextColumn Header="序"    Width="38*" Binding="{Binding Index}"/>
+                        <DataGridTextColumn Header="时间"  Width="74*" Binding="{Binding Time}"/>
+                        <DataGridTextColumn Header="段"    Width="44*" Binding="{Binding Seg}"/>
+                        <DataGridTextColumn Header="速度"  Width="58*" Binding="{Binding Speed, StringFormat=0.00}"/>
+                        <DataGridTextColumn Header="击键"  Width="58*" Binding="{Binding Jj, StringFormat=0.00}"/>
+                        <DataGridTextColumn Header="码长"  Width="58*" Binding="{Binding Mc, StringFormat=0.00}"/>
+                        <DataGridTextColumn Header="回改"  Width="48*" Binding="{Binding Hg}"/>
+                        <DataGridTextColumn Header="错字"  Width="48*" Binding="{Binding Cz}"/>
+                        <DataGridTextColumn Header="键数"  Width="48*" Binding="{Binding Js}"/>
+                        <DataGridTextColumn Header="字数"  Width="50*" Binding="{Binding Words}"/>
+                        <DataGridTextColumn Header="打词"  Width="50*" Binding="{Binding DaCi}"/>
+                        <DataGridTextColumn Header="选重"  Width="46*" Binding="{Binding Reselect}"/>
+                        <DataGridTextColumn Header="拼回"  Width="46*" Binding="{Binding Enter}"/>
+                        <DataGridTextColumn Header="左:右" Width="62*" Binding="{Binding LeftRight}"/>
+                        <DataGridTextColumn Header="用时" Width="58*" Binding="{Binding UseTime, StringFormat=0.00}"/>
                         <!-- 独立的"本次/全部"切换列：用原生 DataGridColumnHeader（本身就是 ButtonBase），
                              普通字符串表头 → 与其它列头字体/颜色/对齐完全一致；HeaderStyle 挂 Click 事件 -->
-                        <DataGridTemplateColumn Width="52" Header="本次">
+                        <DataGridTemplateColumn Width="52*" Header="本次">
                             <DataGridTemplateColumn.HeaderStyle>
                                 <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
                                     <Setter Property="Cursor" Value="Hand"/>
