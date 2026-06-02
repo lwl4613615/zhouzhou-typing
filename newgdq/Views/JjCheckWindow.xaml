@@ -20,8 +20,8 @@
         <TextBlock DockPanel.Dock="Top" x:Name="TxtTitle"
                    FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ValueFG}" Margin="0,0,0,8"/>
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
-            <Button Content="复制评定" Width="90" Margin="6,0" Click="BtnCopy_Click"/>
-            <Button Content="关闭"     Width="80" Margin="6,0" Click="BtnClose_Click"/>
+            <ui:Button Content="复制评定" Width="90" Margin="6,0" Click="BtnCopy_Click"/>
+            <ui:Button Content="关闭"     Width="80" Margin="6,0" Click="BtnClose_Click"/>
         </StackPanel>
         <sp:WpfPlot x:Name="Plot"/>
     </DockPanel>

@@ -29,8 +29,8 @@
                     <ComboBoxItem Content="按月（近 12 月）"/>
                 </ComboBox>
 
-                <Button DockPanel.Dock="Right" Content="关闭" Width="72" Margin="6,0,0,0" Click="BtnClose_Click"/>
-                <Button DockPanel.Dock="Right" Content="复制趋势" Width="84" Margin="6,0,0,0" Click="BtnCopy_Click"
+                <ui:Button DockPanel.Dock="Right" Content="关闭" Width="72" Margin="6,0,0,0" Click="BtnClose_Click"/>
+                <ui:Button DockPanel.Dock="Right" Content="复制趋势" Width="84" Margin="6,0,0,0" Click="BtnCopy_Click"
                         ToolTip="把各周期均速复制为文本"/>
                 <ui:NumberBox x:Name="NumGoal" DockPanel.Dock="Right" Width="100" Minimum="0" Maximum="600"
                                   SmallChange="5" MaxDecimalPlaces="0" Margin="6,0,0,0"

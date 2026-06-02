@@ -53,8 +53,8 @@
             <DockPanel>
                 <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
                     <TextBlock Text="联系州州" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,12,0"/>
-                    <Button x:Name="BtnContact" Content="显示微信二维码" Click="BtnContact_Click" Width="140"/>
-                    <Button Content="复制微信号 synhxb" Click="BtnCopyWeChat_Click" Width="160" Margin="8,0,0,0"/>
+                    <ui:Button x:Name="BtnContact" Content="显示微信二维码" Click="BtnContact_Click" Width="140"/>
+                    <ui:Button Content="复制微信号 synhxb" Click="BtnCopyWeChat_Click" Width="160" Margin="8,0,0,0"/>
                 </StackPanel>
                 <Image x:Name="ImgQr" Source="pack://application:,,,/Resources/erweima.jpg"
                        Stretch="Uniform" Visibility="Collapsed"/>
@@ -63,7 +63,7 @@
 
         <!-- 底部 -->
         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
-            <Button Content="关闭" Width="80" Click="BtnClose_Click"/>
+            <ui:Button Content="关闭" Width="80" Click="BtnClose_Click"/>
         </StackPanel>
         </Grid>
     </Grid>

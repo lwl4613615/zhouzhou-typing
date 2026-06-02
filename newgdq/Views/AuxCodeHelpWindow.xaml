@@ -120,7 +120,7 @@
         </FlowDocumentScrollViewer>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-            <Button Content="关闭" Width="80" Click="BtnClose_Click"/>
+            <ui:Button Content="关闭" Width="80" Click="BtnClose_Click"/>
         </StackPanel>
     </Grid>
     </Grid>

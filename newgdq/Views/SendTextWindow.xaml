@@ -55,23 +55,23 @@
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="发送字数" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{DynamicResource LabelFG}"/>
-                        <TextBox x:Name="TbxSendCount" Width="50" Text="25" Margin="0,0,8,0" PreviewTextInput="DigitOnly_PreviewTextInput"/>
+                        <ui:TextBox x:Name="TbxSendCount" Width="50" Text="25" Margin="0,0,8,0" PreviewTextInput="DigitOnly_PreviewTextInput"/>
                         <TextBlock Text="起始位置" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{DynamicResource LabelFG}"/>
-                        <TextBox x:Name="TbxSendStart" Width="50" Text="0" Margin="0,0,8,0" PreviewTextInput="DigitOnly_PreviewTextInput"/>
+                        <ui:TextBox x:Name="TbxSendStart" Width="50" Text="0" Margin="0,0,8,0" PreviewTextInput="DigitOnly_PreviewTextInput"/>
                         <TextBlock Text="始段号" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{DynamicResource LabelFG}"/>
-                        <TextBox x:Name="TbxStartSeg" Width="50" Text="1" PreviewTextInput="DigitOnly_PreviewTextInput"/>
+                        <ui:TextBox x:Name="TbxStartSeg" Width="50" Text="1" PreviewTextInput="DigitOnly_PreviewTextInput"/>
                     </StackPanel>
                 </StackPanel>
 
                 <!-- 右：动作按钮 -->
                 <StackPanel Grid.Column="1" Orientation="Vertical" VerticalAlignment="Bottom">
-                    <Button x:Name="BtnGoSend"  Content="开启发文"   Width="120" Height="38"
-                            Background="#0E7C42" Foreground="{DynamicResource ValueFG}" FontSize="14" FontWeight="Bold"
-                            BorderThickness="0" Click="BtnGoSend_Click"/>
-                    <Button x:Name="BtnSendAll" Content="发全文（不分段）" Width="120" Height="26" Margin="0,4,0,0"
+                    <ui:Button x:Name="BtnGoSend"  Content="开启发文"   Width="120" Height="38"
+                            Appearance="Success" FontSize="14" FontWeight="Bold"
+                            Click="BtnGoSend_Click"/>
+                    <ui:Button x:Name="BtnSendAll" Content="发全文（不分段）" Width="120" Height="26" Margin="0,4,0,0"
                             ToolTip="忽略每段字数，把整篇文章作为一段一次性发出"
                             Click="BtnSendAll_Click"/>
-                    <Button Content="关闭" Width="120" Height="26" Margin="0,4,0,0" Click="BtnClose_Click"/>
+                    <ui:Button Content="关闭" Width="120" Height="26" Margin="0,4,0,0" Click="BtnClose_Click"/>
                 </StackPanel>
             </Grid>
         </Border>
@@ -103,9 +103,9 @@
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,4">
                         <TextBlock Text="标题:" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                        <TextBox x:Name="TbxCustomTitle" Width="260" Text="自定义文章" TextChanged="TbxCustom_TextChanged"/>
+                        <ui:TextBox x:Name="TbxCustomTitle" Width="260" Text="自定义文章" TextChanged="TbxCustom_TextChanged"/>
                     </StackPanel>
-                    <TextBox Grid.Row="1" x:Name="TbxCustomBody" AcceptsReturn="True" TextWrapping="Wrap"
+                    <ui:TextBox Grid.Row="1" x:Name="TbxCustomBody" AcceptsReturn="True" TextWrapping="Wrap"
                              VerticalScrollBarVisibility="Auto" TextChanged="TbxCustom_TextChanged"/>
                 </Grid>
             </TabItem>
@@ -118,13 +118,13 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,4">
-                        <Button Content="重新获取"   Click="BtnReGet_Click"   Margin="0,0,4,0"/>
-                        <Button Content="去掉空格"   Click="BtnTickBlock_Click" Margin="0,0,4,0"/>
-                        <Button Content="标点填充"   Click="BtnFillIt_Click"  Margin="0,0,8,0"/>
+                        <ui:Button Content="重新获取"   Click="BtnReGet_Click"   Margin="0,0,4,0"/>
+                        <ui:Button Content="去掉空格"   Click="BtnTickBlock_Click" Margin="0,0,4,0"/>
+                        <ui:Button Content="标点填充"   Click="BtnFillIt_Click"  Margin="0,0,8,0"/>
                         <TextBlock Text="标题:" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                        <TextBox x:Name="TbxClipTitle" Width="200" Text="来自剪切板" TextChanged="TbxClip_TextChanged"/>
+                        <ui:TextBox x:Name="TbxClipTitle" Width="200" Text="来自剪切板" TextChanged="TbxClip_TextChanged"/>
                     </StackPanel>
-                    <TextBox Grid.Row="1" x:Name="TbxClipBody" AcceptsReturn="True" TextWrapping="Wrap"
+                    <ui:TextBox Grid.Row="1" x:Name="TbxClipBody" AcceptsReturn="True" TextWrapping="Wrap"
                              VerticalScrollBarVisibility="Auto" TextChanged="TbxClip_TextChanged"/>
                 </Grid>
             </TabItem>
@@ -141,8 +141,8 @@
                     <DockPanel Grid.Column="0" Margin="0,0,6,0">
                         <TextBlock DockPanel.Dock="Top" Text="已保存的预设" FontWeight="Bold" Margin="0,0,0,4"/>
                         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,4,0,0">
-                            <Button Content="删除"     Width="60" Margin="0,0,4,0" Click="BtnPresetDelete_Click"/>
-                            <Button Content="应用到当前" Width="100" Click="BtnPresetApply_Click"/>
+                            <ui:Button Content="删除"     Width="60" Margin="0,0,4,0" Click="BtnPresetDelete_Click"/>
+                            <ui:Button Content="应用到当前" Width="100" Click="BtnPresetApply_Click"/>
                         </StackPanel>
                         <ListBox x:Name="LbxPresets" SelectionChanged="LbxPresets_SelectionChanged"
                                  DisplayMemberPath="Name"/>
@@ -153,8 +153,8 @@
                         <TextBlock DockPanel.Dock="Top" Text="编辑预设" FontWeight="Bold" Margin="0,0,0,4"/>
 
                         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
-                            <Button Content="保存为新预设"  Width="120" Margin="0,0,6,0" Click="BtnPresetCreate_Click"/>
-                            <Button Content="更新选中预设"  Width="120" Click="BtnPresetUpdate_Click"/>
+                            <ui:Button Content="保存为新预设"  Width="120" Margin="0,0,6,0" Click="BtnPresetCreate_Click"/>
+                            <ui:Button Content="更新选中预设"  Width="120" Click="BtnPresetUpdate_Click"/>
                         </StackPanel>
 
                         <Grid>
@@ -174,16 +174,16 @@
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
                             <TextBlock Grid.Row="0" Grid.Column="0" Text="名称"        VerticalAlignment="Center"/>
-                            <TextBox   Grid.Row="0" Grid.Column="1" x:Name="TbxPresetName"      Margin="0,4"/>
+                            <ui:TextBox   Grid.Row="0" Grid.Column="1" x:Name="TbxPresetName"      Margin="0,4"/>
 
                             <TextBlock Grid.Row="1" Grid.Column="0" Text="每段字数"    VerticalAlignment="Center"/>
-                            <TextBox   Grid.Row="1" Grid.Column="1" x:Name="TbxPresetCount"     Margin="0,4" PreviewTextInput="DigitOnly_PreviewTextInput"/>
+                            <ui:TextBox   Grid.Row="1" Grid.Column="1" x:Name="TbxPresetCount"     Margin="0,4" PreviewTextInput="DigitOnly_PreviewTextInput"/>
 
                             <TextBlock Grid.Row="2" Grid.Column="0" Text="起始段号"    VerticalAlignment="Center"/>
-                            <TextBox   Grid.Row="2" Grid.Column="1" x:Name="TbxPresetStartSeg"  Margin="0,4" PreviewTextInput="DigitOnly_PreviewTextInput"/>
+                            <ui:TextBox   Grid.Row="2" Grid.Column="1" x:Name="TbxPresetStartSeg"  Margin="0,4" PreviewTextInput="DigitOnly_PreviewTextInput"/>
 
                             <TextBlock Grid.Row="3" Grid.Column="0" Text="起始位置"    VerticalAlignment="Center"/>
-                            <TextBox   Grid.Row="3" Grid.Column="1" x:Name="TbxPresetMark"      Margin="0,4" PreviewTextInput="DigitOnly_PreviewTextInput"/>
+                            <ui:TextBox   Grid.Row="3" Grid.Column="1" x:Name="TbxPresetMark"      Margin="0,4" PreviewTextInput="DigitOnly_PreviewTextInput"/>
 
                             <CheckBox  Grid.Row="4" Grid.Column="1" x:Name="ChkPresetRandom"     Content="乱序"      VerticalAlignment="Center"/>
                             <CheckBox  Grid.Row="5" Grid.Column="1" x:Name="ChkPresetNoRepeat"   Content="不重复（全段抽完前不重复）" VerticalAlignment="Center"/>

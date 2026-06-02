@@ -66,35 +66,35 @@
                     </Grid.RowDefinitions>
 
                     <TextBlock Grid.Row="0" Grid.Column="0" Text="正确字 前景"   VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="0" Grid.Column="1" x:Name="TxtColorRight"   Margin="0,4" VerticalContentAlignment="Center"/>
+                    <ui:TextBox Grid.Row="0" Grid.Column="1" x:Name="TxtColorRight"   Margin="0,4" VerticalContentAlignment="Center"/>
                     <Border  Grid.Row="0" Grid.Column="2" x:Name="PvwColorRight"   Margin="6,4,0,4" BorderBrush="#666" BorderThickness="1" Cursor="Hand" MouseLeftButtonUp="Pvw_Click" Tag="TxtColorRight"/>
 
                     <TextBlock Grid.Row="1" Grid.Column="0" Text="正确字 背景"   VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="1" Grid.Column="1" x:Name="TxtColorRightBg" Margin="0,4" VerticalContentAlignment="Center"/>
+                    <ui:TextBox Grid.Row="1" Grid.Column="1" x:Name="TxtColorRightBg" Margin="0,4" VerticalContentAlignment="Center"/>
                     <Border  Grid.Row="1" Grid.Column="2" x:Name="PvwColorRightBg" Margin="6,4,0,4" BorderBrush="#666" BorderThickness="1" Cursor="Hand" MouseLeftButtonUp="Pvw_Click" Tag="TxtColorRightBg"/>
 
                     <TextBlock Grid.Row="2" Grid.Column="0" Text="错误字 前景"   VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="2" Grid.Column="1" x:Name="TxtColorWrong"   Margin="0,4" VerticalContentAlignment="Center"/>
+                    <ui:TextBox Grid.Row="2" Grid.Column="1" x:Name="TxtColorWrong"   Margin="0,4" VerticalContentAlignment="Center"/>
                     <Border  Grid.Row="2" Grid.Column="2" x:Name="PvwColorWrong"   Margin="6,4,0,4" BorderBrush="#666" BorderThickness="1" Cursor="Hand" MouseLeftButtonUp="Pvw_Click" Tag="TxtColorWrong"/>
 
                     <TextBlock Grid.Row="3" Grid.Column="0" Text="错误字 背景"   VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="3" Grid.Column="1" x:Name="TxtColorWrongBg" Margin="0,4" VerticalContentAlignment="Center"/>
+                    <ui:TextBox Grid.Row="3" Grid.Column="1" x:Name="TxtColorWrongBg" Margin="0,4" VerticalContentAlignment="Center"/>
                     <Border  Grid.Row="3" Grid.Column="2" x:Name="PvwColorWrongBg" Margin="6,4,0,4" BorderBrush="#666" BorderThickness="1" Cursor="Hand" MouseLeftButtonUp="Pvw_Click" Tag="TxtColorWrongBg"/>
 
                     <TextBlock Grid.Row="4" Grid.Column="0" Text="对照区 背景"   VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="4" Grid.Column="1" x:Name="TxtColorCompareBg" Margin="0,4" VerticalContentAlignment="Center"/>
+                    <ui:TextBox Grid.Row="4" Grid.Column="1" x:Name="TxtColorCompareBg" Margin="0,4" VerticalContentAlignment="Center"/>
                     <Border  Grid.Row="4" Grid.Column="2" x:Name="PvwColorCompareBg" Margin="6,4,0,4" BorderBrush="#666" BorderThickness="1" Cursor="Hand" MouseLeftButtonUp="Pvw_Click" Tag="TxtColorCompareBg"/>
 
                     <TextBlock Grid.Row="5" Grid.Column="0" Text="输入区 背景"   VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="5" Grid.Column="1" x:Name="TxtColorInputBg" Margin="0,4" VerticalContentAlignment="Center"/>
+                    <ui:TextBox Grid.Row="5" Grid.Column="1" x:Name="TxtColorInputBg" Margin="0,4" VerticalContentAlignment="Center"/>
                     <Border  Grid.Row="5" Grid.Column="2" x:Name="PvwColorInputBg" Margin="6,4,0,4" BorderBrush="#666" BorderThickness="1" Cursor="Hand" MouseLeftButtonUp="Pvw_Click" Tag="TxtColorInputBg"/>
 
                     <StackPanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="一键预设：" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                        <Button Content="默认"   Padding="12,2" Margin="2,0" Click="BtnPreset_Click" Tag="default"/>
-                        <Button Content="护眼"   Padding="12,2" Margin="2,0" Click="BtnPreset_Click" Tag="eye"/>
-                        <Button Content="高对比" Padding="12,2" Margin="2,0" Click="BtnPreset_Click" Tag="contrast"/>
-                        <Button Content="暗夜"   Padding="12,2" Margin="2,0" Click="BtnPreset_Click" Tag="dark"/>
+                        <ui:Button Content="默认"   Padding="12,2" Margin="2,0" Click="BtnPreset_Click" Tag="default"/>
+                        <ui:Button Content="护眼"   Padding="12,2" Margin="2,0" Click="BtnPreset_Click" Tag="eye"/>
+                        <ui:Button Content="高对比" Padding="12,2" Margin="2,0" Click="BtnPreset_Click" Tag="contrast"/>
+                        <ui:Button Content="暗夜"   Padding="12,2" Margin="2,0" Click="BtnPreset_Click" Tag="dark"/>
                         <TextBlock Text="（只改跟打区配色，不动整体主题）" Opacity="0.6" VerticalAlignment="Center" Margin="8,0,0,0"/>
                     </StackPanel>
                 </Grid>
@@ -114,7 +114,7 @@
                     <CheckBox Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" x:Name="ChkSignEnabled"
                               Content="启用个签（显示在信息条右侧签名列）" VerticalAlignment="Center"/>
                     <TextBlock Grid.Row="1" Grid.Column="0" Text="个签文本" VerticalAlignment="Center"/>
-                    <TextBox  Grid.Row="1" Grid.Column="1" x:Name="TxtSignText" Margin="0,4" VerticalContentAlignment="Center"/>
+                    <ui:TextBox  Grid.Row="1" Grid.Column="1" x:Name="TxtSignText" Margin="0,4" VerticalContentAlignment="Center"/>
                     <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Top" Margin="0,12,0,0">
                         <CheckBox x:Name="ChkMinimizeToTray"
                                   Content="最小化时藏到系统托盘（点击托盘图标恢复）"/>
@@ -146,7 +146,7 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <TextBlock Grid.Row="0" Text="配置文件路径（便携模式：始终在 exe 同目录）" FontWeight="Bold"/>
-                    <TextBox  Grid.Row="1" x:Name="TxtConfigPath" IsReadOnly="True" Margin="0,4,0,0"
+                    <ui:TextBox  Grid.Row="1" x:Name="TxtConfigPath" IsReadOnly="True" Margin="0,4,0,0"
                               TextWrapping="NoWrap" VerticalContentAlignment="Center"/>
                     <TextBlock Grid.Row="2" Text="主题（重启生效）" FontWeight="Bold" Margin="0,16,0,4"/>
                     <StackPanel Grid.Row="3" Orientation="Horizontal">
@@ -160,8 +160,8 @@
         </TabControl>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
-            <Button Content="确定" Width="80" Margin="6,0" Click="BtnOk_Click"/>
-            <Button Content="取消" Width="80" Margin="6,0" Click="BtnCancel_Click"/>
+            <ui:Button Content="确定" Width="80" Margin="6,0" Appearance="Primary" Click="BtnOk_Click"/>
+            <ui:Button Content="取消" Width="80" Margin="6,0" Click="BtnCancel_Click"/>
         </StackPanel>
     </Grid>
     </Grid>

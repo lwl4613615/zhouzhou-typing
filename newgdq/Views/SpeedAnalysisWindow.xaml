@@ -33,8 +33,8 @@
         </Border>
 
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
-            <Button Content="复制" Width="80" Margin="6,0" Click="BtnCopy_Click"/>
-            <Button Content="关闭" Width="80" Margin="6,0" Click="BtnClose_Click"/>
+            <ui:Button Content="复制" Width="80" Margin="6,0" Click="BtnCopy_Click"/>
+            <ui:Button Content="关闭" Width="80" Margin="6,0" Click="BtnClose_Click"/>
         </StackPanel>
 
         <sp:WpfPlot x:Name="Plot" Margin="0,12,0,0"/>
