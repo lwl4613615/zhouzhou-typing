@@ -254,6 +254,17 @@ namespace newgdq
             UpdateScaleMenuChecks();
         }
 
+        // 左侧导航：点击带下拉的导航行，在按钮下方弹出其 ContextMenu
+        private void NavDropdown_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.Button b && b.ContextMenu != null)
+            {
+                b.ContextMenu.PlacementTarget = b;
+                b.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+                b.ContextMenu.IsOpen = true;
+            }
+        }
+
         // ===== 界面缩放菜单（实际缩放逻辑在 Services.UiScaleManager） =====
 
         private void UpdateScaleMenuChecks()
