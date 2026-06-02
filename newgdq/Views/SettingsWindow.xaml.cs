@@ -70,9 +70,12 @@ namespace newgdq.Views
 
             // 存储 Tab
             TxtConfigPath.Text = SettingsService.FilePath;
-            bool isLight = string.Equals(s.ThemeName, "Light", StringComparison.OrdinalIgnoreCase);
-            RdoThemeLight.IsChecked = isLight;
-            RdoThemeDark.IsChecked  = !isLight;
+            if (string.Equals(s.ThemeName, "System", StringComparison.OrdinalIgnoreCase))
+                RdoThemeSystem.IsChecked = true;
+            else if (string.Equals(s.ThemeName, "Light", StringComparison.OrdinalIgnoreCase))
+                RdoThemeLight.IsChecked = true;
+            else
+                RdoThemeDark.IsChecked = true;
         }
 
         private void WirePreviewSync()
@@ -191,7 +194,8 @@ namespace newgdq.Views
             s.MergeChord = ChkMergeChord.IsChecked == true;
 
             string oldTheme = string.IsNullOrEmpty(s.ThemeName) ? "Dark" : s.ThemeName;
-            s.ThemeName = RdoThemeLight.IsChecked == true ? "Light" : "Dark";
+            s.ThemeName = RdoThemeSystem.IsChecked == true ? "System"
+                        : RdoThemeLight.IsChecked == true ? "Light" : "Dark";
 
             _owner.ApplyAppearance();
             SettingsService.Save();

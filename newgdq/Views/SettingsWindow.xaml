@@ -156,8 +156,9 @@
                               TextWrapping="Wrap" VerticalContentAlignment="Center"/>
                     <TextBlock Grid.Row="2" Text="主题（重启生效）" FontWeight="Bold" Margin="0,16,0,4"/>
                     <StackPanel Grid.Row="3" Orientation="Horizontal">
-                        <RadioButton x:Name="RdoThemeDark"  Content="暗色 Dark"  GroupName="Theme" Margin="0,0,16,0"/>
-                        <RadioButton x:Name="RdoThemeLight" Content="浅色 Light" GroupName="Theme"/>
+                        <RadioButton x:Name="RdoThemeDark"   Content="暗色 Dark"   GroupName="Theme" Margin="0,0,16,0"/>
+                        <RadioButton x:Name="RdoThemeLight"  Content="浅色 Light"  GroupName="Theme" Margin="0,0,16,0"/>
+                        <RadioButton x:Name="RdoThemeSystem" Content="跟随系统" GroupName="Theme"/>
                     </StackPanel>
                     <TextBlock Grid.Row="4" Foreground="{DynamicResource LabelFG}" TextWrapping="Wrap" Margin="0,16,0,0"
                                Text="整个程序文件夹（含 settings.json）拷哪都行：U 盘、其它电脑、新用户。换机就直接复制文件夹。&#10;主题切换后需要重启程序才能完全应用（确定后会提示）。"/>

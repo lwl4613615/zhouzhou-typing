@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using Microsoft.Win32;
 
 namespace newgdq
 {
@@ -51,6 +52,9 @@ namespace newgdq
             // 主题：根据 settings.json 中 ThemeName 替换 App.xaml 里默认 Dark 资源字典
             Services.SettingsService.Load();
             ApplyTheme(Services.SettingsService.Instance.ThemeName);
+
+            // 跟随系统深浅色：当 ThemeName == "System" 时，系统切换深浅色后实时重应用
+            SystemEvents.UserPreferenceChanged += OnUserPreferenceChanged;
 
             // 全局界面缩放：确定初始倍数并钩住所有窗口，使各窗体字体/控件一起缩放
             Services.UiScaleManager.Initialize();
@@ -100,11 +104,12 @@ namespace newgdq
         }
 
         /// <summary>切换主题资源字典。已在 App.xaml 加载了 Dark 作为默认；这里按名替换。
-        /// 名称："Light" 用浅色；其它（含 null/Dark）保留默认 Dark 不变。</summary>
+        /// 名称："Light" 用浅色；"System" 跟随系统深浅色；其它（含 null/Dark）保留默认 Dark 不变。</summary>
         public static void ApplyTheme(string themeName)
         {
+            string resolved = ResolveTheme(themeName);
             string targetUri;
-            if (string.Equals(themeName, "Light", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(resolved, "Light", StringComparison.OrdinalIgnoreCase))
                 targetUri = "pack://application:,,,/newgdq;component/Themes/Light.xaml";
             else
                 targetUri = "pack://application:,,,/newgdq;component/Themes/Dark.xaml";
@@ -121,6 +126,38 @@ namespace newgdq
                     dicts.RemoveAt(i);
             }
             dicts.Insert(0, newDict);
+        }
+
+        /// <summary>把主题名解析为实际的 "Light" / "Dark"。"System" 读注册表跟随系统深浅色。</summary>
+        public static string ResolveTheme(string themeName)
+        {
+            if (string.Equals(themeName, "System", StringComparison.OrdinalIgnoreCase))
+                return IsSystemLightTheme() ? "Light" : "Dark";
+            if (string.Equals(themeName, "Light", StringComparison.OrdinalIgnoreCase))
+                return "Light";
+            return "Dark";
+        }
+
+        /// <summary>读注册表判断系统“应用”主题是否为浅色。读不到时默认深色。</summary>
+        private static bool IsSystemLightTheme()
+        {
+            try
+            {
+                using var key = Registry.CurrentUser.OpenSubKey(
+                    @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+                var v = key?.GetValue("AppsUseLightTheme");
+                if (v is int i) return i != 0;
+            }
+            catch { }
+            return false;
+        }
+
+        /// <summary>系统深浅色变化时，若用户选的是“跟随系统”，实时重应用主题。</summary>
+        private static void OnUserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
+        {
+            if (e.Category != UserPreferenceCategory.General) return;
+            if (!string.Equals(Services.SettingsService.Instance.ThemeName, "System", StringComparison.OrdinalIgnoreCase)) return;
+            try { Current?.Dispatcher?.Invoke(() => ApplyTheme("System")); } catch { }
         }
 
         protected override void OnExit(ExitEventArgs e)
