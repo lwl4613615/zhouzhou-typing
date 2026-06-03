@@ -1656,6 +1656,8 @@ namespace newgdq
         /// <summary>在主内容区内嵌显示一个分析视图，隐藏跟打区/信息条/标记栏。</summary>
         private void ShowAnalysis(System.Windows.UIElement view, string title)
         {
+            // 键位练习与分析页同为覆盖层。若正在键位练习，先退出，避免两层叠在一起互相抢焦点。
+            if (_practiceMode) ExitPracticeMode();
             PauseType();   // 查看分析期间暂停跟打计时
             AnalysisTitle.Text       = title;
             AnalysisContent.Content  = view;
@@ -1774,6 +1776,9 @@ namespace newgdq
         private void EnterPracticeMode()
         {
             if (_practiceMode) return;
+            // 分析页(AnalysisHost) 与键位练习同为覆盖 MainContentRoot 的层，且分析页 z 序在最上。
+            // 若分析页正显示，必须先关掉，否则它盖在键位练习面板上抢走焦点 → 键位练习按键无效。
+            CloseAnalysis();
             _practiceMode = true;
             PauseType();   // 停掉跟打计时，避免后台计数
             PracticePanel.BackRequested -= PracticePanel_BackRequested;
@@ -1965,6 +1970,19 @@ namespace newgdq
             if (_practiceMode) return;
             // 所有热键都要求主窗激活才生效，避免在其他程序里误触
             if (!this.IsActive) return;
+
+            // 内嵌分析页（AnalysisHost）显示时：底层跟打区被盖住、用户看不见，
+            // 此时若误触会改动底层内容/进度的功能键（F2 发文 / F3 重打 / F4 抓文 / F6 发下一段），
+            // 会在背后悄悄清掉当前进度或换文 → 关掉分析页回去时数据已丢。一律拦掉并提示。
+            if (AnalysisHost != null && AnalysisHost.Visibility == Visibility.Visible)
+            {
+                if (vk == 0x71 || vk == 0x72 || vk == 0x73 || vk == 0x75)
+                {
+                    Dispatcher.BeginInvoke(new Action(() =>
+                        Services.Toast.Info("正在看分析页，先返回跟打再用功能键", 2)));
+                    return;
+                }
+            }
 
             // 群比赛模式（F4 抓来的云比赛文）：锁掉除 F8 暂停以外的所有功能键 / Ctrl 组合键，
             // 防止 F3 重打 / F6 发下一段 / Ctrl+Q 乱序等"重打刷分"，比赛只许打一遍。
