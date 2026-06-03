@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -213,6 +213,10 @@ namespace newgdq
             {
                 _timerTime.Stop();
                 _timerStats.Stop();
+                // 关窗后这些定时器若仍在跑，其 Tick 回调会访问已释放的窗口资源（TbxInput/_session 等）导致崩溃
+                _autoAdvanceTimer.Stop();
+                _hgFlashTimer.Stop();
+                _autoRepeatTimer.Stop();
                 _keyHook.Dispose();
                 try { TrayIcon?.Dispose(); } catch { }
             };

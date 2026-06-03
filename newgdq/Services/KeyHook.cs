@@ -53,6 +53,12 @@ namespace newgdq.Services
                 _hookId = SetWindowsHookEx(WH_KEYBOARD_LL, _proc,
                     GetModuleHandle(curModule.ModuleName), 0);
             }
+            if (_hookId == IntPtr.Zero)
+            {
+                // 安装失败（权限/系统限制）：清掉 delegate 避免无谓的 GC 根引用，并记录诊断
+                _proc = null;
+                Debug.WriteLine($"KeyHook.Start failed, error={Marshal.GetLastWin32Error()}");
+            }
         }
 
         public void Stop()
@@ -86,10 +92,19 @@ namespace newgdq.Services
                 if (injected || imeProcess)
                     return CallNextHookEx(_hookId, nCode, wParam, lParam);
 
-                if (isDown)
-                    KeyDown?.Invoke(this, vk);
-                else if (msg == WM_KEYUP || msg == WM_SYSKEYUP)
-                    KeyUp?.Invoke(this, vk);
+                // 事件处理器若抛异常，会逃逸回 P/Invoke 回调栈 → 系统可能直接禁用本钩子（全局快捷键失效）。
+                // 这里吞掉订阅方异常，保证回调始终正常返回，钩子链不被破坏。
+                try
+                {
+                    if (isDown)
+                        KeyDown?.Invoke(this, vk);
+                    else if (msg == WM_KEYUP || msg == WM_SYSKEYUP)
+                        KeyUp?.Invoke(this, vk);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"KeyHook callback handler threw: {ex.Message}");
+                }
             }
             return CallNextHookEx(_hookId, nCode, wParam, lParam);
         }

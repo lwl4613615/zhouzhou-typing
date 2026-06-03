@@ -21,7 +21,16 @@ namespace newgdq.Views
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
             var s = Services.SettingsService.Instance;
-            s.CloudUrl        = (TbxUrl.Text ?? string.Empty).Trim();
+            string url = (TbxUrl.Text ?? string.Empty).Trim();
+            // 非空时校验必须 https，防止明文 http 被中间人窃听/篡改
+            if (url.Length > 0 &&
+                (!System.Uri.TryCreate(url, System.UriKind.Absolute, out var uri)
+                 || !uri.Scheme.Equals("https", System.StringComparison.OrdinalIgnoreCase)))
+            {
+                Services.Toast.Warning("云地址必须以 https:// 开头", 3);
+                return;
+            }
+            s.CloudUrl        = url;
             Services.SettingsService.Save();
 
             // 个人码：只进内存，不持久化

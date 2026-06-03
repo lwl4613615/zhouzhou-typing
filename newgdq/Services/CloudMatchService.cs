@@ -20,6 +20,9 @@ namespace newgdq.Services
         // 个人码：仅本次运行内存缓存，不持久化。
         public static string PersonalCode { get; set; }
 
+        // 抓来的发文内容上限：防云端被攻破/中间人返回超大正文撑爆内存。
+        private const int MaxArticleContentLength = 100_000;
+
         // 当前 F4 抓到的比赛文对应的本场口令（非空 = 当前正在跟打云比赛文）。
         public static string CurrentArticleToken { get; private set; }
         // 当前比赛文标题（仅展示用）。
@@ -60,6 +63,14 @@ namespace newgdq.Services
             return url.TrimEnd('/');
         }
 
+        /// <summary>校验云地址：必须是 https 绝对地址。明文 http 会被中间人窃听/篡改发文与成绩。</summary>
+        private static void EnsureSecureBaseUrl(string baseUrl)
+        {
+            if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var uri)
+                || !uri.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("云地址必须以 https:// 开头（左侧『群比赛』里改）");
+        }
+
         /// <summary>F4 抓文：GET {url}/article?token=本场口令。成功返回 (标题, 正文, 口令)，失败抛异常带原因。
         /// 注意：本方法不置"当前比赛文"标记，调用方在 LoadArticle 之后再调 SetCurrentArticle 置位。</summary>
         public static async Task<(string title, string content, string token)> FetchArticleAsync(string token)
@@ -67,6 +78,7 @@ namespace newgdq.Services
             string baseUrl = BaseUrl();
             if (string.IsNullOrEmpty(baseUrl))
                 throw new InvalidOperationException("还没配置云地址（左侧『群比赛』里填）");
+            EnsureSecureBaseUrl(baseUrl);
             if (string.IsNullOrWhiteSpace(token))
                 throw new InvalidOperationException("还没填本场口令（群里发文后机器人会公布 5 位口令）");
 
@@ -100,6 +112,8 @@ namespace newgdq.Services
                 string content = art.TryGetProperty("content", out var c) ? (c.GetString() ?? "") : "";
                 if (string.IsNullOrEmpty(content))
                     throw new InvalidOperationException("本场发文内容为空");
+                if (content.Length > MaxArticleContentLength)
+                    throw new InvalidOperationException($"发文内容过长（超过 {MaxArticleContentLength} 字），已拒绝载入");
 
                 return (title, content, token.Trim());
             }
@@ -113,6 +127,7 @@ namespace newgdq.Services
             string baseUrl = BaseUrl();
             if (string.IsNullOrEmpty(baseUrl))
                 throw new InvalidOperationException("还没配置云地址");
+            EnsureSecureBaseUrl(baseUrl);
             string token = CurrentArticleToken;
             if (string.IsNullOrEmpty(token))
                 throw new InvalidOperationException("当前不是比赛文，无需上传");
