@@ -11,7 +11,8 @@
 
 - **州州跟打器**（newgdq）：WPF 中文跟打练习软件，**双轨并行**：
   - `main` 线 → **.NET Framework 4.8** + HandyControl（老机器兼容）
-  - `net10` 线 → **.NET 10** + WPF-UI（现代 UI，主力开发线）
+  - `net10` 线 → **.NET 10** + WPF-UI（现代 UI，主力开发线；当前为左侧导航 + 分析页内嵌的新 UI）
+  - `net10-classic` 线 → **.NET 10** + WPF-UI **顶部菜单旧版 UI** 的归档/回退线（tag `net10-topmenu-ui`），保留随时从老 UI 继续开发的能力，平时不动
 - 主工程：`newgdq/newgdq.csproj`；解决方案：`newgdq.slnx`
 - 依赖（NuGet）：HandyControl 3.5.1（仅 main）/ WPF-UI 4.3.0（仅 net10）、OxyPlot 2.2.0、System.Data.SQLite.Core 1.0.118、Hardcodet.NotifyIcon.Wpf 1.1.0
 - DPI：`app.manifest` 启用 PerMonitorV2 + UTF-8；WPF 文本输入走 **TSF** 而非 IMM32
@@ -81,7 +82,10 @@ Start-Process "$deploy\newgdq.exe"
 | 线 | 分支 | 工程 | UI 框架 | tag 前缀 | 本地部署目录 |
 |---|---|---|---|---|---|
 | 稳定线（老机器兼容） | `main` | 老式 csproj + packages.config | HandyControl（`Growl`） | `v0.*` | `D:\gdq\48EXE` |
-| 主力线（现代 UI） | `net10` | SDK 式 + PackageReference | WPF-UI（`Toast` / `FluentWindow`） | `v1.*` | `D:\gdq\net10exe` |
+| 主力线（现代 UI） | `net10` | SDK 式 + PackageReference | WPF-UI（`Toast` / `FluentWindow`，左侧导航 + 内嵌分析页） | `v1.*` | `D:\gdq\net10exe` |
+| 归档/回退（旧版 net10 UI） | `net10-classic` | SDK 式 + PackageReference | WPF-UI 顶部菜单旧版 UI | — | （按需） |
+
+> 📌 `net10-classic` 是 net10 切换到新 UI 前的快照分支（对应 tag `net10-topmenu-ui`），用于随时回退或从老 UI 继续开发；**平时不主动维护、不发版**。回退入口：`git checkout net10-classic`。
 
 ### 维护工作流（单向流动：net10 → main）
 
