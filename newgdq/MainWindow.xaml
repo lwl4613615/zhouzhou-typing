@@ -257,7 +257,6 @@
                     <MenuItem Header="显示主窗口" Click="TrayMenu_Show_Click"/>
                     <MenuItem Header="重打"      InputGestureText="F3" Click="MenuItem_Repeat_Click"/>
                     <MenuItem Header="发下一段" InputGestureText="F6 / Ctrl+R" Click="MenuItem_SendNext_Click"/>
-                    <MenuItem Header="暂停 / 继续" InputGestureText="F8" Click="MenuItem_Pause_Click"/>
                     <Separator/>
                     <MenuItem Header="退出" Click="TrayMenu_Exit_Click"/>
                 </ContextMenu>
@@ -347,12 +346,6 @@
                         <StackPanel Orientation="Horizontal">
                             <ui:SymbolIcon Symbol="DataUsage24" FontSize="16" Margin="0,0,10,0"/>
                             <TextBlock Text="发文状态" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
-                    <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_Pause_Click" ToolTip="F8">
-                        <StackPanel Orientation="Horizontal">
-                            <ui:SymbolIcon Symbol="Pause24" FontSize="16" Margin="0,0,10,0"/>
-                            <TextBlock Text="暂停 / 继续" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                     <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_CopyResult_Click" ToolTip="F9">
