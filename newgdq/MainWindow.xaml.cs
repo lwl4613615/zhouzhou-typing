@@ -1151,6 +1151,9 @@ namespace newgdq
 
         private void LoadArticle(string text, string title)
         {
+            // 载入任何新内容默认解除"群比赛文"标记（F4 抓文会在本方法之后重新置位）。
+            // 这样发文/内部文/乱序/转换/复位等普通载文都会自动解锁比赛态快捷键。
+            Services.CloudMatchService.ClearCurrentArticle();
             // 载入新内容前取消任何挂起的自动续发（F5/重打/跳段/手动发段都经过这里）
             CancelAutoAdvance();
             // 如果上一段已字数打满但因末字错未 finish，载新文时强制以当前成绩入历史
@@ -1943,6 +1946,26 @@ namespace newgdq
             // 所有热键都要求主窗激活才生效，避免在其他程序里误触
             if (!this.IsActive) return;
 
+            // 群比赛模式（F4 抓来的云比赛文）：锁掉除 F8 暂停以外的所有功能键 / Ctrl 组合键，
+            // 防止 F3 重打 / F6 发下一段 / Ctrl+Q 乱序等"重打刷分"，比赛只许打一遍。
+            // 注意：只拦功能键与 Ctrl 组合，下方的逐字击键计数不受影响（正常打字照常）。
+            if (Services.CloudMatchService.IsMatchArticleLoaded)
+            {
+                if (vk == 0x77) // F8 暂停 / 继续——比赛中唯一可用功能键
+                {
+                    Dispatcher.BeginInvoke(new Action(TogglePause));
+                    return;
+                }
+                // F2/F3/F6/F9 或任意 Ctrl 组合键 → 比赛中一律失效并提示
+                bool isFnHotkey = (vk == 0x71 || vk == 0x72 || vk == 0x75 || vk == 0x78);
+                if (isFnHotkey || IsCtrlDown())
+                {
+                    Dispatcher.BeginInvoke(new Action(() =>
+                        Services.Toast.Warning("比赛中已锁定，只能用 F8 暂停", 2)));
+                    return;
+                }
+            }
+
             switch (vk)
             {
                 case 0x71: // F2 打开发文窗口；Ctrl+F2 改为打开发文状态窗
@@ -1953,6 +1976,9 @@ namespace newgdq
                     return;
                 case 0x72: // F3 重打
                     Dispatcher.BeginInvoke(new Action(Repeat));
+                    return;
+                case 0x73: // F4 群比赛抓文（凭本场口令从云端拉取比赛文）
+                    Dispatcher.BeginInvoke(new Action(FetchMatchArticle));
                     return;
                 case 0x75: // F6 发下一段
                     Dispatcher.BeginInvoke(new Action(SendNext));
@@ -2405,7 +2431,62 @@ namespace newgdq
                     AutoCopyResultImage();
             }
 
+            // 群比赛：若当前是 F4 抓来的比赛文，且开启自动上传，则把本段成绩交到云端。
+            if (!blockedByLimit && Services.CloudMatchService.IsMatchArticleLoaded
+                && (SettingsService.Instance.CloudAutoUpload ?? true))
+            {
+                UploadMatchScore(speed, jj, mc, _session.Cz, sec);
+            }
+
             InlineChartMarkFinish();
+        }
+
+        /// <summary>导航栏「群比赛设置」入口。</summary>
+        private void MenuItem_OpenCloudMatch_Click(object sender, RoutedEventArgs e)
+        {
+            var win = new Views.CloudMatchWindow(this);
+            win.ShowDialog();
+        }
+
+        /// <summary>导航栏「抓比赛文」入口（等同 F4）。</summary>
+        private void MenuItem_FetchMatch_Click(object sender, RoutedEventArgs e) => FetchMatchArticle();
+
+        /// <summary>F4：凭本场口令从云端抓比赛文并载入，载入后标记为比赛文（锁键 + 完成自动交卷）。</summary>
+        private async void FetchMatchArticle()
+        {
+            string token = SettingsService.Instance.SessionToken;
+            try
+            {
+                var (title, content, tk) = await Services.CloudMatchService.FetchArticleAsync(token);
+                _currentSegNo = 0;
+                LoadArticle(content, title);                       // 内部会先清比赛标记
+                Services.CloudMatchService.SetCurrentArticle(tk, title); // 再置位 → 进入比赛态
+                Services.Toast.Success($"已抓取比赛文：{title}（比赛中仅 F8 可用）", 3);
+            }
+            catch (Exception ex)
+            {
+                Services.Toast.Error("抓文失败：" + ex.Message, 4);
+            }
+        }
+
+        /// <summary>把本段成绩上传到群比赛云（一场一交卷，重复/已交由服务端与本机共同拦截）。</summary>
+        private async void UploadMatchScore(double speed, double jj, double mc, int cz, double sec)
+        {
+            string token = Services.CloudMatchService.CurrentArticleToken;
+            if (Services.CloudMatchService.HasSubmitted(token))
+            {
+                Services.Toast.Warning("本场你已交过卷了，不再重复上传", 3);
+                return;
+            }
+            try
+            {
+                string name = await Services.CloudMatchService.UploadScoreAsync(speed, jj, mc, cz, sec);
+                Services.Toast.Success($"成绩已交卷：{name}  速度 {speed:0.00}", 3);
+            }
+            catch (Exception ex)
+            {
+                Services.Toast.Error("上传成绩失败：" + ex.Message, 4);
+            }
         }
 
         /// <summary>逐字比对原文与最终输入，把所有"打错的字"(正确字→打成字)写入错字本独立库。

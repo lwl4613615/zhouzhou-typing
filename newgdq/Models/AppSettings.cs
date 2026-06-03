@@ -91,5 +91,14 @@ namespace newgdq.Models
 
         // 成绩趋势：目标速度（字/分）。null 或 0 = 未设目标，趋势窗只看进步不做达标判定。
         [DataMember(EmitDefaultValue = false)] public double? GoalSpeed { get; set; }
+
+        // ===== 群比赛（云中转）=====
+        // 云函数地址（形如 https://xxx.tencentscf.com），群里发文后群友 F4 凭本场口令抓文。
+        [DataMember(EmitDefaultValue = false)] public string CloudUrl { get; set; }
+        // 本场口令：每场比赛主持发文后机器人在群里公布的 5 位口令，抓文用，换场要更新。
+        // （本场口令群里公开，存本地无妨；个人码绝不落地，只在内存，见 CloudMatchService.PersonalCode）
+        [DataMember(EmitDefaultValue = false)] public string SessionToken { get; set; }
+        // 打完是否自动上传成绩到群比赛云（仅当本段是 F4 抓来的云文时生效）。默认 true。
+        [DataMember(EmitDefaultValue = false)] public bool? CloudAutoUpload { get; set; }
     }
 }

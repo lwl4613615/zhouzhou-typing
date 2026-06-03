@@ -361,6 +361,22 @@
                         </StackPanel>
                     </Button>
 
+                    <!-- 群比赛 -->
+                    <TextBlock Text="群比赛" Style="{StaticResource NavSection}"/>
+                    <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_OpenCloudMatch_Click"
+                            ToolTip="填云地址 / 本场口令 / 个人码；F4 抓比赛文，打完自动交卷">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Trophy24" FontSize="16" Margin="0,0,10,0"/>
+                            <TextBlock Text="群比赛设置" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_FetchMatch_Click" ToolTip="F4">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="CloudArrowDown24" FontSize="16" Margin="0,0,10,0"/>
+                            <TextBlock Text="抓比赛文 (F4)" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
                     <!-- 分析 -->
                     <TextBlock Text="分析" Style="{StaticResource NavSection}"/>
                     <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_OpenTrend_Click"
