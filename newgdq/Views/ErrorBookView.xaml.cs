@@ -110,16 +110,18 @@ namespace newgdq.Views
                 LabelPlacement = LabelPlacement.Inside,
                 LabelFormatString = "{0}",
                 TextColor = OxyColors.White,
+                TrackerFormatString = "{1}：错 {2} 次",
             };
             int max = top.Max(s => s.Count);
             var ordered = top.AsEnumerable().Reverse().ToList();
             foreach (var s in ordered)
             {
                 double t = max > 0 ? (double)s.Count / max : 0;
+                // 低→高：柔和青绿 #5BBF8A → 暖珊瑚 #E8825A（避免纯饱和红刺眼）
                 var col = OxyColor.FromRgb(
-                    (byte)(0x42 + (0xEF - 0x42) * t),
-                    (byte)(0xC3 + (0x44 - 0xC3) * t),
-                    (byte)(0x6E + (0x36 - 0x6E) * t));
+                    (byte)(0x5B + (0xE8 - 0x5B) * t),
+                    (byte)(0xBF + (0x82 - 0xBF) * t),
+                    (byte)(0x8A + (0x5A - 0x8A) * t));
                 bar.Items.Add(new BarItem { Value = s.Count, Color = col });
             }
 

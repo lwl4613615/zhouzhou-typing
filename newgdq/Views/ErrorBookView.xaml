@@ -49,8 +49,12 @@
             <!-- 排行表 -->
             <DataGrid x:Name="Grid" Grid.Column="0" AutoGenerateColumns="False" IsReadOnly="True"
                       HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                      HorizontalGridLinesBrush="{DynamicResource GridLine}"
                       CanUserAddRows="False" CanUserDeleteRows="False"
-                      Background="Transparent" RowBackground="Transparent"
+                      RowHeight="28" FontSize="13"
+                      Background="{DynamicResource CellBG}" Foreground="{DynamicResource ValueFG}"
+                      RowBackground="{DynamicResource CellBG}"
+                      AlternatingRowBackground="{DynamicResource AltRowBG}"
                       SelectionChanged="Grid_SelectionChanged">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="正确字" Binding="{Binding Correct}" Width="70"/>
