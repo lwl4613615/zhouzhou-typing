@@ -81,8 +81,10 @@ namespace newgdq.Services
             EnsureSecureBaseUrl(baseUrl);
             if (string.IsNullOrWhiteSpace(token))
                 throw new InvalidOperationException("还没填本场口令（群里发文后机器人会公布 5 位口令）");
-
-            string reqUrl = baseUrl + "/article?token=" + Uri.EscapeDataString(token.Trim());
+            // 云端本场口令字符集全大写、且区分大小写比较（不像个人码会 toUpperCase）。
+            // 客户端统一归一为大写，避免群友输入小写口令时被误判为"本场已结束"。
+            token = token.Trim().ToUpperInvariant();
+            string reqUrl = baseUrl + "/article?token=" + Uri.EscapeDataString(token);
             string body;
             try
             {
@@ -96,7 +98,10 @@ namespace newgdq.Services
                 throw new InvalidOperationException("连不上云服务器：" + ex.Message);
             }
 
-            using (var doc = JsonDocument.Parse(body))
+            JsonDocument doc;
+            try { doc = JsonDocument.Parse(body); }
+            catch (JsonException) { throw new InvalidOperationException("服务器返回了无法识别的内容（可能是网络/网关异常），请稍后再试"); }
+            using (doc)
             {
                 var root = doc.RootElement;
                 bool ok = root.TryGetProperty("ok", out var okEl) && okEl.ValueKind == JsonValueKind.True;
@@ -115,7 +120,7 @@ namespace newgdq.Services
                 if (content.Length > MaxArticleContentLength)
                     throw new InvalidOperationException($"发文内容过长（超过 {MaxArticleContentLength} 字），已拒绝载入");
 
-                return (title, content, token.Trim());
+                return (title, content, token);
             }
         }
 
@@ -162,7 +167,10 @@ namespace newgdq.Services
                 throw new InvalidOperationException("连不上云服务器：" + ex.Message);
             }
 
-            using (var doc = JsonDocument.Parse(respBody))
+            JsonDocument doc;
+            try { doc = JsonDocument.Parse(respBody); }
+            catch (JsonException) { throw new InvalidOperationException("服务器返回了无法识别的内容（可能是网络/网关异常），请稍后再试"); }
+            using (doc)
             {
                 var root = doc.RootElement;
                 bool ok = root.TryGetProperty("ok", out var okEl) && okEl.ValueKind == JsonValueKind.True;

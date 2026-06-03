@@ -1161,15 +1161,17 @@ namespace newgdq
 
         private void LoadArticle(string text, string title)
         {
+            // 载入新内容前取消任何挂起的自动续发（F5/重打/跳段/手动发段都经过这里）
+            CancelAutoAdvance();
+            // 如果上一段已字数打满但因末字错未 finish，载新文时强制以当前成绩入历史。
+            // 必须在清除"群比赛文"标记之前结算：否则上一段是比赛文时，IsMatchArticleLoaded
+            // 已被清掉，强制结算走 FinishTyping 时不会上传云端，导致末字打错的比赛段静默丢分。
+            TryForceFinalizeLastSegment();
             // 载入任何新内容默认解除"群比赛文"标记（F4 抓文会在本方法之后重新置位）。
             // 这样发文/内部文/乱序/转换/复位等普通载文都会自动解锁比赛态快捷键。
             bool wasMatch = Services.CloudMatchService.IsMatchArticleLoaded;
             Services.CloudMatchService.ClearCurrentArticle();
             if (wasMatch) SetNavCollapsed(false);   // 退出比赛态：左侧导航自动展开回来
-            // 载入新内容前取消任何挂起的自动续发（F5/重打/跳段/手动发段都经过这里）
-            CancelAutoAdvance();
-            // 如果上一段已字数打满但因末字错未 finish，载新文时强制以当前成绩入历史
-            TryForceFinalizeLastSegment();
 
             // 替换：底部标记栏"替换"开启时，载入时自动英文标点转中文标点
             if (TogReplace != null && TogReplace.IsChecked == true && !string.IsNullOrEmpty(text))
@@ -2450,7 +2452,9 @@ namespace newgdq
             }
 
             // 群比赛：若当前是 F4 抓来的比赛文，且开启自动上传，则把本段成绩交到云端。
-            if (!blockedByLimit && Services.CloudMatchService.IsMatchArticleLoaded
+            // 注意：比赛成绩上传不受本地「限速」开关影响——限速只过滤本地历史（练习用），
+            // 比赛是真实成绩，哪怕速度低于本地阈值也必须交卷，否则群友会误以为已交卷却查无此人。
+            if (Services.CloudMatchService.IsMatchArticleLoaded
                 && (SettingsService.Instance.CloudAutoUpload ?? true))
             {
                 UploadMatchScore(speed, jj, mc, _session.Cz, sec);
@@ -2469,29 +2473,41 @@ namespace newgdq
         /// <summary>导航栏「抓比赛文」入口（等同 F4）。</summary>
         private void MenuItem_FetchMatch_Click(object sender, RoutedEventArgs e) => FetchMatchArticle();
 
+        /// <summary>F4 抓文进行中标志：防 await 网络期间重复按 F4 弹出多个口令框/重复抓取。</summary>
+        private bool _fetchingMatch;
+
         /// <summary>F4：凭本场口令从云端抓比赛文并载入，载入后标记为比赛文（锁键 + 完成自动交卷）。</summary>
         private async void FetchMatchArticle()
         {
-            // 本场口令每场都换 → F4 时现场输入（预填上次口令方便连打同场）
-            var prompt = new Views.TokenPromptWindow(this, SettingsService.Instance.SessionToken);
-            if (prompt.ShowDialog() != true) return;
-            string token = prompt.Token;
-            SettingsService.Instance.SessionToken = token;   // 记住本场口令，下次预填
-            SettingsService.Save();
+            if (_fetchingMatch) return;   // 抓取进行中，忽略重复 F4
+            _fetchingMatch = true;
             try
             {
-                var (title, content, tk) = await Services.CloudMatchService.FetchArticleAsync(token);
-                _currentSegNo = 0;
-                LoadArticle(content, title);                       // 内部会先清比赛标记
-                Services.CloudMatchService.SetCurrentArticle(tk, title); // 再置位 → 进入比赛态
-                SetNavCollapsed(true);                             // 比赛态：左侧导航自动缩回，跟打区更专注
-                this.Title = "🏆 比赛中 - " + (string.IsNullOrEmpty(title) ? "比赛文" : title);
-                TxtTitle.Text = "🏆 比赛中 · " + (string.IsNullOrEmpty(title) ? "比赛文" : title);
-                Services.Toast.Success($"已抓取比赛文：{title}（比赛中仅 F8 可用）", 3);
+                // 本场口令每场都换 → F4 时现场输入（预填上次口令方便连打同场）
+                var prompt = new Views.TokenPromptWindow(this, SettingsService.Instance.SessionToken);
+                if (prompt.ShowDialog() != true) return;
+                string token = prompt.Token;
+                SettingsService.Instance.SessionToken = token;   // 记住本场口令，下次预填
+                SettingsService.Save();
+                try
+                {
+                    var (title, content, tk) = await Services.CloudMatchService.FetchArticleAsync(token);
+                    _currentSegNo = 0;
+                    LoadArticle(content, title);                       // 内部会先清比赛标记
+                    Services.CloudMatchService.SetCurrentArticle(tk, title); // 再置位 → 进入比赛态
+                    SetNavCollapsed(true);                             // 比赛态：左侧导航自动缩回，跟打区更专注
+                    this.Title = "🏆 比赛中 - " + (string.IsNullOrEmpty(title) ? "比赛文" : title);
+                    TxtTitle.Text = "🏆 比赛中 · " + (string.IsNullOrEmpty(title) ? "比赛文" : title);
+                    Services.Toast.Success($"已抓取比赛文：{title}（比赛中仅 F8 可用）", 3);
+                }
+                catch (Exception ex)
+                {
+                    Services.Toast.Error("抓文失败：" + ex.Message, 4);
+                }
             }
-            catch (Exception ex)
+            finally
             {
-                Services.Toast.Error("抓文失败：" + ex.Message, 4);
+                _fetchingMatch = false;
             }
         }
 
