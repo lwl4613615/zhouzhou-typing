@@ -552,8 +552,11 @@
                                 <MenuItem Header="访问 项目主页" Click="MenuItem_Homepage_Click">
                                     <MenuItem.Icon><ui:SymbolIcon Symbol="Home24" FontSize="16"/></MenuItem.Icon>
                                 </MenuItem>
-                                <MenuItem Header="加入 QQ 交流群" Click="MenuItem_JoinQQ_Click">
+                                <MenuItem Header="加入 跟打练习群" Click="MenuItem_JoinPracticeQQ_Click">
                                     <MenuItem.Icon><ui:SymbolIcon Symbol="People24" FontSize="16"/></MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Header="加入 问题反馈群" Click="MenuItem_JoinQQ_Click">
+                                    <MenuItem.Icon><ui:SymbolIcon Symbol="QuestionCircle24" FontSize="16"/></MenuItem.Icon>
                                 </MenuItem>
                                 <MenuItem Header="关于 州州跟打器..." Click="MenuItem_About_Click">
                                     <MenuItem.Icon><ui:SymbolIcon Symbol="Info24" FontSize="16"/></MenuItem.Icon>

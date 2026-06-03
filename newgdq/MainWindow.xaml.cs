@@ -1570,7 +1570,10 @@ namespace newgdq
         }
 
         // ===== 帮助菜单 =====
+        // 问题反馈群（老群）：用于报 bug、提需求
         private const string QQ_GROUP_URL = "https://qm.qq.com/q/eb2iF433q2";
+        // 跟打练习群（新群）：纯跟打练习交流
+        private const string QQ_PRACTICE_GROUP_URL = "https://qm.qq.com/q/mti78dCTCg";
         private const string QQ_GROUP_ID  = "17079867";
         private const string WECHAT_ID    = "synhxb";
         private const string PROJECT_URL  = "https://github.com/lwl4613615/zhouzhou-typing";
@@ -1588,6 +1591,11 @@ namespace newgdq
         private void MenuItem_JoinQQ_Click(object sender, RoutedEventArgs e)
         {
             OpenUrl(QQ_GROUP_URL);
+        }
+
+        private void MenuItem_JoinPracticeQQ_Click(object sender, RoutedEventArgs e)
+        {
+            OpenUrl(QQ_PRACTICE_GROUP_URL);
         }
 
         /// <summary>用系统默认浏览器打开 URL。.NET Core+ 必须 UseShellExecute=true，否则直接传 URL 会报"找不到文件"。</summary>
@@ -1968,6 +1976,27 @@ namespace newgdq
         {
             // 双拼练习模式：面板自己通过 WPF 焦点接收按键，全局钩/热键/计数全部停用
             if (_practiceMode) return;
+
+            // Ctrl+M 全局切换最小化 / 还原：
+            // 故意放在「主窗激活」守卫之前 —— 窗口最小化后已不是激活窗口，
+            // 若受 IsActive 限制就永远还原不回来。所以这是真正的全局热键（任何前台程序下都能弹出/收起）。
+            if (IsCtrlDown() && vk == 0x4D)
+            {
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    if (WindowState == WindowState.Minimized)
+                    {
+                        WindowState = WindowState.Normal;
+                        Activate();
+                    }
+                    else
+                    {
+                        WindowState = WindowState.Minimized;
+                    }
+                }));
+                return;
+            }
+
             // 所有热键都要求主窗激活才生效，避免在其他程序里误触
             if (!this.IsActive) return;
 

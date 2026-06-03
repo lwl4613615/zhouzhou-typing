@@ -99,6 +99,8 @@
                                 <TextBlock Grid.Row="10" Grid.Column="1" Text="将目前文章乱序" Margin="0,2"/>
                                 <TextBlock Grid.Row="11" Grid.Column="0" Text="Ctrl+W" FontWeight="Bold" Margin="0,2"/>
                                 <TextBlock Grid.Row="11" Grid.Column="1" Text="英文标点换中文" Margin="0,2"/>
+                                <TextBlock Grid.Row="12" Grid.Column="0" Text="Ctrl+M" FontWeight="Bold" Margin="0,2"/>
+                                <TextBlock Grid.Row="12" Grid.Column="1" Text="最小化 / 还原窗口（全局）" Margin="0,2"/>
                             </Grid>
                         </StackPanel>
                     </Border>
