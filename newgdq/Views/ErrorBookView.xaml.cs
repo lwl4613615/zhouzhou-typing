@@ -131,7 +131,8 @@ namespace newgdq.Views
                 TextColor = textColor,
                 AxislineColor = axisColor,
                 TicklineColor = axisColor,
-                FontSize = 13,
+                FontSize = 15,
+                FontWeight = OxyPlot.FontWeights.Bold,
             };
             foreach (var s in ordered)
                 categoryAxis.Labels.Add(s.Correct + "→" + ShowCharShort(s.Typed));

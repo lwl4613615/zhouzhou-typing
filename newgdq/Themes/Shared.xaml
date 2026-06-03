@@ -94,4 +94,19 @@
         <Setter Property="VerticalGridLinesBrush" Value="{DynamicResource GridLine}"/>
     </Style>
 
+    <!-- 全局 DataGrid 列头：WPF-UI 默认列头是浅蓝渐变 + 浅色字，在深色面板上对比度差、看不清。
+         统一改为深色底(CellBG) + 亮字(ValueFG) + 强调色底边，仅画底部分隔线（去竖线）。
+         有局部列头样式的 DataGrid（如主窗历史表）会照旧覆盖，不受影响。 -->
+    <Style TargetType="DataGridColumnHeader">
+        <Setter Property="Background" Value="{DynamicResource CellBG}"/>
+        <Setter Property="Foreground" Value="{DynamicResource ValueFG}"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentFG}"/>
+        <Setter Property="BorderThickness" Value="0,0,0,2"/>
+        <Setter Property="Height" Value="28"/>
+        <Setter Property="Padding" Value="6,2"/>
+    </Style>
+
 </ResourceDictionary>
