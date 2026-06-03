@@ -91,7 +91,22 @@
                     <TextBlock x:Name="TxtChartEmpty" DockPanel.Dock="Bottom" Visibility="Collapsed"
                                Text="暂无错字数据" Foreground="{DynamicResource ValueFG}"
                                HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,20"/>
-                    <sp:PlotView x:Name="PlotErr" Background="Transparent"/>
+                    <sp:PlotView x:Name="PlotErr" Background="Transparent">
+                        <!-- 自定义浮标：OxyPlot 默认浅黄底看不清，改深色底+亮字 -->
+                        <sp:PlotView.DefaultTrackerTemplate>
+                            <ControlTemplate>
+                                <sp:TrackerControl Position="{Binding Position}"
+                                                   LineExtents="{Binding PlotModel.PlotArea}"
+                                                   Background="{DynamicResource PanelBG}"
+                                                   BorderBrush="{DynamicResource AccentFG}"
+                                                   BorderThickness="1">
+                                    <TextBlock Text="{Binding}" Margin="8,5"
+                                               FontSize="13" FontWeight="SemiBold"
+                                               Foreground="{DynamicResource ValueFG}"/>
+                                </sp:TrackerControl>
+                            </ControlTemplate>
+                        </sp:PlotView.DefaultTrackerTemplate>
+                    </sp:PlotView>
                 </DockPanel>
             </Border>
         </Grid>
