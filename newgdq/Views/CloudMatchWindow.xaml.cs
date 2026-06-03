@@ -15,17 +15,13 @@ namespace newgdq.Views
 
             var s = Services.SettingsService.Instance;
             TbxUrl.Text   = s.CloudUrl ?? string.Empty;
-            TbxToken.Text = s.SessionToken ?? string.Empty;
             TbxCode.Text  = Services.CloudMatchService.PersonalCode ?? string.Empty;
-            TogAutoUpload.IsChecked = s.CloudAutoUpload ?? true;
         }
 
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
             var s = Services.SettingsService.Instance;
             s.CloudUrl        = (TbxUrl.Text ?? string.Empty).Trim();
-            s.SessionToken    = (TbxToken.Text ?? string.Empty).Trim();
-            s.CloudAutoUpload = TogAutoUpload.IsChecked == true;
             Services.SettingsService.Save();
 
             // 个人码：只进内存，不持久化

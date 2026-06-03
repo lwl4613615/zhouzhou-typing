@@ -275,8 +275,14 @@ namespace newgdq
         private void NavToggle_Click(object sender, RoutedEventArgs e)
         {
             bool collapsed = NavRail.Visibility != Visibility.Visible;
-            NavRail.Visibility = collapsed ? Visibility.Visible : Visibility.Collapsed;
-            NavExpandStrip.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
+            SetNavCollapsed(!collapsed);
+        }
+
+        /// <summary>设置左侧导航折叠状态（true=收起）。比赛态自动收起、退出自动展开都走这里。</summary>
+        private void SetNavCollapsed(bool collapsed)
+        {
+            NavRail.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
+            NavExpandStrip.Visibility = collapsed ? Visibility.Visible : Visibility.Collapsed;
         }
 
         // ===== 界面缩放菜单（实际缩放逻辑在 Services.UiScaleManager） =====
@@ -1153,7 +1159,9 @@ namespace newgdq
         {
             // 载入任何新内容默认解除"群比赛文"标记（F4 抓文会在本方法之后重新置位）。
             // 这样发文/内部文/乱序/转换/复位等普通载文都会自动解锁比赛态快捷键。
+            bool wasMatch = Services.CloudMatchService.IsMatchArticleLoaded;
             Services.CloudMatchService.ClearCurrentArticle();
+            if (wasMatch) SetNavCollapsed(false);   // 退出比赛态：左侧导航自动展开回来
             // 载入新内容前取消任何挂起的自动续发（F5/重打/跳段/手动发段都经过这里）
             CancelAutoAdvance();
             // 如果上一段已字数打满但因末字错未 finish，载新文时强制以当前成绩入历史
@@ -1850,6 +1858,12 @@ namespace newgdq
         {
             // 与老版一致：复位前若末段已打满但因末字错未结算，强制入历史，避免数据丢失
             TryForceFinalizeLastSegment();
+            // 退出比赛态（若在）：解除标记并展开左侧导航
+            if (Services.CloudMatchService.IsMatchArticleLoaded)
+            {
+                Services.CloudMatchService.ClearCurrentArticle();
+                SetNavCollapsed(false);
+            }
             _session.Load(string.Empty, string.Empty);
             RtbCompare.Document.Blocks.Clear();
             _charRuns.Clear();
@@ -2454,13 +2468,21 @@ namespace newgdq
         /// <summary>F4：凭本场口令从云端抓比赛文并载入，载入后标记为比赛文（锁键 + 完成自动交卷）。</summary>
         private async void FetchMatchArticle()
         {
-            string token = SettingsService.Instance.SessionToken;
+            // 本场口令每场都换 → F4 时现场输入（预填上次口令方便连打同场）
+            var prompt = new Views.TokenPromptWindow(this, SettingsService.Instance.SessionToken);
+            if (prompt.ShowDialog() != true) return;
+            string token = prompt.Token;
+            SettingsService.Instance.SessionToken = token;   // 记住本场口令，下次预填
+            SettingsService.Save();
             try
             {
                 var (title, content, tk) = await Services.CloudMatchService.FetchArticleAsync(token);
                 _currentSegNo = 0;
                 LoadArticle(content, title);                       // 内部会先清比赛标记
                 Services.CloudMatchService.SetCurrentArticle(tk, title); // 再置位 → 进入比赛态
+                SetNavCollapsed(true);                             // 比赛态：左侧导航自动缩回，跟打区更专注
+                this.Title = "🏆 比赛中 - " + (string.IsNullOrEmpty(title) ? "比赛文" : title);
+                TxtTitle.Text = "🏆 比赛中 · " + (string.IsNullOrEmpty(title) ? "比赛文" : title);
                 Services.Toast.Success($"已抓取比赛文：{title}（比赛中仅 F8 可用）", 3);
             }
             catch (Exception ex)

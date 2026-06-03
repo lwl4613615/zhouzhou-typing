@@ -23,7 +23,7 @@
         </ui:TitleBar>
         <DockPanel Grid.Row="1" Margin="16">
             <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
-                <ui:Button Content="保存" Padding="12,4" MinWidth="80" Appearance="Primary" Click="BtnSave_Click"/>
+                <ui:Button Content="保存" Padding="12,4" MinWidth="80" Click="BtnSave_Click"/>
                 <ui:Button Content="取消" Padding="12,4" MinWidth="80" Margin="8,0,0,0" Click="BtnClose_Click"/>
             </StackPanel>
             <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -39,15 +39,6 @@
 
                     <Border Style="{StaticResource CardStyle}">
                         <StackPanel>
-                            <TextBlock Text="本场口令" Style="{StaticResource SectionTitleStyle}"/>
-                            <TextBlock Text="每场比赛主持发文后，机器人在群里公布的 5 位口令；按 F4 凭它抓取比赛文。换场要更新。"
-                                       TextWrapping="Wrap" Opacity="0.7" Margin="0,0,0,6"/>
-                            <ui:TextBox x:Name="TbxToken" PlaceholderText="如 7K2QP" MaxLength="8"/>
-                        </StackPanel>
-                    </Border>
-
-                    <Border Style="{StaticResource CardStyle}">
-                        <StackPanel>
                             <TextBlock Text="个人码（只本次有效，不保存）" Style="{StaticResource SectionTitleStyle}"/>
                             <TextBlock Text="在群里发『领码』，机器人私聊发你 6 位个人码。它代表你本人，关掉软件即清空、绝不存盘，每次打开需重填。"
                                        TextWrapping="Wrap" Opacity="0.7" Margin="0,0,0,6"/>
@@ -55,13 +46,8 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Style="{StaticResource CardStyle}">
-                        <StackPanel>
-                            <ui:ToggleSwitch x:Name="TogAutoUpload" Content="打完自动上传成绩到群比赛"/>
-                            <TextBlock Text="只对 F4 抓来的比赛文生效；普通跟打不会上传。比赛中只能用 F8 暂停，一场只能交一次。"
-                                       TextWrapping="Wrap" Opacity="0.7" Margin="0,6,0,0"/>
-                        </StackPanel>
-                    </Border>
+                    <TextBlock Text="每场按 F4 现场输入本场口令抓文；打完自动交卷，只对比赛文生效。比赛中只能用 F8 暂停，一场只能交一次。"
+                               TextWrapping="Wrap" Opacity="0.7" Margin="4,8,4,0"/>
                 </StackPanel>
             </ScrollViewer>
         </DockPanel>
