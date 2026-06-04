@@ -39,10 +39,28 @@
 
                     <Border Style="{StaticResource CardStyle}">
                         <StackPanel>
-                            <TextBlock Text="个人码（只本次有效，不保存）" Style="{StaticResource SectionTitleStyle}"/>
-                            <TextBlock Text="在群里发『领码』，机器人私聊发你 6 位个人码。它代表你本人，关掉软件即清空、绝不存盘，每次打开需重填。"
+                            <TextBlock Text="昵称（参赛显示名）" Style="{StaticResource SectionTitleStyle}"/>
+                            <TextBlock Text="排行榜上显示的名字，长期保存。它只是显示名，不是口令，可随时改。"
                                        TextWrapping="Wrap" Opacity="0.7" Margin="0,0,0,6"/>
-                            <ui:TextBox x:Name="TbxCode" PlaceholderText="如 A8K3M9" MaxLength="8"/>
+                            <ui:TextBox x:Name="TbxNickname" PlaceholderText="如 周周" MaxLength="20"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="设备身份（本机以此身份参赛）" Style="{StaticResource SectionTitleStyle}"/>
+                            <TextBlock Text="本机自动生成、代表这台电脑，无需填写、不可编辑。交卷时凭它认人。"
+                                       TextWrapping="Wrap" Opacity="0.7" Margin="0,0,0,6"/>
+                            <ui:TextBox x:Name="TbxDeviceId" IsReadOnly="True" FontFamily="Consolas"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="当前文章模式" Style="{StaticResource SectionTitleStyle}"/>
+                            <TextBlock Text="daily（每日文）可反复跟打、不断刷新最好成绩；match（赛文）一场只交一次。"
+                                       TextWrapping="Wrap" Opacity="0.7" Margin="0,0,0,6"/>
+                            <TextBlock x:Name="TxtCurrentMode" FontWeight="SemiBold"/>
                         </StackPanel>
                     </Border>
 

@@ -2569,8 +2569,31 @@ namespace newgdq
             }
             try
             {
-                string name = await Services.CloudMatchService.UploadScoreAsync(speed, jj, mc, cz, sec);
-                Services.Toast.Success($"成绩已交卷：{name}  速度 {speed:0.00}", 3);
+                var result = await Services.CloudMatchService.UploadScoreAsync(speed, jj, mc, cz, sec);
+                if (result.IsDuplicate)
+                {
+                    Services.Toast.Warning("本场你已交过卷了，不再重复上传", 3);
+                    return;
+                }
+                if (result.IsDaily)
+                {
+                    double cur = result.New ?? speed;
+                    if (result.Improved)
+                    {
+                        string fromTo = result.Old.HasValue
+                            ? $"{result.Old.Value:0.00}→{cur:0.00}"
+                            : $"{cur:0.00}";
+                        Services.Toast.Success($"新纪录！{fromTo}（最佳 {result.Best:0.00}）", 4);
+                    }
+                    else
+                    {
+                        Services.Toast.Info($"本次 {cur:0.00}，未超越最佳 {result.Best:0.00}", 3);
+                    }
+                }
+                else
+                {
+                    Services.Toast.Success($"成绩已交卷：{result.Name}  速度 {speed:0.00}", 3);
+                }
             }
             catch (Exception ex)
             {
