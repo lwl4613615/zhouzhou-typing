@@ -100,5 +100,9 @@ namespace newgdq.Models
         [DataMember(EmitDefaultValue = false)] public string SessionToken { get; set; }
         // 打完是否自动上传成绩到群比赛云（仅当本段是 F4 抓来的云文时生效）。默认 true。
         [DataMember(EmitDefaultValue = false)] public bool? CloudAutoUpload { get; set; }
+        // 群比赛昵称：设备路径上传成绩时的显示名（昵称存本地无妨，不是口令/密钥）。
+        [DataMember(EmitDefaultValue = false)] public string CloudNickname { get; set; }
+        // 设备标识回退值：取不到 MachineGuid 时用，生成一次后持久化，保证跨重启一致。
+        [DataMember(EmitDefaultValue = false)] public string DeviceIdFallback { get; set; }
     }
 }
