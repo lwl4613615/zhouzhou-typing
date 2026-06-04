@@ -373,7 +373,21 @@
                     <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_FetchMatch_Click" ToolTip="F4">
                         <StackPanel Orientation="Horizontal">
                             <ui:SymbolIcon Symbol="CloudArrowDown24" FontSize="16" Margin="0,0,10,0"/>
-                            <TextBlock Text="抓比赛文 (F4)" VerticalAlignment="Center"/>
+                            <TextBlock Text="赛文 (F4)" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_FetchDaily_Click"
+                            ToolTip="每日一文：可反复跟打、不断刷新最好成绩">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="CalendarLtr24" FontSize="16" Margin="0,0,10,0"/>
+                            <TextBlock Text="每日一文" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_OpenRank_Click"
+                            ToolTip="看本场榜单（需先 F4 抓比赛文/每日文）">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Ribbon24" FontSize="16" Margin="0,0,10,0"/>
+                            <TextBlock Text="看榜" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 

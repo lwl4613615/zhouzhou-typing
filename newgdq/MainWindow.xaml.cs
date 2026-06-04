@@ -389,7 +389,7 @@ namespace newgdq
             int len = Math.Min(input.Length, _charRuns.Count);
             for (int i = 0; i < len; i++)
             {
-                if (input[i] == _session.TypeText[i])
+                if (Services.TextProcessor.NormalizeForCompare(input[i]) == Services.TextProcessor.NormalizeForCompare(_session.TypeText[i]))
                 {
                     _charRuns[i].Foreground = _brushRight;
                     _charRuns[i].Background = _brushRightBg;
@@ -443,7 +443,7 @@ namespace newgdq
             {
                 if (i < input.Length && i < _session.TypeText.Length)
                 {
-                    if (input[i] == _session.TypeText[i])
+                    if (Services.TextProcessor.NormalizeForCompare(input[i]) == Services.TextProcessor.NormalizeForCompare(_session.TypeText[i]))
                     {
                         _charRuns[i].Foreground = _brushRight;
                         _charRuns[i].Background = _brushRightBg;
@@ -1352,7 +1352,7 @@ namespace newgdq
             int inputLen = TbxInput.Text?.Length ?? 0;
             if (inputLen < _session.TypeText.Length) return;
             _session.Finished = true;
-            FinishTyping();
+            FinishTyping(false);
         }
 
         // ===== 复位 =====清空当前文章、输入区、历史不动
@@ -2016,7 +2016,7 @@ namespace newgdq
             // 群比赛模式（F4 抓来的云比赛文）：锁掉除 F8 暂停以外的所有功能键 / Ctrl 组合键，
             // 防止 F3 重打 / F6 发下一段 / Ctrl+Q 乱序等"重打刷分"，比赛只许打一遍。
             // 注意：只拦功能键与 Ctrl 组合，下方的逐字击键计数不受影响（正常打字照常）。
-            if (Services.CloudMatchService.IsMatchArticleLoaded)
+            if (Services.CloudMatchService.IsMatchArticleLoaded && !Services.CloudMatchService.IsDailyArticle)
             {
                 if (vk == 0x77) // F8 暂停 / 继续——比赛中唯一可用功能键
                 {
@@ -2275,7 +2275,7 @@ namespace newgdq
             // 缓存状态匹配但 Brush 已丢失导致灰底消失（偶发渲染异常）。性能开销极小（属性赋值）。
             for (int i = 0; i < len; i++)
             {
-                byte newSt = input[i] == _session.TypeText[i] ? (byte)1 : (byte)2;
+                byte newSt = Services.TextProcessor.NormalizeForCompare(input[i]) == Services.TextProcessor.NormalizeForCompare(_session.TypeText[i]) ? (byte)1 : (byte)2;
                 if (newSt == 2) cz++;
                 if (i >= _runStatus.Length) continue;
                 var run = _charRuns[i];
@@ -2343,7 +2343,7 @@ namespace newgdq
                 int to   = Math.Min(_session.TypeText.Length, len);
                 for (int i = from; i < to; i++)
                 {
-                    if (i >= input.Length || input[i] != _session.TypeText[i])
+                    if (i >= input.Length || Services.TextProcessor.NormalizeForCompare(input[i]) != Services.TextProcessor.NormalizeForCompare(_session.TypeText[i]))
                     {
                         tailWrong = true;
                         break;
@@ -2407,7 +2407,10 @@ namespace newgdq
 
         // ===== 完成 =====
 
-        private void FinishTyping()
+        /// <param name="restoreAfter">正常打完路径传 true：群比赛/每日文交卷后解除"完成只读冻结"，
+        /// 复位成可重新开始的状态。强制结算（换文/复位触发，本身就在 LoadArticle 内部）传 false，
+        /// 由外层流程接管界面状态，避免重入 LoadArticle。</param>
+        private void FinishTyping(bool restoreAfter = true)
         {
             _timerTime.Stop();
             _timerStats.Stop();
@@ -2501,13 +2504,46 @@ namespace newgdq
             // 群比赛：若当前是 F4 抓来的比赛文，且开启自动上传，则把本段成绩交到云端。
             // 注意：比赛成绩上传不受本地「限速」开关影响——限速只过滤本地历史（练习用），
             // 比赛是真实成绩，哪怕速度低于本地阈值也必须交卷，否则群友会误以为已交卷却查无此人。
-            if (Services.CloudMatchService.IsMatchArticleLoaded
-                && (SettingsService.Instance.CloudAutoUpload ?? true))
+            bool cloudArticle = Services.CloudMatchService.IsMatchArticleLoaded;
+            if (cloudArticle && (SettingsService.Instance.CloudAutoUpload ?? true))
             {
+                // UploadMatchScore 是 async void：其同步段（读 token / isDaily / HasSubmitted）在本次调用内
+                // 即刻执行完毕，真正的网络 await 之后才让出 → 此处返回时 token 已被捕获到上传方法的局部变量，
+                // 后续 RestoreAfterCloudFinish 清/留比赛标记不会影响这次上传。
                 UploadMatchScore(speed, jj, mc, _session.Cz, sec);
             }
 
             InlineChartMarkFinish();
+
+            // 解除"完成只读冻结"：群比赛/每日文打完并已触发后台交卷后，复位成可重新开始的状态，
+            // 让用户立刻能重新跟打 / 正常打字 / 发文（不等上传完成；上传成功/失败仅 Toast 提示）。
+            // 仅正常打完路径执行；强制结算路径 restoreAfter=false，由外层 LoadArticle/复位接管。
+            if (cloudArticle && restoreAfter)
+                RestoreAfterCloudFinish();
+        }
+
+        /// <summary>群比赛/每日文打完并已触发交卷后，解除"完成只读冻结"，把界面复位成可重新开始的状态。
+        /// 复用 <see cref="LoadArticle"/> 的整套复位（解只读 / 清空输入 / 重新聚焦 / 重置计时·统计·钩子 /
+        /// 重建对照区 / _session.Finished 复位），避免只翻标志位漏掉其它状态。
+        /// 比赛文（只许打一遍）：复位顺带退出比赛态（恢复被锁的功能键）。
+        /// 每日文（可反复打卷刷分）：复位后重置每日标记与展示标题，保持"再打一卷"体验。</summary>
+        private void RestoreAfterCloudFinish()
+        {
+            bool wasDaily = Services.CloudMatchService.IsDailyArticle;
+            string token  = Services.CloudMatchService.CurrentArticleToken;
+            string aTitle = Services.CloudMatchService.CurrentArticleTitle;
+            string winTitle = this.Title;     // 保留"📚 每日文 …"等自定义标题
+            string headTitle = TxtTitle.Text;
+
+            LoadArticle(_session.TypeText, _session.Title);
+
+            if (wasDaily)
+            {
+                Services.CloudMatchService.SetCurrentArticle(token, aTitle, "daily");
+                SetNavCollapsed(true);
+                this.Title    = winTitle;
+                TxtTitle.Text = headTitle;
+            }
         }
 
         /// <summary>导航栏「群比赛设置」入口。</summary>
@@ -2519,6 +2555,9 @@ namespace newgdq
 
         /// <summary>导航栏「抓比赛文」入口（等同 F4）。</summary>
         private void MenuItem_FetchMatch_Click(object sender, RoutedEventArgs e) => FetchMatchArticle();
+
+        /// <summary>导航栏「每日一文」入口：抓每日文，可反复跟打、不锁键、不断刷新最好成绩。</summary>
+        private void MenuItem_FetchDaily_Click(object sender, RoutedEventArgs e) => FetchDailyArticle();
 
         /// <summary>F4 抓文进行中标志：防 await 网络期间重复按 F4 弹出多个口令框/重复抓取。</summary>
         private bool _fetchingMatch;
@@ -2541,7 +2580,7 @@ namespace newgdq
                     var (title, content, tk) = await Services.CloudMatchService.FetchArticleAsync(token);
                     _currentSegNo = 0;
                     LoadArticle(content, title);                       // 内部会先清比赛标记
-                    Services.CloudMatchService.SetCurrentArticle(tk, title); // 再置位 → 进入比赛态
+                    Services.CloudMatchService.SetCurrentArticle(tk, title, "match"); // 再置位 → 进入比赛态
                     SetNavCollapsed(true);                             // 比赛态：左侧导航自动缩回，跟打区更专注
                     this.Title = "🏆 比赛中 - " + (string.IsNullOrEmpty(title) ? "比赛文" : title);
                     TxtTitle.Text = "🏆 比赛中 · " + (string.IsNullOrEmpty(title) ? "比赛文" : title);
@@ -2558,11 +2597,43 @@ namespace newgdq
             }
         }
 
-        /// <summary>把本段成绩上传到群比赛云（一场一交卷，重复/已交由服务端与本机共同拦截）。</summary>
+        /// <summary>「每日一文」：凭口令从云端抓每日文并载入。daily 不锁键、可反复打、反复交卷刷新最好成绩。</summary>
+        private async void FetchDailyArticle()
+        {
+            if (_fetchingMatch) return;   // 抓取进行中，忽略重复触发
+            _fetchingMatch = true;
+            try
+            {
+                var prompt = new Views.TokenPromptWindow(this, SettingsService.Instance.SessionToken);
+                if (prompt.ShowDialog() != true) return;
+                string token = prompt.Token;
+                SettingsService.Instance.SessionToken = token;   // 记住口令，下次预填
+                SettingsService.Save();
+                try
+                {
+                    var (title, content, tk) = await Services.CloudMatchService.FetchArticleAsync(token);
+                    _currentSegNo = 0;
+                    LoadArticle(content, title);                            // 内部会先清比赛标记
+                    Services.CloudMatchService.SetCurrentArticle(tk, title, "daily"); // 置为每日文
+                    SetNavCollapsed(true);
+                    this.Title = "📚 每日文 - " + (string.IsNullOrEmpty(title) ? "每日一文" : title);
+                    TxtTitle.Text = "📚 每日文 · " + (string.IsNullOrEmpty(title) ? "每日一文" : title);
+                    Services.Toast.Success($"已加载每日一文：{title}（可反复打卷刷新最好成绩）", 3);
+                }
+                catch (Exception ex)
+                {
+                    Services.Toast.Error("抓文失败：" + ex.Message, 4);
+                }
+            }
+            finally
+            {
+                _fetchingMatch = false;
+            }
+        }
         private async void UploadMatchScore(double speed, double jj, double mc, int cz, double sec)
         {
             string token = Services.CloudMatchService.CurrentArticleToken;
-            if (Services.CloudMatchService.HasSubmitted(token))
+            if (!Services.CloudMatchService.IsDailyArticle && Services.CloudMatchService.HasSubmitted(token))
             {
                 Services.Toast.Warning("本场你已交过卷了，不再重复上传", 3);
                 return;
@@ -2573,9 +2644,8 @@ namespace newgdq
                 if (result.IsDuplicate)
                 {
                     Services.Toast.Warning("本场你已交过卷了，不再重复上传", 3);
-                    return;
                 }
-                if (result.IsDaily)
+                else if (result.IsDaily)
                 {
                     double cur = result.New ?? speed;
                     if (result.Improved)
@@ -2594,11 +2664,81 @@ namespace newgdq
                 {
                     Services.Toast.Success($"成绩已交卷：{result.Name}  速度 {speed:0.00}", 3);
                 }
+
+                // 交卷成功后：自动拉一次 /rank 算名次。
+                // cost-guard 红线：严格只 1 次、失败不重试、不轮询、不加 Timer；失败则名次传 null
+                //（弹窗会显示「—」），弹窗照常弹、绝不阻塞。重复交卷(409,result.Ok=false) 不算成功，跳过拉榜。
+                int? rank = null;
+                if (result.Ok)
+                {
+                    try
+                    {
+                        var rankResult = await Services.CloudMatchService.FetchRankAsync();
+                        rank = Services.CloudMatchService.FindMyRank(rankResult.Rows, result.Name);
+                    }
+                    catch { rank = null; }
+                }
+
+                // 非模态弹成绩窗：不阻塞、不影响已做的复位（复位在 FinishTyping 同步段已先跑完）。
+                ShowCloudScoreCard(speed, jj, mc, cz, sec, result, rank);
             }
             catch (Exception ex)
             {
                 Services.Toast.Error("上传成绩失败：" + ex.Message, 4);
             }
+        }
+
+        /// <summary>弹云成绩窗（非模态）。订阅其「看榜单」事件 → 看榜入口①（防抖拉一次 /rank 开榜单窗）。</summary>
+        private void ShowCloudScoreCard(double speed, double jj, double mc, int cz, double useTime,
+                                        Services.CloudMatchService.UploadResult result, int? rank)
+        {
+            var card = new Views.CloudScoreCard(speed, jj, mc, cz, useTime, result, rank);
+            card.Owner = this;
+            // 看榜入口①：成绩弹窗内「看榜单」→ 走统一的防抖拉榜（榜单窗 owner 用成绩窗）。
+            card.OnViewRank = () => { _ = OpenRankWindowAsync(card); };
+            card.Show();
+        }
+
+        /// <summary>看榜拉取进行中标志：进行中再点忽略，杜绝并发刷请求。</summary>
+        private bool _rankFetching;
+        /// <summary>上次看榜点击时间（UTC），用于 2.5s 防抖。</summary>
+        private DateTime _lastRankClickUtc = DateTime.MinValue;
+
+        /// <summary>看榜统一入口：防抖 2.5s + 进行中禁用，校验本场口令，拉一次 /rank 后开榜单窗。
+        /// cost-guard：每次点击只发 1 次，失败给友好提示，不重试不轮询。</summary>
+        private async System.Threading.Tasks.Task OpenRankWindowAsync(Window owner)
+        {
+            if (_rankFetching) return;                                           // 请求进行中：忽略
+            if ((DateTime.UtcNow - _lastRankClickUtc).TotalSeconds < 2.5) return; // 防抖 2.5s
+            if (string.IsNullOrEmpty(Services.CloudMatchService.CurrentArticleToken))
+            {
+                Services.Toast.Warning("当前没有比赛文，先按 F4 抓比赛文再看榜", 3);
+                return;
+            }
+            _lastRankClickUtc = DateTime.UtcNow;
+            _rankFetching = true;
+            try
+            {
+                var result = await Services.CloudMatchService.FetchRankAsync();
+                Views.CloudRankWindow.Show(result, owner ?? this);
+            }
+            catch (Exception ex)
+            {
+                Services.Toast.Error("拉榜失败：" + ex.Message, 4);
+            }
+            finally
+            {
+                _rankFetching = false;
+            }
+        }
+
+        /// <summary>看榜入口②：导航栏群比赛区「看榜」常驻按钮。点击禁用按钮 + 防抖，拉一次 /rank 开榜单窗。</summary>
+        private async void MenuItem_OpenRank_Click(object sender, RoutedEventArgs e)
+        {
+            var btn = sender as System.Windows.Controls.Control;
+            if (btn != null) btn.IsEnabled = false;
+            try { await OpenRankWindowAsync(this); }
+            finally { if (btn != null) btn.IsEnabled = true; }
         }
 
         /// <summary>逐字比对原文与最终输入，把所有"打错的字"(正确字→打成字)写入错字本独立库。
@@ -2613,7 +2753,7 @@ namespace newgdq
             {
                 char correct = _session.TypeText[i];
                 char typed = input[i];
-                bool wrong = typed != correct;
+                bool wrong = Services.TextProcessor.NormalizeForCompare(typed) != Services.TextProcessor.NormalizeForCompare(correct);
                 chars.Add((correct.ToString(), wrong));
                 if (wrong)
                     errs.Add((correct.ToString(), typed.ToString()));

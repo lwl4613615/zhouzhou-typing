@@ -46,24 +46,6 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Style="{StaticResource CardStyle}">
-                        <StackPanel>
-                            <TextBlock Text="设备身份（本机以此身份参赛）" Style="{StaticResource SectionTitleStyle}"/>
-                            <TextBlock Text="本机自动生成、代表这台电脑，无需填写、不可编辑。交卷时凭它认人。"
-                                       TextWrapping="Wrap" Opacity="0.7" Margin="0,0,0,6"/>
-                            <ui:TextBox x:Name="TbxDeviceId" IsReadOnly="True" FontFamily="Consolas"/>
-                        </StackPanel>
-                    </Border>
-
-                    <Border Style="{StaticResource CardStyle}">
-                        <StackPanel>
-                            <TextBlock Text="当前文章模式" Style="{StaticResource SectionTitleStyle}"/>
-                            <TextBlock Text="daily（每日文）可反复跟打、不断刷新最好成绩；match（赛文）一场只交一次。"
-                                       TextWrapping="Wrap" Opacity="0.7" Margin="0,0,0,6"/>
-                            <TextBlock x:Name="TxtCurrentMode" FontWeight="SemiBold"/>
-                        </StackPanel>
-                    </Border>
-
                     <TextBlock Text="每场按 F4 现场输入本场口令抓文；打完自动交卷，只对比赛文生效。比赛中只能用 F8 暂停，一场只能交一次。"
                                TextWrapping="Wrap" Opacity="0.7" Margin="4,8,4,0"/>
                 </StackPanel>

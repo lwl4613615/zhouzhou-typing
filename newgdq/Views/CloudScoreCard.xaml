@@ -1,0 +1,119 @@
+<ui:FluentWindow x:Class="newgdq.Views.CloudScoreCard"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        Title="云成绩" Width="560" Height="500" MinWidth="480" MinHeight="440"
+        Icon="pack://application:,,,/Resources/myicon.ico"
+        FontFamily="微软雅黑" FontSize="12"
+        ExtendsContentIntoTitleBar="True"
+        WindowBackdropType="None"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize">
+    <ui:FluentWindow.Resources>
+        <!-- 配色跟随 ScoreCard，保持一致观感 -->
+        <SolidColorBrush x:Key="ScCardBG"   Color="#1E2533"/>
+        <SolidColorBrush x:Key="ScSubBG"    Color="#283044"/>
+        <SolidColorBrush x:Key="ScText"     Color="#F1F5F9"/>
+        <SolidColorBrush x:Key="ScMute"     Color="#94A3B8"/>
+        <SolidColorBrush x:Key="ScAccent"   Color="#FFD54F"/>
+        <SolidColorBrush x:Key="ScGreen"    Color="#4ADE80"/>
+        <SolidColorBrush x:Key="ScCyan"     Color="#22D3EE"/>
+        <SolidColorBrush x:Key="ScRed"      Color="#F87171"/>
+    </ui:FluentWindow.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <ui:TitleBar Grid.Row="0" Title="云成绩" Height="36">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Source="pack://application:,,,/Resources/myicon.ico" Width="18" Height="18"/>
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
+
+        <!-- 渐变深空蓝背景 -->
+        <Grid Grid.Row="1">
+            <Grid.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Offset="0" Color="#0F172A"/>
+                    <GradientStop Offset="1" Color="#1E293B"/>
+                </LinearGradientBrush>
+            </Grid.Background>
+            <Grid Margin="20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>     <!-- 标题 + 模式文案 -->
+                    <RowDefinition Height="Auto"/>     <!-- 登记名 / 名次 -->
+                    <RowDefinition Height="*"/>         <!-- 五项明细 -->
+                    <RowDefinition Height="Auto"/>     <!-- 底部按钮 -->
+                </Grid.RowDefinitions>
+
+                <!-- 顶部：标题 + 模式文案 -->
+                <StackPanel Grid.Row="0" Margin="0,0,0,12">
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse Width="10" Height="10" Fill="{StaticResource ScAccent}" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="TxtTitle" Foreground="{StaticResource ScText}" FontSize="18" FontWeight="Bold" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <TextBlock x:Name="TxtMsg" Foreground="{StaticResource ScMute}" FontSize="13" Margin="18,6,0,0" TextWrapping="Wrap"/>
+                </StackPanel>
+
+                <!-- 登记名 / 名次 -->
+                <Grid Grid.Row="1" Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Background="{StaticResource ScSubBG}" CornerRadius="8" Padding="12,8">
+                        <StackPanel>
+                            <TextBlock Text="登记名" Foreground="{StaticResource ScMute}" FontSize="11"/>
+                            <TextBlock x:Name="TxtName" Text="—" Foreground="{StaticResource ScText}" FontSize="18" FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="2" Background="{StaticResource ScSubBG}" CornerRadius="8" Padding="12,8">
+                        <StackPanel>
+                            <TextBlock Text="名次" Foreground="{StaticResource ScMute}" FontSize="11"/>
+                            <TextBlock x:Name="TxtRank" Text="—" Foreground="{StaticResource ScAccent}" FontSize="18" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- 五项明细：速度 / 击键 / 码长 / 错字 / 用时 -->
+                <Border Grid.Row="2" Background="{StaticResource ScCardBG}" CornerRadius="8" Padding="14,12">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="本次成绩" Foreground="{StaticResource ScMute}" FontSize="11" Margin="0,0,0,8"/>
+                        <UniformGrid Columns="5">
+                            <StackPanel>
+                                <TextBlock Text="速度 字/分" Foreground="{StaticResource ScMute}" FontSize="10"/>
+                                <TextBlock x:Name="TxtSpeed" Text="0.00" Foreground="{StaticResource ScAccent}" FontSize="22" FontWeight="Bold"/>
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Text="击键 /s" Foreground="{StaticResource ScMute}" FontSize="10"/>
+                                <TextBlock x:Name="TxtJj" Text="0.00" Foreground="{StaticResource ScGreen}" FontSize="22" FontWeight="Bold"/>
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Text="码长 /字" Foreground="{StaticResource ScMute}" FontSize="10"/>
+                                <TextBlock x:Name="TxtMc" Text="0.00" Foreground="{StaticResource ScCyan}" FontSize="22" FontWeight="Bold"/>
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Text="错字" Foreground="{StaticResource ScMute}" FontSize="10"/>
+                                <TextBlock x:Name="TxtCz" Text="0" Foreground="{StaticResource ScRed}" FontSize="22" FontWeight="Bold"/>
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Text="用时" Foreground="{StaticResource ScMute}" FontSize="10"/>
+                                <TextBlock x:Name="TxtUseTime" Text="0.0s" Foreground="{StaticResource ScCyan}" FontSize="22" FontWeight="Bold"/>
+                            </StackPanel>
+                        </UniformGrid>
+                    </StackPanel>
+                </Border>
+
+                <!-- 底部：看榜单 + 关闭 -->
+                <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">
+                    <ui:Button x:Name="BtnViewRank" Content="看榜单" Padding="14,5" MinWidth="90" Click="BtnViewRank_Click"/>
+                    <ui:Button Content="关闭" Padding="14,5" MinWidth="80" Margin="10,0,0,0" Click="BtnClose_Click"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Grid>
+</ui:FluentWindow>

@@ -304,5 +304,135 @@ namespace newgdq.Services
                 return v;
             return null;
         }
+
+        /// <summary>榜单一行（对齐云端 GET /rank 的 rank[] 元素）。</summary>
+        public struct RankRow
+        {
+            public int No;
+            public string Name;
+            public double Speed;
+            public double Jj;
+            public double Mc;
+            public int Cz;
+            public double UseTime;
+        }
+
+        /// <summary>看榜结果（对齐云端 GET /rank 返回）。</summary>
+        public struct RankResult
+        {
+            public string Title;
+            public int Total;
+            public string Ad;
+            public bool IsDaily;
+            public IReadOnlyList<RankRow> Rows;
+        }
+
+        /// <summary>看榜：GET {url}/rank?token=本场口令。成功返回榜单，失败抛带友好文案的异常供 UI 降级。
+        /// 本方法只提供能力，不触发任何定时/轮询，调用方手动调用。</summary>
+        public static async Task<RankResult> FetchRankAsync()
+        {
+            string baseUrl = BaseUrl();
+            if (string.IsNullOrEmpty(baseUrl))
+                throw new InvalidOperationException("还没配置云地址");
+            EnsureSecureBaseUrl(baseUrl);
+            string token = CurrentArticleToken;
+            if (string.IsNullOrEmpty(token))
+                throw new InvalidOperationException("当前不是比赛文");
+
+            string reqUrl = baseUrl + "/rank?token=" + Uri.EscapeDataString(token);
+            string body;
+            int statusCode;
+            try
+            {
+                using (var resp = await _http.GetAsync(reqUrl).ConfigureAwait(false))
+                {
+                    statusCode = (int)resp.StatusCode;
+                    body = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("连不上云服务器：" + ex.Message);
+            }
+
+            if (statusCode == 404)
+                throw new InvalidOperationException("本场已结束或还没有发文");
+            if (statusCode == 401)
+                throw new InvalidOperationException("本场已过期");
+            if (statusCode == 429)
+                throw new InvalidOperationException("请求过于频繁");
+
+            JsonDocument doc;
+            try { doc = JsonDocument.Parse(body); }
+            catch (JsonException) { throw new InvalidOperationException("暂时拉不到榜单"); }
+            using (doc)
+            {
+                var root = doc.RootElement;
+                bool ok = root.TryGetProperty("ok", out var okEl) && okEl.ValueKind == JsonValueKind.True;
+                if (!ok)
+                {
+                    string err = root.TryGetProperty("err", out var e) ? e.GetString() : "暂时拉不到榜单";
+                    throw new InvalidOperationException(err ?? "暂时拉不到榜单");
+                }
+
+                var rows = new List<RankRow>();
+                if (root.TryGetProperty("rank", out var rankEl) && rankEl.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var item in rankEl.EnumerateArray())
+                    {
+                        if (item.ValueKind != JsonValueKind.Object) continue;
+                        rows.Add(new RankRow
+                        {
+                            No      = ReadInt(item, "no"),
+                            Name    = item.TryGetProperty("name", out var nm) ? (nm.GetString() ?? "") : "",
+                            Speed   = ReadDouble(item, "speed"),
+                            Jj      = ReadDouble(item, "jj"),
+                            Mc      = ReadDouble(item, "mc"),
+                            Cz      = ReadInt(item, "cz"),
+                            UseTime = ReadDouble(item, "useTime"),
+                        });
+                    }
+                }
+
+                return new RankResult
+                {
+                    Title   = root.TryGetProperty("title", out var t) ? (t.GetString() ?? "") : "",
+                    Total   = ReadInt(root, "total"),
+                    Ad      = root.TryGetProperty("ad", out var ad) ? (ad.GetString() ?? "") : "",
+                    IsDaily = IsDailyArticle,
+                    Rows    = rows,
+                };
+            }
+        }
+
+        /// <summary>在榜单里找"我"的名次：按 name 序数比较（各自 Trim 后）匹配，命中返回该行 No，否则 null。
+        /// 纯函数无副作用，便于单测。</summary>
+        public static int? FindMyRank(IReadOnlyList<RankRow> rows, string myName)
+        {
+            if (rows == null || string.IsNullOrEmpty(myName)) return null;
+            string target = myName.Trim();
+            foreach (var row in rows)
+            {
+                if (string.Equals((row.Name ?? string.Empty).Trim(), target, StringComparison.Ordinal))
+                    return row.No;
+            }
+            return null;
+        }
+
+        private static int ReadInt(JsonElement root, string name)
+        {
+            if (root.TryGetProperty(name, out var el) && el.ValueKind == JsonValueKind.Number
+                && el.TryGetInt32(out var v))
+                return v;
+            return 0;
+        }
+
+        private static double ReadDouble(JsonElement root, string name)
+        {
+            if (root.TryGetProperty(name, out var el) && el.ValueKind == JsonValueKind.Number
+                && el.TryGetDouble(out var v))
+                return v;
+            return 0;
+        }
     }
 }

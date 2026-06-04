@@ -53,6 +53,16 @@ namespace newgdq.Services
                        .Replace("(", "（").Replace(")", "）");
         }
 
+        /// <summary>逐字比对用的字符归一：全角 ASCII 区（U+FF01–FF5E）映射回半角（减 0xFEE0），
+        /// 全角空格 U+3000 映射为半角空格 U+0020，其余字符原样返回。
+        /// 仅用于"是否打对"的比较，不改变显示；不做大小写转换（大小写仍敏感）。</summary>
+        public static char NormalizeForCompare(char c)
+        {
+            if (c >= '\uFF01' && c <= '\uFF5E') return (char)(c - 0xFEE0);
+            if (c == '\u3000') return ' ';
+            return c;
+        }
+
         /// <summary>从 [0, max) 随机抽 count 个不重复整数。</summary>
         public static int[] GetRandomUnrepeatArray(int max, int count, Random rnd = null)
         {

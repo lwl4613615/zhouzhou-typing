@@ -1,0 +1,78 @@
+<ui:FluentWindow x:Class="newgdq.Views.CloudRankWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        Title="比赛榜单" Height="600" Width="720" MinWidth="520" MinHeight="380"
+        Icon="pack://application:,,,/Resources/myicon.ico"
+        FontFamily="微软雅黑" FontSize="12"
+        Background="{DynamicResource RegionBrush}"
+        Foreground="{DynamicResource PrimaryTextBrush}"
+        ExtendsContentIntoTitleBar="True"
+        WindowBackdropType="None"
+        WindowStartupLocation="CenterOwner">
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.18"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </Window.Triggers>
+    <Grid Background="{DynamicResource RegionBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <ui:TitleBar x:Name="Bar" Grid.Row="0" Title="比赛榜单" Background="{DynamicResource PanelBG}" Height="36">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Source="pack://application:,,,/Resources/myicon.ico" Width="18" Height="18"/>
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
+    <DockPanel Grid.Row="1" Margin="12" LastChildFill="True">
+
+        <!-- 顶部：榜单标题 -->
+        <Border DockPanel.Dock="Top" Background="{DynamicResource CellBG}" Padding="14,10" CornerRadius="8">
+            <StackPanel>
+                <TextBlock x:Name="TxtTitle" Style="{StaticResource PageTitleStyle}"/>
+                <TextBlock x:Name="TxtTotal" Foreground="{DynamicResource LabelFG}" Margin="0,4,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- 底部：广告语（Ad 为空时隐藏，不留空白） -->
+        <Border x:Name="AdBorder" DockPanel.Dock="Bottom" Margin="0,12,0,0"
+                Background="{DynamicResource CellBG}" Padding="14,10" CornerRadius="8"
+                Visibility="Collapsed">
+            <TextBlock x:Name="TxtAd" TextWrapping="Wrap"
+                       Foreground="{DynamicResource ValueFG}"/>
+        </Border>
+
+        <!-- 中部：榜单 DataGrid + 空榜占位 -->
+        <Grid Margin="0,12,0,0">
+            <DataGrid x:Name="DgvRank"
+                      AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True"
+                      HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                      HorizontalGridLinesBrush="{DynamicResource GridLine}"
+                      RowHeight="28" FontSize="13"
+                      Background="{DynamicResource CellBG}" Foreground="{DynamicResource ValueFG}"
+                      RowBackground="{DynamicResource CellBG}"
+                      AlternatingRowBackground="{DynamicResource AltRowBG}"
+                      VerticalContentAlignment="Center">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="名次" Binding="{Binding No}"                          Width="60"/>
+                    <DataGridTextColumn Header="名字" Binding="{Binding Name}"                        Width="*"/>
+                    <DataGridTextColumn Header="速度" Binding="{Binding Speed, StringFormat=0.00}"    Width="80"/>
+                    <DataGridTextColumn Header="击键" Binding="{Binding Jj, StringFormat=0.00}"       Width="80"/>
+                    <DataGridTextColumn Header="码长" Binding="{Binding Mc, StringFormat=0.00}"       Width="80"/>
+                    <DataGridTextColumn Header="错字" Binding="{Binding Cz}"                          Width="60"/>
+                    <DataGridTextColumn Header="用时(s)" Binding="{Binding UseTime, StringFormat=0.00}" Width="90"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            <TextBlock x:Name="TxtEmpty" Visibility="Collapsed"
+                       Text="本场暂无成绩" Foreground="{DynamicResource LabelFG}"
+                       FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Grid>
+
+    </DockPanel>
+    </Grid>
+</ui:FluentWindow>

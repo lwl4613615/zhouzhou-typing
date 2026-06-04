@@ -4,7 +4,6 @@ namespace newgdq.Views
 {
     /// <summary>
     /// 群比赛设置窗：云地址持久化到 settings.json；昵称（显示名）落盘 AppSettings.CloudNickname。
-    /// 设备身份只读展示（DeviceIdentity 明文 deviceId）；当前文章模式只读展示。
     /// </summary>
     public partial class CloudMatchWindow : Wpf.Ui.Controls.FluentWindow
     {
@@ -16,17 +15,6 @@ namespace newgdq.Views
             var s = Services.SettingsService.Instance;
             TbxUrl.Text       = s.CloudUrl ?? string.Empty;
             TbxNickname.Text  = Services.CloudMatchService.Nickname ?? string.Empty;
-            TbxDeviceId.Text  = Services.DeviceIdentity.GetDeviceId();
-            TxtCurrentMode.Text = DescribeMode(Services.CloudMatchService.CurrentArticleMode);
-        }
-
-        private static string DescribeMode(string mode)
-        {
-            if (string.IsNullOrWhiteSpace(mode))
-                return "未抓文（按 F4 抓比赛文后这里显示当前模式）";
-            if (string.Equals(mode, "daily", System.StringComparison.OrdinalIgnoreCase))
-                return "每日文（daily）— 可反复跟打，不断刷新最好成绩";
-            return "赛文（match）— 一场只能交一次";
         }
 
         private void BtnSave_Click(object sender, RoutedEventArgs e)

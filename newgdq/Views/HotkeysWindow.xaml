@@ -74,6 +74,7 @@
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
                                 <TextBlock Grid.Row="0" Grid.Column="0" Text="F9" FontWeight="Bold" Margin="0,2"/>
                                 <TextBlock Grid.Row="0" Grid.Column="1" Text="复制最新一段成绩" Margin="0,2"/>
