@@ -81,8 +81,7 @@ namespace newgdq.Services
         {
             CurrentArticleToken = string.IsNullOrWhiteSpace(token) ? null : token.Trim();
             CurrentArticleTitle = title;
-            string m = string.IsNullOrWhiteSpace(mode) ? LastFetchedMode : mode;
-            CurrentArticleMode = string.IsNullOrWhiteSpace(m) ? "match" : m.Trim().ToLowerInvariant();
+            CurrentArticleMode = string.IsNullOrWhiteSpace(LastFetchedMode) ? "match" : LastFetchedMode;
         }
 
         /// <summary>该口令本机是否已交过卷（仅 match 模式有意义；daily 不锁）。</summary>
@@ -220,6 +219,7 @@ namespace newgdq.Services
                 deviceId = deviceId,
                 name     = name,
                 token    = token,
+                mode     = CurrentArticleMode,
                 speed    = Math.Round(speed, 2),
                 jj       = Math.Round(jj, 2),
                 mc       = Math.Round(mc, 2),

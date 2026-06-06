@@ -2578,6 +2578,11 @@ namespace newgdq
                 try
                 {
                     var (title, content, tk) = await Services.CloudMatchService.FetchArticleAsync(token);
+                    if (Services.CloudMatchService.LastFetchedMode == "daily")
+                    {
+                        Services.Toast.Warning("这是每日一文，请用每日一文入口抓取", 4);
+                        return;
+                    }
                     _currentSegNo = 0;
                     LoadArticle(content, title);                       // 内部会先清比赛标记
                     Services.CloudMatchService.SetCurrentArticle(tk, title, "match"); // 再置位 → 进入比赛态
@@ -2612,6 +2617,11 @@ namespace newgdq
                 try
                 {
                     var (title, content, tk) = await Services.CloudMatchService.FetchArticleAsync(token);
+                    if (Services.CloudMatchService.LastFetchedMode != "daily")
+                    {
+                        Services.Toast.Warning("这是比赛文，请用 F4 比赛入口抓取", 4);
+                        return;
+                    }
                     _currentSegNo = 0;
                     LoadArticle(content, title);                            // 内部会先清比赛标记
                     Services.CloudMatchService.SetCurrentArticle(tk, title, "daily"); // 置为每日文

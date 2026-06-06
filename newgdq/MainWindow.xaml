@@ -383,11 +383,11 @@
                             <TextBlock Text="每日一文" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
-                    <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_OpenRank_Click"
+                    <Button Style="{StaticResource NavCtaBtn}" Click="MenuItem_OpenRank_Click"
                             ToolTip="看本场榜单（需先 F4 抓比赛文/每日文）">
                         <StackPanel Orientation="Horizontal">
-                            <ui:SymbolIcon Symbol="Ribbon24" FontSize="16" Margin="0,0,10,0"/>
-                            <TextBlock Text="看榜" VerticalAlignment="Center"/>
+                            <ui:SymbolIcon Symbol="Trophy24" FontSize="17" Margin="0,0,8,0"/>
+                            <TextBlock Text="🏆 看榜单" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
