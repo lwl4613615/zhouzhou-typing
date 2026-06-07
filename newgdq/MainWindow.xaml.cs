@@ -168,7 +168,7 @@ namespace newgdq
             // 合成中（拼音未上屏）才保护尾部占位串；非合成（英文直打/已上屏）则逐字判错。
             System.Windows.Input.TextCompositionManager.AddPreviewTextInputStartHandler(TbxInput, TbxInput_TextInputStart);
             System.Windows.Input.TextCompositionManager.AddPreviewTextInputHandler(TbxInput, TbxInput_TextInputDone);
-            TbxInput.LostFocus += (s, e) => { _imeComposing = false; PauseType(); };
+            TbxInput.LostFocus += (s, e) => { ResetImeCompose(); PauseType(); };
             _flashTimer.Tick += FlashTimer_Tick;
             _hgFlashTimer.Tick += HgFlashTimer_Tick;
             _autoRepeatTimer.Tick += AutoRepeatTimer_Tick;
@@ -1209,6 +1209,7 @@ namespace newgdq
             TbxInput.IsReadOnly = false;  // 新段恢复可输入
             // 限制输入长度 = 文段长度，防止用户超打（IME 提交时 WPF 会自动截断）
             TbxInput.MaxLength = _session.TypeText.Length;
+            ResetImeCompose();
             TbxInput.Clear();
             TbxInput.Focus();
 
@@ -2162,6 +2163,9 @@ namespace newgdq
 
         private void TbxInput_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
+            // Esc 取消合成 → 清状态机，避免残留 _imeComposing=true（不依赖 _session.Started）
+            if (e.Key == System.Windows.Input.Key.Escape) ResetImeCompose();
+
             if (!_session.Started) return;
 
             // 退格的 Hg/Enter 由 KeyHook 统一处理（保留老版口径，能区分 IME 删拼音 vs 删上屏字符）。
@@ -2194,17 +2198,34 @@ namespace newgdq
         // TextInputStart → 合成开始；PreviewTextInput → 合成提交（上屏）/结束。靠这对事件维护标志，
         // 比"猜尾部 ASCII 占位符"可靠：英文直打或已上屏时 _imeComposing=false → 一律逐字判错。
         private bool _imeComposing;
+        private int _imeComposeStartLen = -1;
+
+        private void ResetImeCompose()
+        {
+            _imeComposing = false;
+            _imeComposeStartLen = -1;
+        }
+
+        private static bool ChangeTouchesBeforeComposeStart(TextChangedEventArgs e, int composeStart)
+        {
+            foreach (var ch in e.Changes)
+            {
+                if (ch.Offset < composeStart) return true;
+            }
+            return false;
+        }
 
         private void TbxInput_TextInputStart(object sender, System.Windows.Input.TextCompositionEventArgs e)
         {
             // 仅当存在真实合成（输入法在组字）时才置位；普通字符的 TextInput 不会进入此事件。
             _imeComposing = true;
+            _imeComposeStartLen = TbxInput.Text?.Length ?? 0;
         }
 
         private void TbxInput_TextInputDone(object sender, System.Windows.Input.TextCompositionEventArgs e)
         {
             // 合成提交/结束（汉字上屏或英文直接输入完成）→ 解除保护，让 TextChanged 走纯逐字比对。
-            _imeComposing = false;
+            ResetImeCompose();
         }
 
         // ===== 输入比对染色 =====
@@ -2226,8 +2247,29 @@ namespace newgdq
             // 合成中间态只会出现在文本末尾，且很快会被上屏的汉字替换。非合成态（英文直打、已上屏）
             // 完全不剥离 → 真打错的空格/字母/数字一律逐字判错（修复"空格后字母也不判错"）。
             var rawInput = TbxInput.Text ?? string.Empty;
+
+            if (_imeComposing)
+            {
+                if (_imeComposeStartLen < 0 || rawInput.Length < _imeComposeStartLen)
+                    ResetImeCompose();
+
+                if (_imeComposing && ChangeTouchesBeforeComposeStart(e, _imeComposeStartLen))
+                    ResetImeCompose();
+
+                // 上屏后的尾部已非 ASCII，说明不再是拼音占位串；只 clear，不重入。
+                if (_imeComposing && rawInput.Length > _imeComposeStartLen)
+                {
+                    char tail = rawInput[rawInput.Length - 1];
+                    if (tail >= 128) ResetImeCompose();
+                }
+            }
+
+            int composeStart = _imeComposing && _imeComposeStartLen >= 0
+                ? Math.Min(_imeComposeStartLen, rawInput.Length)
+                : rawInput.Length;
+
             int realLen = rawInput.Length;
-            while (_imeComposing && realLen > 0)
+            while (_imeComposing && realLen > composeStart)
             {
                 int i = realLen - 1;
                 char inp = rawInput[i];
@@ -2298,6 +2340,7 @@ namespace newgdq
             // if (hgFrom >= 0) TriggerHgFlash(hgFrom, hgTo);
 
             // 段内事件 + 慢/回改位置记录（仅记录，不在跟打中染色，等 FinishTyping 时统一染）
+            int prevLenBeforeAppend = _session.LastInputLen;
             if (_session.Started && len != _session.LastInputLen)
             {
                 int prevLen = _session.LastInputLen;
@@ -2339,8 +2382,10 @@ namespace newgdq
             {
                 // 检查最后一段输入是否有错字（取上次输入位置到当前位置）
                 bool tailWrong = false;
-                int from = Math.Max(0, _session.LastInputLen);
                 int to   = Math.Min(_session.TypeText.Length, len);
+                int from = prevLenBeforeAppend == len
+                    ? Math.Max(0, to - 1)
+                    : Math.Max(0, Math.Min(prevLenBeforeAppend, _session.TypeText.Length));
                 for (int i = from; i < to; i++)
                 {
                     if (i >= input.Length || Services.TextProcessor.NormalizeForCompare(input[i]) != Services.TextProcessor.NormalizeForCompare(_session.TypeText[i]))
@@ -2642,8 +2687,9 @@ namespace newgdq
         }
         private async void UploadMatchScore(double speed, double jj, double mc, int cz, double sec)
         {
-            string token = Services.CloudMatchService.CurrentArticleToken;
-            if (!Services.CloudMatchService.IsDailyArticle && Services.CloudMatchService.HasSubmitted(token))
+            // 提交那一刻的本场 token：成绩卡看榜用它（bug1：不依赖可能已被复位的全局 token）。
+            string submitToken = Services.CloudMatchService.CurrentArticleToken;
+            if (!Services.CloudMatchService.IsDailyArticle && Services.CloudMatchService.HasSubmitted(submitToken))
             {
                 Services.Toast.Warning("本场你已交过卷了，不再重复上传", 3);
                 return;
@@ -2651,6 +2697,55 @@ namespace newgdq
             try
             {
                 var result = await Services.CloudMatchService.UploadScoreAsync(speed, jj, mc, cz, sec);
+
+                // Bug16：先按统一 code 分流；之后才走旧布尔兜底（成功 match/daily）。
+                switch (result.Code)
+                {
+                    case "duplicate":
+                        Services.Toast.Warning("本场你已交过卷了，不再重复上传", 3);
+                        ShowCloudScoreCard(speed, jj, mc, cz, sec, result, null, submitToken);
+                        return;
+                    case "write_conflict":
+                        Services.Toast.Warning("提交冲突，请点重打/稍后再交一次；本次没有登记到云榜", 4);
+                        ShowCloudScoreCard(speed, jj, mc, cz, sec, result, null, submitToken);
+                        return;
+                    case "daily_over_limit":
+                        Services.Toast.Info("今日重打次数已达上限，本次不再上传", 4);
+                        ShowCloudScoreCard(speed, jj, mc, cz, sec, result, null, submitToken);
+                        return;
+                    case "score_cap_reached":
+                        Services.Toast.Error("本场提交人数已达上限，请联系主持", 5);
+                        ShowCloudScoreCard(speed, jj, mc, cz, sec, result, null, submitToken);
+                        return;
+                    case "rate_limited":
+                        Services.Toast.Warning("请求过于频繁，请稍后再试；本次未登记到云榜", 4);
+                        ShowCloudScoreCard(speed, jj, mc, cz, sec, result, null, submitToken);
+                        return;
+                    case "local_too_fast":
+                        Services.Toast.Info($"交得太快啦，{result.RetryAfterSeconds} 秒后可再上传；本次本地成绩已结算", 4);
+                        ShowCloudScoreCard(speed, jj, mc, cz, sec, result, null, submitToken);
+                        return;
+                    case "mode_mismatch":
+                        Services.Toast.Error("文章模式不符，请用正确入口重新抓取", 4);
+                        return;
+                    case "invalid_code":
+                        Services.Toast.Error("个人码无效", 4);
+                        return;
+                    case "invalid_device":
+                        Services.Toast.Error("设备标识无效，无法交卷", 4);
+                        return;
+                    case "missing_identity":
+                        Services.Toast.Error("缺少身份信息，无法交卷", 4);
+                        return;
+                    case "session_expired":
+                        Services.Toast.Error("本场已超时", 4);
+                        return;
+                    case "session_not_found":
+                        Services.Toast.Error("本场已结束或无发文", 4);
+                        return;
+                }
+
+                // 旧布尔兜底：成功路径（Code 为空）。
                 if (result.IsDuplicate)
                 {
                     Services.Toast.Warning("本场你已交过卷了，不再重复上传", 3);
@@ -2675,22 +2770,8 @@ namespace newgdq
                     Services.Toast.Success($"成绩已交卷：{result.Name}  速度 {speed:0.00}", 3);
                 }
 
-                // 交卷成功后：自动拉一次 /rank 算名次。
-                // cost-guard 红线：严格只 1 次、失败不重试、不轮询、不加 Timer；失败则名次传 null
-                //（弹窗会显示「—」），弹窗照常弹、绝不阻塞。重复交卷(409,result.Ok=false) 不算成功，跳过拉榜。
-                int? rank = null;
-                if (result.Ok)
-                {
-                    try
-                    {
-                        var rankResult = await Services.CloudMatchService.FetchRankAsync();
-                        rank = Services.CloudMatchService.FindMyRank(rankResult.Rows, result.Name);
-                    }
-                    catch { rank = null; }
-                }
-
-                // 非模态弹成绩窗：不阻塞、不影响已做的复位（复位在 FinishTyping 同步段已先跑完）。
-                ShowCloudScoreCard(speed, jj, mc, cz, sec, result, rank);
+                // Bug4：名次直接用云端回的 MyNo，不再交卷后二次拉 /rank 算名次（省一次云请求）。
+                ShowCloudScoreCard(speed, jj, mc, cz, sec, result, result.MyNo, submitToken);
             }
             catch (Exception ex)
             {
@@ -2698,14 +2779,15 @@ namespace newgdq
             }
         }
 
-        /// <summary>弹云成绩窗（非模态）。订阅其「看榜单」事件 → 看榜入口①（防抖拉一次 /rank 开榜单窗）。</summary>
+        /// <summary>弹云成绩窗（非模态）。订阅其「看榜单」事件 → 看榜入口①（防抖拉一次 /rank 开榜单窗）。
+        /// rankToken：提交那一刻的本场 token，成绩卡看榜用它拉本场榜（bug1：不依赖可能已复位的全局 token）。</summary>
         private void ShowCloudScoreCard(double speed, double jj, double mc, int cz, double useTime,
-                                        Services.CloudMatchService.UploadResult result, int? rank)
+                                        Services.CloudMatchService.UploadResult result, int? rank, string rankToken)
         {
-            var card = new Views.CloudScoreCard(speed, jj, mc, cz, useTime, result, rank);
+            var card = new Views.CloudScoreCard(speed, jj, mc, cz, useTime, result, rank, result.DailyOverLimit);
             card.Owner = this;
-            // 看榜入口①：成绩弹窗内「看榜单」→ 走统一的防抖拉榜（榜单窗 owner 用成绩窗）。
-            card.OnViewRank = () => { _ = OpenRankWindowAsync(card); };
+            // 看榜入口①：成绩弹窗内「看榜单」→ 走统一的防抖拉榜（榜单窗 owner 用成绩窗），用提交时 token。
+            card.OnViewRank = () => { _ = OpenRankWindowAsync(card, rankToken); };
             card.Show();
         }
 
@@ -2716,11 +2798,15 @@ namespace newgdq
 
         /// <summary>看榜统一入口：防抖 2.5s + 进行中禁用，校验本场口令，拉一次 /rank 后开榜单窗。
         /// cost-guard：每次点击只发 1 次，失败给友好提示，不重试不轮询。</summary>
-        private async System.Threading.Tasks.Task OpenRankWindowAsync(Window owner)
+        private async System.Threading.Tasks.Task OpenRankWindowAsync(Window owner, string tokenOverride = null)
         {
             if (_rankFetching) return;                                           // 请求进行中：忽略
             if ((DateTime.UtcNow - _lastRankClickUtc).TotalSeconds < 2.5) return; // 防抖 2.5s
-            if (string.IsNullOrEmpty(Services.CloudMatchService.CurrentArticleToken))
+            // bug1：成绩卡看榜传入提交时的本场 token；常驻看榜按钮不传，用当前全局 token。
+            string token = string.IsNullOrEmpty(tokenOverride)
+                ? Services.CloudMatchService.CurrentArticleToken
+                : tokenOverride;
+            if (string.IsNullOrEmpty(token))
             {
                 Services.Toast.Warning("当前没有比赛文，先按 F4 抓比赛文再看榜", 3);
                 return;
@@ -2729,7 +2815,7 @@ namespace newgdq
             _rankFetching = true;
             try
             {
-                var result = await Services.CloudMatchService.FetchRankAsync();
+                var result = await Services.CloudMatchService.FetchRankAsync(token);
                 Views.CloudRankWindow.Show(result, owner ?? this);
             }
             catch (Exception ex)

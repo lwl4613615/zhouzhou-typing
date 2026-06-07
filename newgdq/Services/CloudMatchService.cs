@@ -40,8 +40,8 @@ namespace newgdq.Services
 
         // daily 最小提交间隔（毫秒）：防脚本式/轮询式自动连发，确保是人手动打完才交。
         private const int DailyMinIntervalMs = 5000;
-        // 上次成功提交的时间戳（用于 daily 最小间隔护栏）。
-        private static DateTime _lastSubmitUtc = DateTime.MinValue;
+        // 上次 daily 成功提交的时间戳（用于 daily 最小间隔护栏；match 提交不写，跨模式隔离）。
+        private static DateTime _lastDailySubmitUtc = DateTime.MinValue;
 
         // 本机本次运行已成功交卷的口令集合（防重复上传；仅 match 模式记录/拦截）。
         private static readonly HashSet<string> _submittedTokens = new HashSet<string>(StringComparer.Ordinal);
@@ -57,6 +57,13 @@ namespace newgdq.Services
             public double? Old;        // daily：旧成绩值
             public double? New;        // daily：本次成绩值
             public double? Best;       // daily：当前最好成绩值
+            public string Code;            // 统一返回码（分流一律基于此机器码，不基于中文 err）
+            public bool DailyOverLimit;    // 429 daily_over_limit
+            public bool LocalTooFast;      // 本地 daily 护栏拦截（未发云请求）
+            public bool Retryable;         // 可重试（write_conflict / rate_limited）
+            public int RetryAfterSeconds;  // 建议重试等待秒数
+            public int? MyNo;              // 云端回的当前名次（null=未上榜/未刷新）
+            public int TotalAll;           // 云端回的总人数
         }
 
         private static readonly HttpClient _http = new HttpClient
@@ -81,7 +88,9 @@ namespace newgdq.Services
         {
             CurrentArticleToken = string.IsNullOrWhiteSpace(token) ? null : token.Trim();
             CurrentArticleTitle = title;
-            CurrentArticleMode = string.IsNullOrWhiteSpace(LastFetchedMode) ? "match" : LastFetchedMode;
+            CurrentArticleMode = string.IsNullOrWhiteSpace(mode)
+                ? (string.IsNullOrWhiteSpace(LastFetchedMode) ? "match" : LastFetchedMode)
+                : mode.Trim().ToLowerInvariant();
         }
 
         /// <summary>该口令本机是否已交过卷（仅 match 模式有意义；daily 不锁）。</summary>
@@ -204,13 +213,23 @@ namespace newgdq.Services
                 throw new InvalidOperationException("本场你已交过卷了（一场只能交一次）");
 
             // daily 护栏：客户端最小提交间隔，防脚本式/轮询式自动连发。
+            // bug15 并入 bug16：超频不抛异常、不向云端发请求（省钱），返回统一 local_too_fast code。
             if (isDaily)
             {
-                double sinceMs = (DateTime.UtcNow - _lastSubmitUtc).TotalMilliseconds;
+                double sinceMs = (DateTime.UtcNow - _lastDailySubmitUtc).TotalMilliseconds;
                 if (sinceMs < DailyMinIntervalMs)
                 {
                     int waitSec = (int)Math.Ceiling((DailyMinIntervalMs - sinceMs) / 1000.0);
-                    throw new InvalidOperationException("交得太快啦，手动打完再交（" + waitSec + " 秒后可再交）");
+                    return new UploadResult
+                    {
+                        Ok = false,
+                        IsDaily = true,
+                        Code = "local_too_fast",
+                        LocalTooFast = true,
+                        RetryAfterSeconds = waitSec,
+                        Name = name,
+                        New = speed,
+                    };
                 }
             }
 
@@ -250,24 +269,84 @@ namespace newgdq.Services
             using (doc)
             {
                 var root = doc.RootElement;
+                string code = root.TryGetProperty("code", out var ce) ? ce.GetString() : null;
+                string err  = root.TryGetProperty("err",  out var ee) ? ee.GetString() : null;
+                string respName = root.TryGetProperty("name", out var dn) ? (dn.GetString() ?? "") : "";
 
-                // match 重复交卷：服务端 409。
+                // ── Bug16：统一 status + code 分流（一律基于机器码，不基于中文 err） ──
                 if (statusCode == 409)
                 {
-                    if (!isDaily) _submittedTokens.Add(token);
+                    // 旧云端无 code：按 duplicate 兼容（最小兼容，新云端由 code 主导）。
+                    if (string.IsNullOrEmpty(code) || code == "duplicate")
+                    {
+                        if (!isDaily) _submittedTokens.Add(token);   // 仅 duplicate 写已交卷锁
+                        return new UploadResult
+                        {
+                            Ok = false, Code = "duplicate", IsDuplicate = true,
+                            IsDaily = isDaily, Name = respName,
+                        };
+                    }
+                    if (code == "write_conflict")
+                    {
+                        // 不写 _submittedTokens、不弹已交卷，允许用户重试。
+                        return new UploadResult
+                        {
+                            Ok = false, Code = code, Retryable = true,
+                            IsDaily = isDaily, Name = respName,
+                        };
+                    }
+                    if (code == "mode_mismatch")
+                    {
+                        return new UploadResult
+                        {
+                            Ok = false, Code = code, IsDaily = isDaily, Name = respName,
+                        };
+                    }
+                    throw new InvalidOperationException(err ?? "上传冲突");
+                }
+
+                if (statusCode == 429)
+                {
+                    if (code == "daily_over_limit")
+                    {
+                        _lastDailySubmitUtc = DateTime.UtcNow;   // 避免用户瞬间继续打爆
+                        return new UploadResult
+                        {
+                            Ok = false, Code = code, IsDaily = true,
+                            DailyOverLimit = true, Name = respName,
+                        };
+                    }
+                    if (code == "rate_limited")
+                    {
+                        return new UploadResult
+                        {
+                            Ok = false, Code = code, Retryable = true,
+                            IsDaily = isDaily, Name = respName,
+                        };
+                    }
+                    if (code == "score_cap_reached")
+                    {
+                        return new UploadResult
+                        {
+                            Ok = false, Code = code, IsDaily = isDaily, Name = respName,
+                        };
+                    }
+                    throw new InvalidOperationException(err ?? "请求过于频繁");
+                }
+
+                // 其他已知 4xx code：身份 / 本场 / 设备类，统一返回供 UI 红 toast。
+                if (code == "invalid_code" || code == "invalid_device" || code == "missing_identity"
+                    || code == "session_expired" || code == "session_not_found")
+                {
                     return new UploadResult
                     {
-                        Ok = false,
-                        IsDaily = isDaily,
-                        IsDuplicate = true,
-                        Name = root.TryGetProperty("name", out var dn) ? (dn.GetString() ?? "") : "",
+                        Ok = false, Code = code, IsDaily = isDaily, Name = respName,
                     };
                 }
 
                 bool ok = root.TryGetProperty("ok", out var okEl) && okEl.ValueKind == JsonValueKind.True;
                 if (!ok)
                 {
-                    string err = root.TryGetProperty("err", out var e) ? e.GetString() : "上传失败";
                     throw new InvalidOperationException(err ?? "上传失败");
                 }
 
@@ -276,7 +355,9 @@ namespace newgdq.Services
                     Ok = true,
                     IsDaily = isDaily,
                     IsDuplicate = false,
-                    Name = root.TryGetProperty("name", out var n) ? (n.GetString() ?? "") : "",
+                    Name = respName,
+                    MyNo = ReadNullableInt(root, "myNo"),
+                    TotalAll = ReadInt(root, "totalAll"),
                 };
 
                 if (isDaily)
@@ -285,12 +366,11 @@ namespace newgdq.Services
                     result.Old  = ReadNullableNumber(root, "old");
                     result.New  = ReadNullableNumber(root, "new");
                     result.Best = ReadNullableNumber(root, "best");
-                    _lastSubmitUtc = DateTime.UtcNow;   // daily 不锁，仅刷新最小间隔时间戳
+                    _lastDailySubmitUtc = DateTime.UtcNow;   // daily 成功：仅刷新 daily 护栏时间戳
                 }
                 else
                 {
-                    _submittedTokens.Add(token);        // match：记下已交卷，防本机重复上传
-                    _lastSubmitUtc = DateTime.UtcNow;
+                    _submittedTokens.Add(token);             // match 成功：记下已交卷（不再写 daily 时间戳，bug5）
                 }
 
                 return result;
@@ -305,16 +385,24 @@ namespace newgdq.Services
             return null;
         }
 
+        private static int? ReadNullableInt(JsonElement root, string name)
+        {
+            if (root.TryGetProperty(name, out var el) && el.ValueKind == JsonValueKind.Number
+                && el.TryGetInt32(out var v))
+                return v;
+            return null;
+        }
+
         /// <summary>榜单一行（对齐云端 GET /rank 的 rank[] 元素）。</summary>
         public struct RankRow
         {
-            public int No;
-            public string Name;
-            public double Speed;
-            public double Jj;
-            public double Mc;
-            public int Cz;
-            public double UseTime;
+            public int No { get; set; }
+            public string Name { get; set; }
+            public double Speed { get; set; }
+            public double Jj { get; set; }
+            public double Mc { get; set; }
+            public int Cz { get; set; }
+            public double UseTime { get; set; }
         }
 
         /// <summary>看榜结果（对齐云端 GET /rank 返回）。</summary>
@@ -322,6 +410,7 @@ namespace newgdq.Services
         {
             public string Title;
             public int Total;
+            public int TotalAll;
             public string Ad;
             public bool IsDaily;
             public IReadOnlyList<RankRow> Rows;
@@ -329,13 +418,13 @@ namespace newgdq.Services
 
         /// <summary>看榜：GET {url}/rank?token=本场口令。成功返回榜单，失败抛带友好文案的异常供 UI 降级。
         /// 本方法只提供能力，不触发任何定时/轮询，调用方手动调用。</summary>
-        public static async Task<RankResult> FetchRankAsync()
+        public static async Task<RankResult> FetchRankAsync(string tokenOverride = null)
         {
             string baseUrl = BaseUrl();
             if (string.IsNullOrEmpty(baseUrl))
                 throw new InvalidOperationException("还没配置云地址");
             EnsureSecureBaseUrl(baseUrl);
-            string token = CurrentArticleToken;
+            string token = string.IsNullOrEmpty(tokenOverride) ? CurrentArticleToken : tokenOverride;
             if (string.IsNullOrEmpty(token))
                 throw new InvalidOperationException("当前不是比赛文");
 
@@ -396,11 +485,12 @@ namespace newgdq.Services
 
                 return new RankResult
                 {
-                    Title   = root.TryGetProperty("title", out var t) ? (t.GetString() ?? "") : "",
-                    Total   = ReadInt(root, "total"),
-                    Ad      = root.TryGetProperty("ad", out var ad) ? (ad.GetString() ?? "") : "",
-                    IsDaily = IsDailyArticle,
-                    Rows    = rows,
+                    Title    = root.TryGetProperty("title", out var t) ? (t.GetString() ?? "") : "",
+                    Total    = ReadInt(root, "total"),
+                    TotalAll = ReadInt(root, "totalAll"),
+                    Ad       = root.TryGetProperty("ad", out var ad) ? (ad.GetString() ?? "") : "",
+                    IsDaily  = IsDailyArticle,
+                    Rows     = rows,
                 };
             }
         }

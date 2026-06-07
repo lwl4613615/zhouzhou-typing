@@ -52,29 +52,32 @@ namespace newgdq.Services
             return false;
         }
 
+        private static readonly object SaveLock = new object();
+
         public static void Save()
         {
-            // 原子写入：先写到 .tmp，备份旧文件到 .bak，再替换
-            try
+            // 原子写入：先写到唯一 .tmp，备份旧文件到 .bak，再替换；整体加锁串行化
+            lock (SaveLock)
             {
-                string tmp = FilePath + ".tmp";
-                using (var ms = new MemoryStream())
+                string tmp = FilePath + "." + Guid.NewGuid().ToString("N") + ".tmp";
+                try
                 {
-                    var ser = new DataContractJsonSerializer(typeof(AppSettings));
-                    ser.WriteObject(ms, Instance);
-                    File.WriteAllBytes(tmp, ms.ToArray());
+                    using (var ms = new MemoryStream())
+                    {
+                        var ser = new DataContractJsonSerializer(typeof(AppSettings));
+                        ser.WriteObject(ms, Instance);
+                        File.WriteAllBytes(tmp, ms.ToArray());
+                    }
+                    if (File.Exists(FilePath))
+                        File.Replace(tmp, FilePath, FilePath + ".bak", ignoreMetadataErrors: true);
+                    else
+                        File.Move(tmp, FilePath);
                 }
-                if (File.Exists(FilePath))
+                catch (Exception ex)
                 {
-                    try { File.Copy(FilePath, FilePath + ".bak", overwrite: true); } catch { }
+                    System.Diagnostics.Debug.WriteLine("[SettingsService.Save] " + ex.Message);
+                    try { if (File.Exists(tmp)) File.Delete(tmp); } catch { }
                 }
-                // File.Move 在 .NET 4.8 不支持 overwrite 重载，先删再 move
-                if (File.Exists(FilePath)) File.Delete(FilePath);
-                File.Move(tmp, FilePath);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine("[SettingsService.Save] " + ex.Message);
             }
         }
     }

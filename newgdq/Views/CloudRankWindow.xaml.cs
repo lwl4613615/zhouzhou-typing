@@ -18,10 +18,15 @@ namespace newgdq.Views
             Title = title;
             Bar.Title = title;
             TxtTitle.Text = title;
-            TxtTotal.Text = $"共 {result.Total} 人";
+            // bug14/Bug4：人数文案用云端 totalAll（全量人数）；旧云端无该字段时回退 total。
+            int totalAll = result.TotalAll > 0 ? result.TotalAll : result.Total;
+            int shown = result.Rows?.Count ?? 0;
+            TxtTotal.Text = totalAll > shown
+                ? $"共 {totalAll} 人，显示前 {shown} 名"
+                : $"共 {totalAll} 人";
 
             var rows = result.Rows;
-            bool empty = rows == null || rows.Count == 0 || result.Total == 0;
+            bool empty = rows == null || rows.Count == 0;
             if (empty)
             {
                 DgvRank.ItemsSource = null;

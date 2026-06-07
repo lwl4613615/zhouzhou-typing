@@ -45,6 +45,33 @@ namespace newgdq.Views
             string title;
             string msg;
 
+            // Bug16：失败类 code 的卡片文案（成功 / duplicate / daily 系列走下方旧逻辑）。
+            switch (result.Code)
+            {
+                case "write_conflict":
+                    TxtRank.Text = "—";
+                    TxtTitle.Text = "未登记";
+                    TxtMsg.Text = "提交冲突，本次未登记到云榜，可重打或稍后再交一次";
+                    return;
+                case "rate_limited":
+                    TxtRank.Text = "—";
+                    TxtTitle.Text = "未登记";
+                    TxtMsg.Text = "请求过于频繁，本次未登记到云榜，请稍后再试";
+                    return;
+                case "score_cap_reached":
+                    TxtRank.Text = "—";
+                    TxtTitle.Text = "人数已满";
+                    TxtMsg.Text = "本场提交人数已达上限，请联系主持";
+                    return;
+                case "local_too_fast":
+                    TxtRank.Text = "—";
+                    TxtTitle.Text = "未上传";
+                    TxtMsg.Text = result.RetryAfterSeconds > 0
+                        ? $"交得太快啦，{result.RetryAfterSeconds} 秒后可再上传；本次本地成绩已结算"
+                        : "交得太快啦，本次未上传；本地成绩已结算";
+                    return;
+            }
+
             if (dailyOverLimit)
             {
                 // 429：调用方传入"超上限"标志时显示
