@@ -1300,7 +1300,7 @@ namespace newgdq
             TxtHg.Text    = "0";
             TxtCz.Text    = "0";
             TxtRightLast.Text = "0:0";
-            TxtGroup.Text = $"重{_repeatCount} 呆0s 准100%";
+            TxtGroup.Text = $"重{_repeatCount} 呆0s 键准100%";
         }
 
         /// <summary>刷新信息条"状态"格：重打次数 / 发呆秒数 / 键准百分比。
@@ -1311,9 +1311,10 @@ namespace newgdq
             double idleSec = (_session.Started && !_session.Finished && !_isPaused && _lastInputAt != default)
                 ? (DateTime.Now - _lastInputAt).TotalSeconds : 0;
             int keys = _session.Keys;
-            double acc = keys > 0 ? (keys - _session.Hg) * 100.0 / keys : 100;
+            double acc = keys > 0 ? (keys - _session.Hg * 2) * 100.0 / keys : 100;
             if (acc < 0) acc = 0;
-            TxtGroup.Text = $"重{_repeatCount} 呆{idleSec:0}s 准{acc:0}%";
+            if (acc > 100) acc = 100;
+            TxtGroup.Text = $"重{_repeatCount} 呆{idleSec:0}s 键准{acc:0}%";
         }
 
         // ===== 词组下划线 =====
@@ -2183,15 +2184,25 @@ namespace newgdq
             // = 用户在拼音候选框里删拼音，不是删跟打区已上屏的字（后者 input 变短 → Hg）
             if (isBackspace)
             {
-                int curLen = TbxInput.Text?.Length ?? 0;
-                if (curLen == _session.LastInputLen)
-                    _session.Enter++;
-                else
+                // KeyHook 是同步钩子，回调发生在按键写入 TextBox 之前，此刻 TbxInput.Text 仍是删除前的值，
+                // 长度恒等于 LastInputLen → 旧逻辑永远误判成删拼音、Hg 永不累加。故把判断延后到文本更新后，
+                // 以按下时捕获的长度作比较基准（回调执行时 TextChanged 可能已刷新 LastInputLen，不能在回调里再读）。
+                int lenBefore = _session.LastInputLen;
+                Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    // 真正回改：与老版 Glob.TextHg 对齐，从钩子直接累加 + 立即刷新 UI
-                    _session.Hg++;
-                    Dispatcher.BeginInvoke(new Action(() => TxtHg.Text = _session.Hg.ToString()));
-                }
+                    int lenAfter = TbxInput.Text?.Length ?? 0;
+                    if (lenAfter < lenBefore)
+                    {
+                        // 真正回改：删掉了跟打区已上屏的字（与老版 Glob.TextHg 对齐）
+                        _session.Hg++;
+                        TxtHg.Text = _session.Hg.ToString();
+                    }
+                    else
+                    {
+                        // 长度没变 = 用户在拼音候选框里删拼音，不是删上屏字
+                        _session.Enter++;
+                    }
+                }));
             }
 
             // 选重计数（对齐老版）：按 ; (0xBA) / ' (0xDE) / 0-9 数字主键 时，

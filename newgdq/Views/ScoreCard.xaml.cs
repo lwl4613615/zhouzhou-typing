@@ -37,8 +37,9 @@ namespace newgdq.Views
             TxtResel.Text    = s.Reselect.ToString();
             TxtImeBs.Text    = s.Enter.ToString();
             TxtLeftRight.Text = s.LeftHand + ":" + s.RightHand;
-            double acc = s.Keys > 0 ? (s.Keys - s.Hg) * 100.0 / s.Keys : 100;
+            double acc = s.Keys > 0 ? (s.Keys - s.Hg * 2) * 100.0 / s.Keys : 100;
             if (acc < 0) acc = 0;
+            if (acc > 100) acc = 100;
             TxtAcc.Text      = acc.ToString("0.0") + "%";
 
             BuildMiniChart(s, sec);
