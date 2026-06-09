@@ -188,11 +188,10 @@ namespace newgdq
             _keyHook.KeyDown += KeyHook_KeyDown;
             try { _keyHook.Start(); } catch { /* 钩子安装失败，不影响 UI */ }
 
-            // 异步加载词典（76145 行，主线程加载会卡 ~200ms，可以接受但提示一下）
-            try { _dict.LoadFromResource(); } catch { /* 词典加载失败不致命 */ }
-
             // 从 %AppData%\newgdq\settings.json 恢复设置（窗口几何 + 标记栏开关）
             SettingsService.Load();
+            // 按优先级加载词典：exe 同目录 bm.txt > 设置 BmFilePath > 内置嵌入资源
+            try { _dict.LoadAuto(SettingsService.Instance.BmFilePath); } catch { /* 词典加载失败不致命 */ }
             _showCurrentOnly = SettingsService.Instance.ShowCurrentOnly ?? true;
             UpdateScoreFilterLabel();
             // 成绩区视图过滤：本次模式 = 只显示 When >= _sessionStartAt 的行
@@ -937,6 +936,60 @@ namespace newgdq
                     $"✗ 加载失败\n\n{ex.Message}\n\n请检查文件是否为 UTF-8 编码、格式是否正确（每行 \"编码 字1 字2 ...\"）。",
                     "bm.txt 校验失败");
             }
+        }
+
+        /// <summary>选一个 bm.txt 作为编码提示词表：先临时实例校验，成功才替换当前词典并持久化路径。</summary>
+        private void MenuItem_UseBmFile_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "选择 bm.txt 文件作为编码提示词表",
+                Filter = "文本词典|*.txt|所有文件|*.*",
+                CheckFileExists = true,
+            };
+            if (dlg.ShowDialog() != true) return;
+
+            try
+            {
+                var tmp = new Services.DictionaryService();
+                tmp.LoadFromFile(dlg.FileName);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(
+                    $"✗ 加载失败，当前词典未改变\n\n{ex.Message}\n\n请检查文件是否为 UTF-8 编码、格式是否正确（每行 \"编码 字1 字2 ...\"）。",
+                    "使用自定义 bm.txt 失败");
+                return;
+            }
+
+            _dict.LoadFromFile(dlg.FileName);
+            SettingsService.Instance.BmFilePath = dlg.FileName;
+            SettingsService.Save();
+            ReloadBmRefresh();
+            System.Windows.MessageBox.Show(
+                $"✓ 已切换到自定义词表\n\n路径：{dlg.FileName}\n\n" +
+                $"总条目：{_dict.TotalEntries}\n独立单字：{_dict.SingleCount}\n词组条目：{_dict.PhraseCount}",
+                "已使用自定义 bm.txt");
+        }
+
+        /// <summary>清除自定义码表路径，切回内置词表。</summary>
+        private void MenuItem_ResetBmFile_Click(object sender, RoutedEventArgs e)
+        {
+            SettingsService.Instance.BmFilePath = null;
+            SettingsService.Save();
+            _dict.LoadFromResource();
+            ReloadBmRefresh();
+            System.Windows.MessageBox.Show(
+                "✓ 已恢复内置词表。\n\n注意：若 exe 同目录存在 bm.txt，下次启动仍会优先使用同目录的文件。",
+                "已恢复内置词表");
+        }
+
+        /// <summary>词典重载后刷新编码提示与词组下划线（若功能开启）。</summary>
+        private void ReloadBmRefresh()
+        {
+            RefreshBmTips();
+            ClearPhraseUnderlines();
+            ApplyPhraseUnderlines();
         }
 
         private void TogBmTips_Toggled(object sender, RoutedEventArgs e)

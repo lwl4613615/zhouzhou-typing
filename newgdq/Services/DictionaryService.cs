@@ -51,6 +51,30 @@ namespace newgdq.Services
             }
         }
 
+        /// <summary>码表来源：exe 同目录 / 设置自定义路径 / 内置嵌入资源。</summary>
+        public enum BmSource { SameDir, Custom, Builtin }
+
+        /// <summary>
+        /// 按优先级统一加载码表：exe 同目录 bm.txt > customPath > 内置嵌入资源。
+        /// 任一步抛异常即降级到下一优先级，最终必定走到内置兜底并保证 Loaded==true。
+        /// </summary>
+        public BmSource LoadAuto(string customPath)
+        {
+            string sameDir = Path.Combine(AppContext.BaseDirectory, "bm.txt");
+            if (File.Exists(sameDir))
+            {
+                try { LoadFromFile(sameDir); return BmSource.SameDir; }
+                catch { }
+            }
+            if (!string.IsNullOrEmpty(customPath) && File.Exists(customPath))
+            {
+                try { LoadFromFile(customPath); return BmSource.Custom; }
+                catch { }
+            }
+            LoadFromResource();
+            return BmSource.Builtin;
+        }
+
         private void LoadFromReader(TextReader reader)
         {
             _single.Clear();

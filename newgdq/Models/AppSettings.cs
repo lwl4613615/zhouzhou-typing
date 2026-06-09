@@ -89,6 +89,10 @@ namespace newgdq.Models
         // 发文窗"自定义文章"上次选择的本地文件夹。
         [DataMember(EmitDefaultValue = false)] public string LastCustomFolder { get; set; }
 
+        // 编码提示用户自定义码表（bm.txt）绝对路径。null = 未设（用内置）。
+        // 加载优先级：exe 同目录 bm.txt > 本字段 > 内置嵌入资源。
+        [DataMember(EmitDefaultValue = false)] public string BmFilePath { get; set; }
+
         // 成绩趋势：目标速度（字/分）。null 或 0 = 未设目标，趋势窗只看进步不做达标判定。
         [DataMember(EmitDefaultValue = false)] public double? GoalSpeed { get; set; }
 

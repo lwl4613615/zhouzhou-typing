@@ -493,6 +493,10 @@
                                           Click="MnuSmartCi_Click"/>
                                 <MenuItem Header="测试自定义 bm.txt..." Click="MenuItem_TestBmFile_Click"
                                           ToolTip="选一个 bm.txt 文件，验证格式是否合法 + 显示统计信息&#10;不会替换当前词典，仅用于自检"/>
+                                <MenuItem Header="使用自定义 bm.txt..." Click="MenuItem_UseBmFile_Click"
+                                          ToolTip="选一个 bm.txt 文件作为编码提示词表，立即生效并记住，下次启动仍用"/>
+                                <MenuItem Header="恢复内置词表" Click="MenuItem_ResetBmFile_Click"
+                                          ToolTip="清除自定义码表路径，切回内置词表"/>
                             </ContextMenu>
                         </Button.ContextMenu>
                     </Button>
