@@ -25,6 +25,10 @@ namespace newgdq
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            DiagInput = string.Equals(Environment.GetEnvironmentVariable("NEWGDQ_INPUT_DIAG"), "1", StringComparison.OrdinalIgnoreCase)
+                || e.Args.Any(a => string.Equals(a, "--diag-input", StringComparison.OrdinalIgnoreCase));
+            Services.KeyHook.DiagnosticLog = s => Diag("KEY", s);
+
             // 全局异常处理：UI 线程 + 非 UI 线程 + Task 内部
             this.DispatcherUnhandledException     += (s, ev) => { LogException("UI", ev.Exception); ev.Handled = true; ShowFatal(ev.Exception); };
             AppDomain.CurrentDomain.UnhandledException += (s, ev) => LogException("AppDomain", ev.ExceptionObject as Exception);
@@ -59,6 +63,8 @@ namespace newgdq
             // 全局界面缩放：确定初始倍数并钩住所有窗口，使各窗体字体/控件一起缩放
             Services.UiScaleManager.Initialize();
 
+            Diag("INIT", "input diagnostics enabled");
+
             base.OnStartup(e);
         }
 
@@ -66,16 +72,19 @@ namespace newgdq
             Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? ".",
             "newgdq.log");
 
-        /// <summary>诊断开关：true 时把 IME/输入比对的实时状态写入 newgdq.log（排错用，平时关）。</summary>
-        public static bool DiagIme = false;
+        private static readonly object LogLock = new object();
 
-        /// <summary>诊断日志：仅 DiagIme 为 true 时写入，失败静默。</summary>
+        /// <summary>诊断开关：true 时把输入/IME/键盘钩子的实时状态写入 newgdq.log（排错用，平时关）。</summary>
+        public static bool DiagInput { get; private set; }
+
+        /// <summary>诊断日志：仅 DiagInput 为 true 时写入，失败静默。</summary>
         public static void Diag(string tag, string msg)
         {
-            if (!DiagIme) return;
+            if (!DiagInput) return;
             try
             {
-                File.AppendAllText(LogPath, $"[{DateTime.Now:HH:mm:ss.fff}] [{tag}] {msg}\r\n");
+                lock (LogLock)
+                    File.AppendAllText(LogPath, $"[{DateTime.Now:HH:mm:ss.fff}] [{tag}] {msg}\r\n");
             }
             catch { }
         }

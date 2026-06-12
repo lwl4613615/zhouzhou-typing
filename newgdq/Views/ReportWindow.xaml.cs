@@ -42,7 +42,7 @@ namespace newgdq.Views
             TxtJj.Text     = jj.ToString("0.00");
             TxtMc.Text     = mc.ToString("0.00");
             TxtSec.Text    = sec.ToString("0.00");
-            TxtCounts.Text = $"键 {_session.Keys} / 字 {useLen} / 错 {_session.Cz} / 回改 {_session.Hg} / 打词 {_session.Words} / 选重 {_session.Reselect} / 回车 {_session.Enter}";
+            TxtCounts.Text = $"键 {_session.Keys} / 字 {useLen} / 错 {_session.Cz} / 回改 {_session.Hg} / 打词 {_session.Words} / 选重 {_session.Reselect} / 拼回 {_session.ImeBackspace}";
         }
 
         private void BuildEvents()

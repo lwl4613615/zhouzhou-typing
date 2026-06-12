@@ -21,7 +21,7 @@ namespace newgdq.Models
 
         // 扩展字段（v2 后新增）
         public int    Reselect { get; set; }   // 选重次数
-        public int    Enter    { get; set; }   // 回车次数
+        public int    ImeBackspace { get; set; }   // 拼回次数
         public int    LeftHand { get; set; }   // 左手击键
         public int    RightHand{ get; set; }   // 右手击键
 

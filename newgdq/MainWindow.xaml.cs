@@ -1231,7 +1231,7 @@ namespace newgdq
                 text = Services.TextProcessor.En2Cn(text);
 
             _session.Load(text, title);
-            Services.KeyHook.LogLine($">>>> LOAD seg=[{title}] 字数={_session.TypeText.Length}");
+            App.Diag("LOAD", $"seg=[{title}] chars={_session.TypeText.Length}");
 
             // 重建对照区
             RtbCompare.Document.Blocks.Clear();
@@ -1263,6 +1263,7 @@ namespace newgdq
             // 限制输入长度 = 文段长度，防止用户超打（IME 提交时 WPF 会自动截断）
             TbxInput.MaxLength = _session.TypeText.Length;
             ResetImeCompose();
+            _prevRawLen = 0;
             TbxInput.Clear();
             TbxInput.Focus();
 
@@ -1311,7 +1312,8 @@ namespace newgdq
             double idleSec = (_session.Started && !_session.Finished && !_isPaused && _lastInputAt != default)
                 ? (DateTime.Now - _lastInputAt).TotalSeconds : 0;
             int keys = _session.Keys;
-            double acc = keys > 0 ? (keys - _session.Hg * 2) * 100.0 / keys : 100;
+            int waste = _session.ComputeWasteKeys();
+            double acc = keys > 0 ? (keys - _session.ImeBackspace * 2 - waste) * 100.0 / keys : 100;
             if (acc < 0) acc = 0;
             if (acc > 100) acc = 100;
             TxtGroup.Text = $"重{_repeatCount} 呆{idleSec:0}s 键准{acc:0}%";
@@ -1939,6 +1941,7 @@ namespace newgdq
                 SetNavCollapsed(false);
             }
             _session.Load(string.Empty, string.Empty);
+            _prevRawLen = 0;
             RtbCompare.Document.Blocks.Clear();
             _charRuns.Clear();
             _runStatus = new byte[0];
@@ -2177,32 +2180,7 @@ namespace newgdq
             if (!mergeChord)
             {
                 _session.Keys++;
-                Services.KeyHook.LogLine($"  COUNTED vk=0x{vk:X2} → Keys={_session.Keys}");
-            }
-
-            // IME 退格计数（替代老版的"回车"列）：物理 Backspace 时若 TextBox 长度没变
-            // = 用户在拼音候选框里删拼音，不是删跟打区已上屏的字（后者 input 变短 → Hg）
-            if (isBackspace)
-            {
-                // KeyHook 是同步钩子，回调发生在按键写入 TextBox 之前，此刻 TbxInput.Text 仍是删除前的值，
-                // 长度恒等于 LastInputLen → 旧逻辑永远误判成删拼音、Hg 永不累加。故把判断延后到文本更新后，
-                // 以按下时捕获的长度作比较基准（回调执行时 TextChanged 可能已刷新 LastInputLen，不能在回调里再读）。
-                int lenBefore = _session.LastInputLen;
-                Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    int lenAfter = TbxInput.Text?.Length ?? 0;
-                    if (lenAfter < lenBefore)
-                    {
-                        // 真正回改：删掉了跟打区已上屏的字（与老版 Glob.TextHg 对齐）
-                        _session.Hg++;
-                        TxtHg.Text = _session.Hg.ToString();
-                    }
-                    else
-                    {
-                        // 长度没变 = 用户在拼音候选框里删拼音，不是删上屏字
-                        _session.Enter++;
-                    }
-                }));
+                App.Diag("COUNT", $"hook vk=0x{vk:X2} Keys={_session.Keys}");
             }
 
             // 选重计数（对齐老版）：按 ; (0xBA) / ' (0xDE) / 0-9 数字主键 时，
@@ -2232,7 +2210,7 @@ namespace newgdq
 
             if (!_session.Started) return;
 
-            // 退格的 Hg/Enter 由 KeyHook 统一处理（保留老版口径，能区分 IME 删拼音 vs 删上屏字符）。
+            // 回改 Hg 由 TextChanged 的 back-range 分支统一计（committed 文本变短才算真回改，避免钩子时序竞争）。
             // 这里只负责并击模式下的 Keys 累加；串行模式不在这里计。
             bool mergeChord = Services.SettingsService.Instance.MergeChord ?? true;
             if (!mergeChord) return;
@@ -2254,7 +2232,7 @@ namespace newgdq
             if (!(isAlpha || isDigit || isNumpad || isPunct || isEnter || isBackspace || isSpace)) return;
 
             _session.Keys++;
-            Services.KeyHook.LogLine($"  TBOX vk=0x{vk:X2} → Keys={_session.Keys}");
+            App.Diag("TBOX", $"vk=0x{vk:X2} key={k} Keys={_session.Keys} Last={_session.LastInputLen} rawLen={(TbxInput.Text?.Length ?? 0)}");
         }
 
         // ===== IME 合成态侦测（方案 A'）=====
@@ -2263,11 +2241,14 @@ namespace newgdq
         // 比"猜尾部 ASCII 占位符"可靠：英文直打或已上屏时 _imeComposing=false → 一律逐字判错。
         private bool _imeComposing;
         private int _imeComposeStartLen = -1;
+        // 上一次 TextChanged 的 rawInput.Length（含 IME 合成串）。raw 变短而 committed 不变 → 删拼音（拼回）
+        private int _prevRawLen;
 
         private void ResetImeCompose()
         {
             _imeComposing = false;
             _imeComposeStartLen = -1;
+            App.Diag("IME", "reset");
         }
 
         private static bool ChangeTouchesBeforeComposeStart(TextChangedEventArgs e, int composeStart)
@@ -2279,16 +2260,31 @@ namespace newgdq
             return false;
         }
 
+        private static string SafeText(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return string.Empty;
+            string s = text.Replace("\r", "\\r").Replace("\n", "\\n").Replace("\t", "\\t");
+            return s.Length <= 24 ? s : s.Substring(0, 24) + "...";
+        }
+
+        private static string FormatChanges(TextChangedEventArgs e)
+        {
+            if (e == null) return string.Empty;
+            return string.Join(",", e.Changes.Select(c => $"{c.Offset}:{c.RemovedLength}->{c.AddedLength}"));
+        }
+
         private void TbxInput_TextInputStart(object sender, System.Windows.Input.TextCompositionEventArgs e)
         {
             // 仅当存在真实合成（输入法在组字）时才置位；普通字符的 TextInput 不会进入此事件。
             _imeComposing = true;
             _imeComposeStartLen = TbxInput.Text?.Length ?? 0;
+            App.Diag("IME", $"start composeStart={_imeComposeStartLen} rawLen={(TbxInput.Text?.Length ?? 0)} text=[{SafeText(e.Text)}]");
         }
 
         private void TbxInput_TextInputDone(object sender, System.Windows.Input.TextCompositionEventArgs e)
         {
             // 合成提交/结束（汉字上屏或英文直接输入完成）→ 解除保护，让 TextChanged 走纯逐字比对。
+            App.Diag("IME", $"done composeStart={_imeComposeStartLen} rawLen={(TbxInput.Text?.Length ?? 0)} text=[{SafeText(e.Text)}]");
             ResetImeCompose();
         }
 
@@ -2311,6 +2307,7 @@ namespace newgdq
             // 合成中间态只会出现在文本末尾，且很快会被上屏的汉字替换。非合成态（英文直打、已上屏）
             // 完全不剥离 → 真打错的空格/字母/数字一律逐字判错（修复"空格后字母也不判错"）。
             var rawInput = TbxInput.Text ?? string.Empty;
+            int curRawLen = rawInput.Length;
 
             if (_imeComposing)
             {
@@ -2349,7 +2346,17 @@ namespace newgdq
             var input = realLen < rawInput.Length ? rawInput.Substring(0, realLen) : rawInput;
 
             // 双保险：如果输入长度等于上次染色长度且未回退，说明只是 IME 切换/光标移动，跳过
-            if (input.Length == _session.LastInputLen && _session.Started) return;
+            if (input.Length == _session.LastInputLen && _session.Started)
+            {
+                if (rawInput.Length < _prevRawLen)   // raw 变短而 committed 不变 → 删拼音
+                {
+                    _session.ImeBackspace++;
+                    App.Diag("TEXT", $"imebs++ rawLen={rawInput.Length} prevRaw={_prevRawLen} ImeBs={_session.ImeBackspace}");
+                }
+                App.Diag("TEXT", $"skip-same rawLen={rawInput.Length} realLen={realLen} len={input.Length} Last={_session.LastInputLen} Cz={_session.Cz} Hg={_session.Hg} ImeBs={_session.ImeBackspace} composing={_imeComposing}");
+                _prevRawLen = curRawLen;
+                return;
+            }
 
             // 记录回改范围（输入变短）→ 主染色后再触发黄色闪烁，避免被主循环清回默认色
             int hgFrom = -1, hgTo = -1;
@@ -2357,6 +2364,9 @@ namespace newgdq
             {
                 hgFrom = input.Length;
                 hgTo   = _session.LastInputLen;
+                _session.Hg++;
+                TxtHg.Text = _session.Hg.ToString();
+                App.Diag("TEXT", $"hg++ len={input.Length} last={_session.LastInputLen} Hg={_session.Hg}");
             }
 
             // 第一次有字符 -> 启动计时
@@ -2399,6 +2409,7 @@ namespace newgdq
             _session.Cz = cz;
             TxtCz.Text = cz.ToString();
             TxtWordCount.Text = $"{len}/{_session.TypeText.Length}字";
+            App.Diag("TEXT", $"calc rawLen={rawInput.Length} realLen={realLen} len={len} Last={_session.LastInputLen} Cz={cz} Hg={_session.Hg} ImeBs={_session.ImeBackspace} Keys={_session.Keys} composing={_imeComposing} changes={FormatChanges(e)}");
 
             // 回改地点高亮（用户反馈干扰，已禁用；保留 TriggerHgFlash/HgFlashTimer 代码以备将来切回）
             // if (hgFrom >= 0) TriggerHgFlash(hgFrom, hgTo);
@@ -2469,6 +2480,8 @@ namespace newgdq
                 // 末字有错 → 不结束，允许用户回改纠正
                 // 用户也可以选择不回改，直接载入新文（载入时 _session.Reset()）
             }
+
+            _prevRawLen = curRawLen;
         }
 
         // ===== 计时器 =====
@@ -2539,8 +2552,7 @@ namespace newgdq
             var (speed, speed2, jj, mc, sec) = _session.ComputeStats(total);
             // 个人最佳(PB)：必须在把当前成绩写库前取历史最高速，否则纪录里已含本段
             double oldBest = HistoryRepository.LoadAggregate().MaxSpeed;
-            Services.KeyHook.LogLine($"==== FINISH 字数={total} Keys={_session.Keys} Hg={_session.Hg} Cz={_session.Cz} "
-                + $"用时={sec:0.00}s 速度={speed:0.00} 击键={jj:0.00} 码长={mc:0.00} ====");
+            App.Diag("FINISH", $"chars={total} Keys={_session.Keys} Hg={_session.Hg} Cz={_session.Cz} ImeBs={_session.ImeBackspace} Waste={_session.ComputeWasteKeys()} Reselect={_session.Reselect} sec={sec:0.00} speed={speed:0.00} jj={jj:0.00} mc={mc:0.00}");
 
             // 错字本：逐字比对原文与最终输入，采集"正确字→打成字"明细（独立 errorbook.db）
             CollectErrorsToBook(total);
@@ -2574,7 +2586,7 @@ namespace newgdq
                 DaCi    = _session.Words,
                 UseTime = Math.Round(sec, 2),
                 Reselect= _session.Reselect,
-                Enter   = _session.Enter,
+                ImeBackspace = _session.ImeBackspace,
                 LeftHand = _session.LeftHand,
                 RightHand= _session.RightHand,
             };
@@ -2602,7 +2614,7 @@ namespace newgdq
                 Services.Toast.Success(
                     pbLine +
                         $"完成！速度 {speed:0.00}（错一罚五 {speed2:0.00}）| 击键 {jj:0.00} | 码长 {mc:0.00} | 用时 {sec:0.00}s\n" +
-                        $"错字 {_session.Cz} | 回改 {_session.Hg} | 键数 {_session.Keys} | 打词 {_session.Words} | 选重 {_session.Reselect} | 拼回 {_session.Enter} | 左:右 {_session.LeftHand}:{_session.RightHand}",
+                        $"错字 {_session.Cz} | 回改 {_session.Hg} | 键数 {_session.Keys} | 打词 {_session.Words} | 选重 {_session.Reselect} | 拼回 {_session.ImeBackspace} | 左:右 {_session.LeftHand}:{_session.RightHand}",
                     pbLine.Length > 0 ? 4 : 2);   // 破纪录/接近多停一会儿
 
                 // 图片成绩：完成自动截 ReportWindow 复制到剪贴板

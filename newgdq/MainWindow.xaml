@@ -926,7 +926,7 @@
                         <DataGridTextColumn Header="字数"  Width="50*" Binding="{Binding Words}"/>
                         <DataGridTextColumn Header="打词"  Width="50*" Binding="{Binding DaCi}"/>
                         <DataGridTextColumn Header="选重"  Width="46*" Binding="{Binding Reselect}"/>
-                        <DataGridTextColumn Header="拼回"  Width="46*" Binding="{Binding Enter}"/>
+                        <DataGridTextColumn Header="拼回"  Width="46*" Binding="{Binding ImeBackspace}"/>
                         <DataGridTextColumn Header="左:右" Width="62*" Binding="{Binding LeftRight}"/>
                         <DataGridTextColumn Header="用时" Width="58*" Binding="{Binding UseTime, StringFormat=0.00}"/>
                         <!-- 独立的"本次/全部"切换列：用原生 DataGridColumnHeader（本身就是 ButtonBase），

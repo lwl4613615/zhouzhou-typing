@@ -24,7 +24,7 @@ namespace newgdq.Models
         public int LeftHand;    // 左手键击键次数
         public int RightHand;   // 右手键击键次数
         public int PauseTimes;  // 暂停次数
-        public int Enter;       // 回车次数（对齐老版 Glob.回车）
+        public int ImeBackspace;  // 拼回：删拼音/IME候选退格（committed 长度不变时的退格）
         public int Words;       // 打词数：一次输入 ≥ 2 个字符记 1 词（对齐老版 Glob.aTypeWords）
         public int Reselect;    // 选重次数（对齐老版 Glob.选重）
 
@@ -54,7 +54,7 @@ namespace newgdq.Models
             LeftHand = 0;
             RightHand = 0;
             PauseTimes = 0;
-            Enter = 0;
+            ImeBackspace = 0;
             Words = 0;
             Reselect = 0;
             LastInputLen = 0;
@@ -87,6 +87,55 @@ namespace newgdq.Models
             double jj = Keys / sec;
             double mc = validLen > 0 ? (double)Keys / validLen : 0;
             return (speed, speed2, jj, mc, sec);
+        }
+
+        /// <summary>
+        /// 回改前浪费键（老版 TextMcc 思想的新版适配）：真实回改删掉的已上屏内容，
+        /// 当初打出它们消耗的键数即"浪费键"。从 Report 事件台账无状态推算：
+        /// 正向事件按 [Start,End) 记其 TotalTick 键入台账；回改事件删掉 [End,Start)，
+        /// 把覆盖被删位置的正向段键数计入浪费（跨界的多字提交段按字符比例分摊，不强行拆到单字）。
+        /// </summary>
+        public int ComputeWasteKeys()
+        {
+            // ledger：连续覆盖已上屏位置 [0, committedLen) 的正向提交段（start,end,keys）
+            var ledger = new List<(int start, int end, int keys)>();
+            int waste = 0;
+            foreach (var ev in Report)
+            {
+                if (ev.End > ev.Start)
+                {
+                    ledger.Add((ev.Start, ev.End, ev.TotalTick));
+                }
+                else if (ev.End < ev.Start)
+                {
+                    int target = ev.End;                       // 回改后剩余长度
+                    while (ledger.Count > 0 && ledger[ledger.Count - 1].end > target)
+                    {
+                        var seg = ledger[ledger.Count - 1];
+                        ledger.RemoveAt(ledger.Count - 1);
+                        if (seg.start >= target)
+                        {
+                            waste += seg.keys;                 // 整段被删
+                        }
+                        else
+                        {
+                            // 跨界：保留 [start,target)，浪费 [target,end)，按字符比例分摊键
+                            int totalChars = seg.end - seg.start;
+                            int delChars   = seg.end - target;
+                            int wKeys = totalChars > 0
+                                ? (int)System.Math.Round((double)seg.keys * delChars / totalChars)
+                                : seg.keys;
+                            if (wKeys > seg.keys) wKeys = seg.keys;
+                            if (wKeys < 0) wKeys = 0;
+                            waste += wKeys;
+                            ledger.Add((seg.start, target, seg.keys - wKeys));
+                            break;
+                        }
+                    }
+                }
+                // ev.End == ev.Start：AppendEvent 仅在 len 变化时调用，不会出现，忽略
+            }
+            return waste;
         }
 
         /// <summary>追加一条段内事件（输入长度变化时调用）。</summary>

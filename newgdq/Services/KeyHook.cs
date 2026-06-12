@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Runtime.InteropServices;
 
 namespace newgdq.Services
@@ -14,21 +13,12 @@ namespace newgdq.Services
         public event EventHandler<int> KeyDown;   // 参数：vkCode
         public event EventHandler<int> KeyUp;     // 参数：vkCode
 
-        /// <summary>调试日志开关。开启时把每个 KeyHook 事件写到 exe 同目录的 keyhook.log。</summary>
-        public static bool DebugLog { get; set; } = false;
-        private static readonly string LogPath = Path.Combine(
-            Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? ".",
-            "keyhook.log");
-        private static readonly object LogLock = new object();
+        /// <summary>统一诊断日志出口；由 App 接到 newgdq.log，KeyHook 不再单独维护日志文件/开关。</summary>
+        public static Action<string> DiagnosticLog { get; set; }
+
         public static void LogLine(string s)
         {
-            if (!DebugLog) return;
-            try
-            {
-                lock (LogLock)
-                    File.AppendAllText(LogPath, DateTime.Now.ToString("HH:mm:ss.fff ") + s + Environment.NewLine);
-            }
-            catch { }
+            DiagnosticLog?.Invoke(s);
         }
 
         private const int WH_KEYBOARD_LL = 13;
