@@ -85,8 +85,14 @@ namespace newgdq
         private static readonly Brush SlowBrush = new SolidColorBrush(Color.FromRgb(0xC0, 0xE8, 0x9A));  // 浅绿 = 慢
         private static readonly Brush HgBrush   = new SolidColorBrush(Color.FromRgb(0xF5, 0xB7, 0xD8));  // 粉红 = 回改
         private const double SlowCharThresholdSec = 1.2;
+        // 慢字本采集阈值：单字耗时上限（超过视作停顿/离开噪声，丢弃）+ 高码长阈值（键/字）
+        private const double MaxSlowCharSec = 6.0;
+        private const double HighKeyPerChar = 4.0;
+        private const int SessionSlowTopN = 10;   // 结算摘要 / 生成练习取本场弱项 Top N
         private readonly HashSet<int> _slowMarks = new HashSet<int>();
         private readonly HashSet<int> _hgMarks   = new HashSet<int>();
+        // 本场采集到的慢字/弱项明细（每次结算前清空再填）：供结算摘要 UI 聚合"本场最卡 N 字"
+        private List<Services.SlowEntry> _lastSessionSlowEntries = new();
 
         // 当前段号：发文模式下记录"刚发出的段号"，结算时写入历史。非发文置 0。
         private int _currentSegNo;
@@ -200,6 +206,7 @@ namespace newgdq
             // SQLite 历史持久化初始化 + 装载最近 200 条
             HistoryRepository.Init();
             ErrorBookRepository.Init();
+            SlowCharRepository.Init();
             foreach (var row in HistoryRepository.LoadRecent(200))
                 History.Add(row);
             _historyIndex = HistoryRepository.TotalCount();
@@ -1240,6 +1247,8 @@ namespace newgdq
             _runStatus = new byte[_session.TypeText.Length];
             _slowMarks.Clear();
             _hgMarks.Clear();
+            _lastSessionSlowEntries.Clear();
+            HideSessionSlowSummary();
 
             var para = new Paragraph { Margin = new Thickness(0), Padding = new Thickness(0) };
             foreach (var ch in _session.TypeText)
@@ -1755,6 +1764,11 @@ namespace newgdq
             ShowAnalysis(new Views.ErrorBookView(), "错字本");
         }
 
+        private void MenuItem_OpenSlowCharBook_Click(object sender, RoutedEventArgs e)
+        {
+            ShowAnalysis(new Views.SlowCharBookView(), "慢字本");
+        }
+
         /// <summary>错字本闭环：把给定文本作为针对练习载入跟打区并激活主窗。</summary>
         /// <returns>用户是否确认载入（正打到一半时取消则返回 false，原内容保留）。</returns>
         public bool LoadPracticeText(string text, string title)
@@ -1947,6 +1961,8 @@ namespace newgdq
             _runStatus = new byte[0];
             _slowMarks.Clear();
             _hgMarks.Clear();
+            _lastSessionSlowEntries.Clear();
+            HideSessionSlowSummary();
             this.Title = "州州跟打器";
             TxtTitle.Text = "-";
             TxtWordCount.Text = "0/0字";
@@ -2556,6 +2572,8 @@ namespace newgdq
 
             // 错字本：逐字比对原文与最终输入，采集"正确字→打成字"明细（独立 errorbook.db）
             CollectErrorsToBook(total);
+            // 慢字本：按事件均摊估每字耗时/键数，采集慢/回改/高码长弱项明细（独立 slowchar.db；限速不入历史也照常采集）
+            CollectSlowToBook(total);
 
             // 速度门槛：底部"限制"按钮启用 + 设置中阈值 > 0 + 当前速度低于阈值 → 不入历史
             bool blockedByLimit = false;
@@ -2641,6 +2659,8 @@ namespace newgdq
             // 仅正常打完路径执行；强制结算路径 restoreAfter=false，由外层 LoadArticle/复位接管。
             if (cloudArticle && restoreAfter)
                 RestoreAfterCloudFinish();
+            else if (restoreAfter)
+                ShowSessionSlowSummary();   // 普通练习结算：对照区一角浮现"本场最卡字"（云结算随后会复位/清空，不展示）
         }
 
         /// <summary>群比赛/每日文打完并已触发交卷后，解除"完成只读冻结"，把界面复位成可重新开始的状态。
@@ -2932,6 +2952,221 @@ namespace newgdq
             }
             Services.ErrorBookRepository.InsertBatch(errs, _session.Title);
             Services.ErrorBookRepository.UpsertBatch(chars);
+        }
+
+        /// <summary>慢字本：结算时按事件均摊估每字耗时(秒)/键数，逐字采集"慢/回改/高码长"弱项明细落库。
+        /// 仅最终打对的字才算（打错归错字本）；噪声(>6s)、标点/空白/控制/emoji 一律跳过；
+        /// 只喂弱项（慢 or 回改 or 高码长），避免正常字撑爆 slow_log。失败仅 Debug.WriteLine，不阻塞结算。</summary>
+        private void CollectSlowToBook(int total)
+        {
+            var entries = new List<Services.SlowEntry>();
+            _lastSessionSlowEntries = entries;   // 每次结算前清空再填（供结算摘要 UI 读取）
+            try
+            {
+                if (total <= 0) return;
+
+                // 按事件均摊估每字耗时(秒)/键数（镜像 ScoreCard.BuildHeat 口径：后写事件覆盖前者=最终产生该字的耗时）
+                var charSec  = new double[total];
+                var charTick = new double[total];
+                int prev = 0;
+                foreach (var ev in _session.Report)
+                {
+                    if (ev.Length <= 0) { prev = ev.End; continue; }
+                    double ps = ev.TotalTime / ev.Length;
+                    double pt = (double)ev.TotalTick / ev.Length;
+                    int to = Math.Min(ev.End, total);
+                    for (int i = prev; i < to; i++) { charSec[i] = ps; charTick[i] = pt; }
+                    prev = ev.End;
+                }
+
+                string input = TbxInput.Text ?? string.Empty;
+                int len = Math.Min(total, Math.Min(input.Length, _session.TypeText.Length));
+                for (int i = 0; i < len; i++)
+                {
+                    // 仅最终打对才算慢字；打错归错字本
+                    if (Services.TextProcessor.NormalizeForCompare(input[i]) != Services.TextProcessor.NormalizeForCompare(_session.TypeText[i]))
+                        continue;
+
+                    double ps = charSec[i];
+                    double pt = charTick[i];
+                    if (ps > MaxSlowCharSec) continue;   // 停顿/离开等噪声丢弃
+
+                    bool slow = ps >= SlowCharThresholdSec;
+                    bool hg   = _hgMarks.Contains(i);
+                    bool hk   = pt >= HighKeyPerChar;
+                    if (!(slow || hg || hk)) continue;   // 只喂弱项
+
+                    char center = _session.TypeText[i];
+                    if (!IsCollectibleChar(center)) continue;   // 标点/空白/控制/emoji 不入库
+
+                    string ctx = BuildSlowContext(_session.TypeText, i);
+                    entries.Add(new Services.SlowEntry
+                    {
+                        Ch            = center.ToString(),
+                        Context       = ctx,
+                        Pos           = i,
+                        PerSec        = ps,
+                        ThresholdSec  = SlowCharThresholdSec,
+                        PerTick       = pt,
+                        Slow          = slow,
+                        Hg            = hg,
+                        HighKey       = hk,
+                        SourceSnippet = ctx,
+                    });
+                }
+
+                string segLabel = _currentSegNo > 0 ? _currentSegNo.ToString() : null;
+                Services.SlowCharRepository.InsertBatch(entries, _session.Title, segLabel);
+            }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine("CollectSlowToBook: " + ex); }
+        }
+
+        /// <summary>慢字本可采集字符：保留中文/英文/数字；空白/制表/换行/控制/标点/符号/emoji(代理对) 跳过。</summary>
+        private static bool IsCollectibleChar(char c)
+        {
+            if (char.IsWhiteSpace(c) || char.IsControl(c)) return false;
+            if (char.IsSurrogate(c)) return false;                 // emoji 等代理对
+            if (char.IsPunctuation(c) || char.IsSymbol(c)) return false;
+            return char.IsLetterOrDigit(c);
+        }
+
+        /// <summary>取以 center 为中心、左右各至多 2 字的上下文片段；遇标点/空白/emoji 即停（不跨句），长度 1~5。</summary>
+        private static string BuildSlowContext(string text, int center)
+        {
+            int lo = center, hi = center;
+            for (int step = 0; step < 2 && lo - 1 >= 0 && !IsContextBoundary(text[lo - 1]); step++) lo--;
+            for (int step = 0; step < 2 && hi + 1 < text.Length && !IsContextBoundary(text[hi + 1]); step++) hi++;
+            return text.Substring(lo, hi - lo + 1);
+        }
+
+        /// <summary>上下文窗口的"句子边界"：空白/控制/标点/符号/代理对都视为停止扩展点。</summary>
+        private static bool IsContextBoundary(char c)
+        {
+            return char.IsWhiteSpace(c) || char.IsControl(c)
+                || char.IsPunctuation(c) || char.IsSymbol(c) || char.IsSurrogate(c);
+        }
+
+        // ===== 本场"最卡字"摘要 / 生成慢字练习（sc-finish-summary-ui） =====
+
+        /// <summary>"本场最卡字"摘要列表项（仅供结算摘要 ItemsControl 绑定显示）。</summary>
+        public sealed class SessionSlowItem
+        {
+            public string Ch { get; set; }
+            public string Stat { get; set; }       // 耗时 · 慢次数 · 回改标记
+            public string Context { get; set; }    // 代表上下文片段
+        }
+
+        /// <summary>把本场落库的弱项明细 <see cref="_lastSessionSlowEntries"/> 按字聚合为弱项行：
+        /// WeakScore 与 SlowCharRepository 同口径，按 WeakScore 倒序取 Top N（结算摘要与生成练习共用）。</summary>
+        private List<Services.SlowRankRow> AggregateSessionTopSlow(int topN)
+        {
+            var rows = new List<Services.SlowRankRow>();
+            var entries = _lastSessionSlowEntries;
+            if (entries == null || entries.Count == 0) return rows;
+
+            var order = new List<string>();
+            var groups = new Dictionary<string, List<Services.SlowEntry>>();
+            foreach (var e in entries)
+            {
+                if (e == null || string.IsNullOrEmpty(e.Ch)) continue;
+                if (!groups.TryGetValue(e.Ch, out var g)) { g = new List<Services.SlowEntry>(); groups[e.Ch] = g; order.Add(e.Ch); }
+                g.Add(e);
+            }
+
+            foreach (var ch in order)
+            {
+                var g = groups[ch];
+                int slow = 0, hg = 0, hk = 0, overN = 0;
+                double overSum = 0;
+                foreach (var e in g)
+                {
+                    if (e.Slow) { slow++; overSum += Math.Max(0.0, e.PerSec - e.ThresholdSec); overN++; }
+                    if (e.Hg) hg++;
+                    if (e.HighKey) hk++;
+                }
+                var row = new Services.SlowRankRow
+                {
+                    Ch           = ch,
+                    SlowCount    = slow,
+                    AvgOverSec   = overN > 0 ? overSum / overN : 0.0,
+                    HgCount      = hg,
+                    HighKeyCount = hk,
+                    ErrorCount   = 0,
+                    Mastered     = false,
+                    LastSeen     = DateTime.Now,
+                };
+                row.WeakScore = row.SlowCount * 3.0
+                              + row.AvgOverSec * 2.0
+                              + row.HgCount * 1.5
+                              + row.HighKeyCount * 0.8
+                              + row.ErrorCount * 1.0;
+                rows.Add(row);
+            }
+
+            rows.Sort((a, b) => b.WeakScore.CompareTo(a.WeakScore));
+            if (rows.Count > topN) rows.RemoveRange(topN, rows.Count - topN);
+            return rows;
+        }
+
+        /// <summary>把 Top 弱项行配上每字代表上下文/耗时（取该字 PerSec 最大那条）做成摘要列表项。</summary>
+        private List<SessionSlowItem> BuildSessionSlowItems(IReadOnlyList<Services.SlowRankRow> top)
+        {
+            var items = new List<SessionSlowItem>();
+            var entries = _lastSessionSlowEntries;
+            foreach (var r in top)
+            {
+                Services.SlowEntry rep = null;
+                if (entries != null)
+                    foreach (var e in entries)
+                        if (e != null && e.Ch == r.Ch && (rep == null || e.PerSec > rep.PerSec)) rep = e;
+
+                double perSec = rep != null ? rep.PerSec : 0.0;
+                string ctx = rep != null && !string.IsNullOrEmpty(rep.Context) ? rep.Context : r.Ch;
+                string stat = $"{perSec:0.0}s · 慢{r.SlowCount}" + (r.HgCount > 0 ? " · 回改" : "");
+                items.Add(new SessionSlowItem { Ch = r.Ch, Stat = stat, Context = ctx });
+            }
+            return items;
+        }
+
+        /// <summary>结算后浮现"本场最卡字"摘要：聚合 Top N，空则不显示该块。</summary>
+        private void ShowSessionSlowSummary()
+        {
+            var top = AggregateSessionTopSlow(SessionSlowTopN);
+            if (top.Count == 0)
+            {
+                HideSessionSlowSummary();
+                return;
+            }
+            IcSlowSummary.ItemsSource = BuildSessionSlowItems(top);
+            SessionSlowSummary.Visibility = Visibility.Visible;
+        }
+
+        /// <summary>隐藏"本场最卡字"摘要（换文 / 复位 / 载入练习时调用）。</summary>
+        private void HideSessionSlowSummary()
+        {
+            if (SessionSlowSummary == null) return;
+            SessionSlowSummary.Visibility = Visibility.Collapsed;
+            IcSlowSummary.ItemsSource = null;
+        }
+
+        /// <summary>"生成慢字练习"：用本场聚合的 Top 弱项调 SlowCharDrillBuilder，载入主窗跟打区（沿用覆盖确认）。</summary>
+        private void BtnGenSlowDrill_Click(object sender, RoutedEventArgs e)
+        {
+            var top = AggregateSessionTopSlow(SessionSlowTopN);
+            var (text, title) = Services.SlowCharDrillBuilder.BuildFromSession(top);
+            if (string.IsNullOrEmpty(text))
+            {
+                Services.Toast.Info("本场没有明显慢字");
+                return;
+            }
+            // 用户在覆盖确认里取消 → 不覆盖，保持当前页与摘要
+            if (!LoadPracticeText(text, title)) return;
+            Services.Toast.Success($"已生成 {text.Length} 字慢字练习，去主窗开打");
+        }
+
+        private void BtnCloseSlowSummary_Click(object sender, RoutedEventArgs e)
+        {
+            HideSessionSlowSummary();
         }
 
         /// <summary>完成时若"图片"开启，渲染 ScoreCard UserControl 复制到剪贴板。</summary>

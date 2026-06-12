@@ -431,6 +431,13 @@
                             <TextBlock Text="错字本" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
+                    <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_OpenSlowCharBook_Click"
+                            ToolTip="卡顿字/弱项专项练习">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Timer24" FontSize="16" Margin="0,0,10,0"/>
+                            <TextBlock Text="慢字本" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
                     <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_SendImageScore_Click" ToolTip="Ctrl+T">
                         <StackPanel Orientation="Horizontal">
                             <ui:SymbolIcon Symbol="Image24" FontSize="16" Margin="0,0,10,0"/>
@@ -979,6 +986,61 @@
                 </Grid>  <!-- end right grid -->
             </Grid>
             </Grid>  <!-- end 下半整体 -->
+
+            <!-- 本场最卡字摘要：结算后浮现于对照区一角（Grid.Row=0 限定在对照区内，绝不下探输入区），可关闭；位置避开右上角成绩 Toast -->
+            <Border x:Name="SessionSlowSummary" Grid.Row="0" Visibility="Collapsed"
+                    VerticalAlignment="Bottom" HorizontalAlignment="Right"
+                    Margin="0,0,16,10" MaxWidth="320" MaxHeight="220"
+                    CornerRadius="8" Padding="12,10"
+                    Background="{DynamicResource CellBG}"
+                    BorderBrush="{DynamicResource GridLine}" BorderThickness="1">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="14" ShadowDepth="2" Opacity="0.28"/>
+                </Border.Effect>
+                <DockPanel LastChildFill="True">
+                    <Grid DockPanel.Dock="Top">
+                        <TextBlock Text="本场最卡字" FontSize="13" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource ValueFG}" VerticalAlignment="Center"/>
+                        <ui:Button x:Name="BtnCloseSlowSummary" Appearance="Transparent"
+                                   Padding="2" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                   Click="BtnCloseSlowSummary_Click" ToolTip="关闭">
+                            <ui:SymbolIcon Symbol="Dismiss24" FontSize="14"/>
+                        </ui:Button>
+                    </Grid>
+                    <ui:Button x:Name="BtnGenSlowDrill" DockPanel.Dock="Bottom" Appearance="Primary"
+                               Margin="0,10,0,0" HorizontalAlignment="Stretch"
+                               Click="BtnGenSlowDrill_Click" ToolTip="按本场最卡的字生成专项练习并载入跟打区">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Target24" FontSize="14" Margin="0,0,6,0"/>
+                            <TextBlock Text="生成慢字练习" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </ui:Button>
+                    <ScrollViewer Margin="0,8,0,0" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl x:Name="IcSlowSummary">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,3">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="{Binding Ch}"
+                                                   FontFamily="宋体" FontSize="18" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource AccentFG}"
+                                                   VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Stat}" FontSize="11"
+                                                       Foreground="{DynamicResource ValueFG}"/>
+                                            <TextBlock Text="{Binding Context}" FontSize="11" Opacity="0.65"
+                                                       FontFamily="宋体" TextTrimming="CharacterEllipsis"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
         </Grid>
 
             <!-- 双拼键位练习面板（默认隐藏，菜单 功能 → 双拼键位练习 切换） -->
