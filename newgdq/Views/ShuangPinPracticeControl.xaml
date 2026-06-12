@@ -6,6 +6,7 @@
              xmlns:views="clr-namespace:newgdq.Views"
              mc:Ignorable="d"
              Focusable="True"
+             InputMethod.IsInputMethodEnabled="False"
              Background="{DynamicResource PanelBG}"
              d:DesignWidth="900" d:DesignHeight="500">
     <Grid>

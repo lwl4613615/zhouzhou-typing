@@ -610,7 +610,8 @@ namespace newgdq.Views
                 else e.Handled = true;
                 return;
             }
-            if (!TryMapKey(e.Key, out char c)) return;
+            var effKey = (e.Key == Key.ImeProcessed) ? e.ImeProcessedKey : e.Key;
+            if (!TryMapKey(effKey, out char c)) return;
             if (!_sessionSw.IsRunning) _sessionSw.Start();   // 首次按键开始计时
             if (!_wubi && _mode == ModeSimple)
             {
