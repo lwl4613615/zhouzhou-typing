@@ -2903,7 +2903,10 @@ namespace newgdq
         private async void UploadMatchScore(double speed, double jj, double mc, int cz, double sec)
         {
             // 提交那一刻的本场 token：成绩卡看榜用它（bug1：不依赖可能已被复位的全局 token）。
+            // bug7：连同提交瞬间的 isDaily/mode 一并快照，重试窗内用户手动切场也不漂移。
             string submitToken = Services.CloudMatchService.CurrentArticleToken;
+            bool   submitIsDaily = Services.CloudMatchService.IsDailyArticle;
+            string submitMode = Services.CloudMatchService.CurrentArticleMode;
             if (!Services.CloudMatchService.IsDailyArticle && Services.CloudMatchService.HasSubmitted(submitToken))
             {
                 Services.Toast.Warning("本场你已交过卷了，不再重复上传", 3);
@@ -2911,7 +2914,17 @@ namespace newgdq
             }
             try
             {
-                var result = await Services.CloudMatchService.UploadScoreAsync(speed, jj, mc, cz, sec);
+                var result = await Services.CloudMatchService.UploadScoreAsync(speed, jj, mc, cz, sec, submitToken, submitIsDaily, submitMode);
+
+                // bug7：write_conflict 是服务端明确「本次未登记」的安全可重试冲突，
+                // 自动重试 1 次（共 2 次尝试）再放弃，仍冲突才提示用户手动重交；
+                // 只对 write_conflict 重试，duplicate/cap/限流/身份类一律不重试。
+                if (result.Code == "write_conflict")
+                {
+                    Services.Toast.Info("提交冲突，正在自动重试…", 2);
+                    await System.Threading.Tasks.Task.Delay(300);
+                    result = await Services.CloudMatchService.UploadScoreAsync(speed, jj, mc, cz, sec, submitToken, submitIsDaily, submitMode);
+                }
 
                 // Bug16：先按统一 code 分流；之后才走旧布尔兜底（成功 match/daily）。
                 switch (result.Code)
@@ -3017,7 +3030,7 @@ namespace newgdq
         {
             if (_rankFetching) return;                                           // 请求进行中：忽略
             if ((DateTime.UtcNow - _lastRankClickUtc).TotalSeconds < 2.5) return; // 防抖 2.5s
-            // bug1：成绩卡看榜传入提交时的本场 token；常驻看榜按钮不传，用当前全局 token。
+            // bug1：成绩卡看榜传提交时的本场 token；常驻看榜按钮当前有文用全局 token，交卷后传完成场口令兜底。
             string token = string.IsNullOrEmpty(tokenOverride)
                 ? Services.CloudMatchService.CurrentArticleToken
                 : tokenOverride;
@@ -3048,7 +3061,15 @@ namespace newgdq
         {
             var btn = sender as System.Windows.Controls.Control;
             if (btn != null) btn.IsEnabled = false;
-            try { await OpenRankWindowAsync(this); }
+            try
+            {
+                // bug1：当前有比赛文就看当前场；交卷后 CurrentArticleToken 已复位时，
+                // 用最近完成的本场口令兜底，仍能看本场榜（下一场新发文则优先当前场）。
+                string fallback = string.IsNullOrEmpty(Services.CloudMatchService.CurrentArticleToken)
+                    ? Services.CloudMatchService.LastFinishedMatchToken
+                    : null;
+                await OpenRankWindowAsync(this, fallback);
+            }
             finally { if (btn != null) btn.IsEnabled = true; }
         }
 

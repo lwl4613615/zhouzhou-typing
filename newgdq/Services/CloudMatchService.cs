@@ -34,6 +34,10 @@ namespace newgdq.Services
         // 最近一次 FetchArticleAsync 解析出的模式（SetCurrentArticle 未显式传 mode 时带入）。
         public static string LastFetchedMode { get; private set; }
 
+        // bug1：最近一次成功交卷的 match 本场口令。交卷后 CurrentArticleToken 被复位，
+        // 常驻"看榜"按钮拿它兜底，仍能看本场榜（仅 match 成功时写，daily 不写）。
+        public static string LastFinishedMatchToken { get; private set; }
+
         /// <summary>当前是否为 daily（日经）模式。daily 不锁交卷，可反复提交刷新最好成绩。</summary>
         public static bool IsDailyArticle =>
             string.Equals(CurrentArticleMode, "daily", StringComparison.OrdinalIgnoreCase);
@@ -188,13 +192,14 @@ namespace newgdq.Services
         /// match：成功登记 / 重复交卷（IsDuplicate）。daily：返回是否超越（Improved）及 old/new/best，不锁可反复刷。
         /// 调用方须保证当前段是比赛文（IsMatchArticleLoaded）。</summary>
         public static async Task<UploadResult> UploadScoreAsync(
-            double speed, double jj, double mc, int cz, double useTime)
+            double speed, double jj, double mc, int cz, double useTime,
+            string tokenOverride = null, bool? isDailyOverride = null, string modeOverride = null)
         {
             string baseUrl = BaseUrl();
             if (string.IsNullOrEmpty(baseUrl))
                 throw new InvalidOperationException("还没配置云地址");
             EnsureSecureBaseUrl(baseUrl);
-            string token = CurrentArticleToken;
+            string token = string.IsNullOrEmpty(tokenOverride) ? CurrentArticleToken : tokenOverride;
             if (string.IsNullOrEmpty(token))
                 throw new InvalidOperationException("当前不是比赛文，无需上传");
 
@@ -206,7 +211,7 @@ namespace newgdq.Services
             if (string.IsNullOrWhiteSpace(deviceId))
                 throw new InvalidOperationException("拿不到设备标识，无法交卷");
 
-            bool isDaily = IsDailyArticle;
+            bool isDaily = isDailyOverride ?? IsDailyArticle;
 
             // match：本机一场一交卷锁。
             if (!isDaily && _submittedTokens.Contains(token))
@@ -238,7 +243,7 @@ namespace newgdq.Services
                 deviceId = deviceId,
                 name     = name,
                 token    = token,
-                mode     = CurrentArticleMode,
+                mode     = modeOverride ?? CurrentArticleMode,
                 speed    = Math.Round(speed, 2),
                 jj       = Math.Round(jj, 2),
                 mc       = Math.Round(mc, 2),
@@ -371,6 +376,7 @@ namespace newgdq.Services
                 else
                 {
                     _submittedTokens.Add(token);             // match 成功：记下已交卷（不再写 daily 时间戳，bug5）
+                    LastFinishedMatchToken = token;          // bug1：留作交卷后常驻看榜的兜底口令
                 }
 
                 return result;
