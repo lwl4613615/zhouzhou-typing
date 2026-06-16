@@ -54,6 +54,12 @@ namespace newgdq.Models
         public int Mark;                 // 标记（顺序模式下的当前位置）
         public int CountPerSeg = 25;     // 每段字数
 
+        // 续打身份（resume-core）：会话级、仅内存。用于"自定义文章续打进度"识别与同切法判定。
+        public string ArticleKind = "";  // "Builtin" / "CustomFile" / "Clipboard"
+        public string ArticleId   = "";  // 自带=资源名；本地=绝对路径；剪贴板=空（以正文指纹为身份）
+        public bool   TickOut;           // 是否"自动去空格"（FullText 已据此处理，存此值便于同切法判定）
+        public int    InitialMark;       // 会话起始 Mark（区别于发文推进中的 Mark）
+
         public int CurSeg => StartSeg + SentSeg;
     }
 }

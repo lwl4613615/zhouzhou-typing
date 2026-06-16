@@ -642,7 +642,8 @@
                     <ColumnDefinition Width="Auto" MinWidth="48"/>   <!-- 段号 -->
                     <ColumnDefinition Width="*"    MinWidth="120"/>  <!-- 标题 -->
                     <ColumnDefinition Width="Auto" MinWidth="56"/>   <!-- 字数 -->
-                    <ColumnDefinition Width="Auto" MinWidth="120"/>  <!-- 状态：重打/发呆/键准 -->
+                    <ColumnDefinition Width="Auto" MinWidth="120"/>  <!-- 状态：重打/发呆 -->
+                    <ColumnDefinition Width="Auto" MinWidth="56"/>   <!-- 键准 -->
                     <ColumnDefinition Width="Auto" MinWidth="56"/>   <!-- 速度 -->
                     <ColumnDefinition Width="Auto" MinWidth="56"/>   <!-- 击键 -->
                     <ColumnDefinition Width="Auto" MinWidth="56"/>   <!-- 码长 -->
@@ -654,11 +655,13 @@
                 <TextBlock Grid.Row="0" Grid.Column="1" Text="标题"   Style="{StaticResource LblText}"/>
                 <TextBlock Grid.Row="0" Grid.Column="2" Text="字数"   Style="{StaticResource LblText}"/>
                 <TextBlock Grid.Row="0" Grid.Column="3" Text="状态" Style="{StaticResource LblText}"
-                           ToolTip="重打次数 / 发呆秒 / 键准百分比"/>
-                <TextBlock Grid.Row="0" Grid.Column="4" Text="速度"   Style="{StaticResource LblText}"/>
-                <TextBlock Grid.Row="0" Grid.Column="5" Text="击键"   Style="{StaticResource LblText}"/>
-                <TextBlock Grid.Row="0" Grid.Column="6" Text="码长"   Style="{StaticResource LblText}"/>
-                <TextBlock Grid.Row="0" Grid.Column="7" Text="联系州州"   Style="{StaticResource LblText}"
+                           ToolTip="重打次数 / 发呆秒"/>
+                <TextBlock Grid.Row="0" Grid.Column="4" Text="键准"   Style="{StaticResource LblText}"
+                           ToolTip="键准：没白敲的键占比，越高越好"/>
+                <TextBlock Grid.Row="0" Grid.Column="5" Text="速度"   Style="{StaticResource LblText}"/>
+                <TextBlock Grid.Row="0" Grid.Column="6" Text="击键"   Style="{StaticResource LblText}"/>
+                <TextBlock Grid.Row="0" Grid.Column="7" Text="码长"   Style="{StaticResource LblText}"/>
+                <TextBlock Grid.Row="0" Grid.Column="8" Text="联系州州"   Style="{StaticResource LblText}"
                            ToolTip="点击复制 QQ 群号"/>
 
                 <!-- 下行：值（居中） -->
@@ -667,11 +670,12 @@
                            MouseLeftButtonUp="TxtCurSegInfo_Click"/>
                 <TextBlock Grid.Row="1" Grid.Column="1" x:Name="TxtTitle"      Text="-"      Style="{StaticResource LblValue}" TextTrimming="CharacterEllipsis"/>
                 <TextBlock Grid.Row="1" Grid.Column="2" x:Name="TxtWordCount"  Text="0/0字"  Style="{StaticResource LblValue}"/>
-                <TextBlock Grid.Row="1" Grid.Column="3" x:Name="TxtGroup"      Text="重0 呆 0s 键准 100%"      Style="{StaticResource LblValue}" FontSize="11"/>
-                <TextBlock Grid.Row="1" Grid.Column="4" x:Name="TxtSpeed"      Text="0.00"   Style="{StaticResource LblValueKey}" FontSize="15"/>
-                <TextBlock Grid.Row="1" Grid.Column="5" x:Name="TxtJj"         Text="0.00"   Style="{StaticResource LblValueKey}" FontSize="15"/>
-                <TextBlock Grid.Row="1" Grid.Column="6" x:Name="TxtMc"         Text="0.00"   Style="{StaticResource LblValueKey}"/>
-                <TextBlock Grid.Row="1" Grid.Column="7" x:Name="TxtSign"       Text="微信 synhxb"    Style="{StaticResource LblValue}"
+                <TextBlock Grid.Row="1" Grid.Column="3" x:Name="TxtGroup"      Text="重0 呆 0s"      Style="{StaticResource LblValue}" FontSize="11"/>
+                <TextBlock Grid.Row="1" Grid.Column="4" x:Name="TxtAccBar"     Text="100%"   Style="{StaticResource LblValueKey}" FontSize="15" Foreground="{DynamicResource SuccessFG}"/>
+                <TextBlock Grid.Row="1" Grid.Column="5" x:Name="TxtSpeed"      Text="0.00"   Style="{StaticResource LblValueKey}" FontSize="15"/>
+                <TextBlock Grid.Row="1" Grid.Column="6" x:Name="TxtJj"         Text="0.00"   Style="{StaticResource LblValueKey}" FontSize="15"/>
+                <TextBlock Grid.Row="1" Grid.Column="7" x:Name="TxtMc"         Text="0.00"   Style="{StaticResource LblValueKey}"/>
+                <TextBlock Grid.Row="1" Grid.Column="8" x:Name="TxtSign"       Text="微信 synhxb"    Style="{StaticResource LblValue}"
                            Cursor="Hand" ToolTip="点击复制微信号"
                            MouseLeftButtonUp="TxtSign_LeftClick"/>
 

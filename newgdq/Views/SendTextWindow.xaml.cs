@@ -38,6 +38,9 @@ namespace newgdq.Views
 
         private string _currentText = "";
         private string _currentTitle = "";
+        // 续打身份：随 _currentText 一起更新，保证与实际载入的正文来源一致。
+        private string _currentArticleKind = "";   // "Builtin" / "CustomFile" / "Clipboard"
+        private string _currentArticleSourceId = ""; // 自带=资源名；本地=文件路径；剪贴板=空
 
         public SendTextWindow()
         {
@@ -188,6 +191,8 @@ namespace newgdq.Views
                 var fileName = Builtin[idx].FileName;
                 _currentText = ArticleLoader.LoadInternal(fileName);
                 _currentTitle = Builtin[idx].Header;
+                _currentArticleKind = "Builtin";
+                _currentArticleSourceId = fileName;
                 TxtBuiltinPreview.Text = _currentText.Length > 200
                     ? _currentText.Substring(0, 200) + "..."
                     : _currentText;
@@ -309,6 +314,8 @@ namespace newgdq.Views
                 }
                 _currentText = text;
                 _currentTitle = System.IO.Path.GetFileNameWithoutExtension(path);
+                _currentArticleKind = "CustomFile";
+                _currentArticleSourceId = path;
                 TxtCustomPreview.Text = text.Length > 400 ? text.Substring(0, 400) + " ..." : text;
                 RefreshInfo();
             }
@@ -349,6 +356,8 @@ namespace newgdq.Views
             if (TbxClipBody == null || TbxClipTitle == null) return;
             _currentText = TbxClipBody.Text ?? "";
             _currentTitle = string.IsNullOrEmpty(TbxClipTitle.Text) ? "来自剪切板" : TbxClipTitle.Text;
+            _currentArticleKind = "Clipboard";
+            _currentArticleSourceId = "";
             RefreshInfo();
         }
 
@@ -411,6 +420,10 @@ namespace newgdq.Views
                 Mark           = mark,
                 StartSeg       = startSeg,
                 SourceName     = GetCurrentSourceName(),
+                ArticleKind    = _currentArticleKind,
+                ArticleId      = _currentArticleSourceId,
+                TickOut        = ChkTickOut.IsChecked == true,
+                InitialMark    = mark,
             };
             ResultState = state;
             OnStartSending?.Invoke(state);
@@ -449,6 +462,10 @@ namespace newgdq.Views
                 Mark           = 0,
                 StartSeg       = 1,
                 SourceName     = GetCurrentSourceName(),
+                ArticleKind    = _currentArticleKind,
+                ArticleId      = _currentArticleSourceId,
+                TickOut        = ChkTickOut.IsChecked == true,
+                InitialMark    = 0,
             };
             ResultState = state;
             OnStartSending?.Invoke(state);

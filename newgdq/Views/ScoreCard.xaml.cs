@@ -42,6 +42,7 @@ namespace newgdq.Views
             if (acc < 0) acc = 0;
             if (acc > 100) acc = 100;
             TxtAcc.Text      = acc.ToString("0.0") + "%";
+            TxtAcc.Foreground = (Brush)FindResource(acc >= 95 ? "ScGreen" : (acc >= 85 ? "ScAccent" : "ScRed"));
 
             BuildMiniChart(s, sec);
             // 等控件布局完成后画热力条（异步避免 ActualWidth=0）

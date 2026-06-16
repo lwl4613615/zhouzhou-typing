@@ -1310,10 +1310,12 @@ namespace newgdq
             TxtHg.Text    = "0";
             TxtCz.Text    = "0";
             TxtRightLast.Text = "0:0";
-            TxtGroup.Text = $"重{_repeatCount} 呆0s 键准100%";
+            TxtGroup.Text = $"重{_repeatCount} 呆0s";
+            TxtAccBar.Text = "100%";
+            TxtAccBar.Foreground = AccColor(100);
         }
 
-        /// <summary>刷新信息条"状态"格：重打次数 / 发呆秒数 / 键准百分比。
+        /// <summary>刷新信息条"状态"格（重打次数 / 发呆秒数）与"键准"列（百分比 + 三档配色）。
         /// 由 TimerStats_Tick 每 200ms 调一次。</summary>
         private void RefreshExtraStatus()
         {
@@ -1325,7 +1327,17 @@ namespace newgdq
             double acc = keys > 0 ? (keys - _session.ImeBackspace * 2 - waste) * 100.0 / keys : 100;
             if (acc < 0) acc = 0;
             if (acc > 100) acc = 100;
-            TxtGroup.Text = $"重{_repeatCount} 呆{idleSec:0}s 键准{acc:0}%";
+            TxtGroup.Text = $"重{_repeatCount} 呆{idleSec:0}s";
+            TxtAccBar.Text = $"{acc:0}%";
+            TxtAccBar.Foreground = AccColor(acc);
+        }
+
+        /// <summary>键准三档配色：>=95 绿 / 85~95 黄 / <85 红。优先主题资源，缺失回退硬编码。</summary>
+        private Brush AccColor(double acc)
+        {
+            if (acc >= 95) return TryFindResource("SuccessFG") as Brush ?? new SolidColorBrush(Color.FromRgb(0x4C, 0xC9, 0x6A));
+            if (acc >= 85) return TryFindResource("AccentFG")  as Brush ?? new SolidColorBrush(Color.FromRgb(0xFF, 0xD2, 0x4C));
+            return                TryFindResource("ErrorFG")   as Brush ?? new SolidColorBrush(Color.FromRgb(0xE7, 0x3E, 0x3E));
         }
 
         // ===== 词组下划线 =====
@@ -1461,7 +1473,19 @@ namespace newgdq
                 _sending.State.SentSeg        = 0;
                 // 来源（SendTextWindow 当前 Tab 名）
                 _sending.State.SourceName     = state.SourceName ?? "-";
+                // 续打身份（resume-core）：随会话保留，供 RecordResumeProgress 重建身份
+                _sending.State.ArticleKind    = state.ArticleKind ?? "";
+                _sending.State.ArticleId      = state.ArticleId ?? "";
+                _sending.State.TickOut        = state.TickOut;
+                _sending.State.InitialMark    = state.InitialMark;
                 CancelAutoAdvance();     // 新会话先清掉任何挂起的自动续发
+                // 有有效续打记录则弹窗询问；用户选"继续"会跳到第 N 段并 return true，
+                // 这里就不再发默认首段（避免续打跳段后又被首段覆盖的双发）。
+                if (TryResumeSending())
+                {
+                    ShowSendStatusWindow();
+                    return;
+                }
                 SendNext();   // 立即发第一段
                 ShowSendStatusWindow();  // 自动弹发文状态窗
             };
@@ -1526,19 +1550,59 @@ namespace newgdq
         /// <summary>Ctrl+← / Ctrl+→ 相对跳段：仅顺序 / 一句结束模式支持。</summary>
         private void JumpSegRelative(int delta)
         {
-            if (!_sending.State.Active) return;
-            int cur = _sending.State.CurSeg - 1;
-            int target = cur + delta;
-            if (target < 1) target = 1;
-            string seg = _sending.JumpToSeg(target);
-            if (seg == null)
+            var s = _sending.State;
+            if (!s.Active) return;
+
+            // 模式守卫：仅 文章 + 顺序（含一句结束）支持段号跳转
+            if (Services.CloudMatchService.IsMatchArticleLoaded)
+            {
+                Services.Toast.Info("群比赛文不支持跳段");
+                return;
+            }
+            if (s.Type != SendingTextType.Article)
+            {
+                Services.Toast.Info("当前模式不支持段号跳转");
+                return;
+            }
+            if (s.IsRandom)
             {
                 Services.Toast.Info("当前模式不支持跳段（乱序）");
                 return;
             }
-            LoadArticle(seg, $"{_sending.State.Title} · 第 {target} 段");
+
+            int total = _sending.EnumerateSegments().Count;   // 总段数（仅顺序/一句结束可枚举）
+            if (total <= 0)
+            {
+                Services.Toast.Info("当前模式不支持跳段");
+                return;
+            }
+
+            int first = s.StartSeg;
+            int last  = s.StartSeg + total - 1;
+            int cur = s.CurSeg - 1;            // 当前已载入段号（StartSeg + SentSeg - 1）
+            int target = cur + delta;
+            if (target < first)
+            {
+                Services.Toast.Info("已经是第一段");
+                return;
+            }
+            if (target > last)
+            {
+                Services.Toast.Info("已经是最后一段");
+                return;
+            }
+
+            string seg = _sending.JumpToSeg(target);
+            if (seg == null)
+            {
+                Services.Toast.Info("当前模式不支持跳段");
+                return;
+            }
+            // 保成绩：LoadArticle 内 TryForceFinalizeLastSegment 会先结算上一段
+            LoadArticle(seg, $"{s.Title} · 第 {target} 段");
             _currentSegNo = target;
             _sendStatusWin?.Refresh();
+            RecordResumeProgress(target);   // 复用 resume-core 单一入口（内部自带范围守卫）
         }
 
         private Views.SendStatusWindow _sendStatusWin;
@@ -1567,6 +1631,7 @@ namespace newgdq
             {
                 Services.Toast.Success("全部发送完毕");
                 _sending.Stop();
+                ClearResumeProgress();   // 全部发完：清除续打记录，避免"继续到不存在的段"
                 return;
             }
             int curSeg = _sending.State.CurSeg - 1; // SentSeg 已 ++，当前段号 = StartSeg + (SentSeg - 1)
@@ -1574,6 +1639,60 @@ namespace newgdq
             string title = $"{_sending.State.Title} · 第 {curSeg} 段";
             LoadArticle(seg, title);
             _sendStatusWin?.Refresh();
+            RecordResumeProgress(curSeg);   // 进段即记录（手动发段 / 自动续发都经此处）
+        }
+
+        // ===== 自定义文章续打进度（resume-core）=====
+        /// <summary>记录续打进度的单一入口（resume-jump-help 跳段后也调本方法复用）。
+        /// 仅当当前会话在可续打范围（文章 + 顺序，非群比赛文）才写盘；否则忽略。</summary>
+        internal void RecordResumeProgress(int segNo)
+        {
+            var s = _sending.State;
+            if (s.Type != SendingTextType.Article || s.IsRandom) return;     // 乱序/词组/单字不写
+            if (s.InitialMark != 0) return;                                  // 仅起始位置=0 才能经 JumpToSeg(从0重切)精确复现，自定义起始位置不记
+            if (Services.CloudMatchService.IsMatchArticleLoaded) return;     // 群比赛云文不写
+            var rec = Services.ResumeProgressService.BuildIdentity(s);
+            rec.ResumeSegNo = segNo;
+            rec.UpdatedAt   = System.DateTime.Now.ToString("o");
+            Services.SettingsService.Instance.SendResumeProgress = rec;
+            try { Services.SettingsService.Save(); } catch { }
+        }
+
+        /// <summary>清除续打进度（全部发完时调用）。</summary>
+        private void ClearResumeProgress()
+        {
+            if (Services.SettingsService.Instance.SendResumeProgress == null) return;
+            Services.SettingsService.Instance.SendResumeProgress = null;
+            try { Services.SettingsService.Save(); } catch { }
+        }
+
+        /// <summary>开启发文时尝试续打：有有效记录则弹窗询问。
+        /// 返回 true 表示已按"续打第 N 段"载入该段（调用方不要再发默认首段，避免双发）。</summary>
+        private bool TryResumeSending()
+        {
+            var s = _sending.State;
+            // 范围守卫：仅 文章 + 顺序（发文流程本身即非群比赛文，故不查 IsMatchArticleLoaded —
+            // 该标记此刻反映的是上一篇载入态，尚未被本会话首段 LoadArticle 清除）
+            if (s.Type != SendingTextType.Article || s.IsRandom) return false;
+            var rec = Services.SettingsService.Instance.SendResumeProgress;
+            if (rec == null) return false;
+            var cur = Services.ResumeProgressService.BuildIdentity(s);
+            int total = _sending.EnumerateSegments().Count;
+            if (!Services.ResumeProgressService.IsResumeValid(rec, cur, total)) return false;
+
+            int n = rec.ResumeSegNo;
+            var r = System.Windows.MessageBox.Show(
+                $"上次停在第 {n} 段，是否继续？",
+                "续打", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question);
+            if (r != System.Windows.MessageBoxResult.Yes) return false;   // 选"否" → 走默认首段（记录不删）
+
+            string seg = _sending.JumpToSeg(n);   // 与 EnumerateSegments 同样从 Mark=0 重切，确定性复现第 N 段
+            if (seg == null) return false;         // 兜底：取不到则回默认流程
+            _currentSegNo = n;
+            LoadArticle(seg, $"{s.Title} · 第 {n} 段");
+            _sendStatusWin?.Refresh();
+            RecordResumeProgress(n);
+            return true;
         }
 
         // ===== 自动续发（打完一段自动发下一段）=====

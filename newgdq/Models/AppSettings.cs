@@ -108,5 +108,9 @@ namespace newgdq.Models
         [DataMember(EmitDefaultValue = false)] public string CloudNickname { get; set; }
         // 设备标识回退值：取不到 MachineGuid 时用，生成一次后持久化，保证跨重启一致。
         [DataMember(EmitDefaultValue = false)] public string DeviceIdFallback { get; set; }
+
+        // ===== 自定义文章续打进度 =====
+        // 只存最近 1 篇（顺序文章模式）。旧 settings 无此字段 → 反序列化为 null = 无记录，不崩。
+        [DataMember(EmitDefaultValue = false)] public SendResumeProgress SendResumeProgress { get; set; }
     }
 }

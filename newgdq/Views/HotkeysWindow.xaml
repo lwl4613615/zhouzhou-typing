@@ -75,6 +75,7 @@
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
                                 <TextBlock Grid.Row="0" Grid.Column="0" Text="F9" FontWeight="Bold" Margin="0,2"/>
                                 <TextBlock Grid.Row="0" Grid.Column="1" Text="复制最新一段成绩" Margin="0,2"/>
@@ -86,22 +87,24 @@
                                 <TextBlock Grid.Row="3" Grid.Column="1" Text="乱序重抽（发下一段）" Margin="0,2"/>
                                 <TextBlock Grid.Row="4" Grid.Column="0" Text="Ctrl+F2" FontWeight="Bold" Margin="0,2"/>
                                 <TextBlock Grid.Row="4" Grid.Column="1" Text="打开发文状态窗" Margin="0,2"/>
-                                <TextBlock Grid.Row="5" Grid.Column="0" Text="Ctrl+←/→" FontWeight="Bold" Margin="0,2"/>
-                                <TextBlock Grid.Row="5" Grid.Column="1" Text="上一段 / 下一段（跳段）" Margin="0,2"/>
-                                <TextBlock Grid.Row="6" Grid.Column="0" Text="Ctrl+T" FontWeight="Bold" Margin="0,2"/>
-                                <TextBlock Grid.Row="6" Grid.Column="1" Text="发送图片成绩" Margin="0,2"/>
-                                <TextBlock Grid.Row="7" Grid.Column="0" Text="Ctrl+B" FontWeight="Bold" Margin="0,2"/>
-                                <TextBlock Grid.Row="7" Grid.Column="1" Text="击键评定" Margin="0,2"/>
-                                <TextBlock Grid.Row="8" Grid.Column="0" Text="Ctrl+E" FontWeight="Bold" Margin="0,2"/>
-                                <TextBlock Grid.Row="8" Grid.Column="1" Text="速度分析" Margin="0,2"/>
-                                <TextBlock Grid.Row="9" Grid.Column="0" Text="Ctrl+G" FontWeight="Bold" Margin="0,2"/>
-                                <TextBlock Grid.Row="9" Grid.Column="1" Text="跟打报告" Margin="0,2"/>
-                                <TextBlock Grid.Row="10" Grid.Column="0" Text="Ctrl+Q" FontWeight="Bold" Margin="0,2"/>
-                                <TextBlock Grid.Row="10" Grid.Column="1" Text="将目前文章乱序" Margin="0,2"/>
-                                <TextBlock Grid.Row="11" Grid.Column="0" Text="Ctrl+W" FontWeight="Bold" Margin="0,2"/>
-                                <TextBlock Grid.Row="11" Grid.Column="1" Text="英文标点换中文" Margin="0,2"/>
-                                <TextBlock Grid.Row="12" Grid.Column="0" Text="Ctrl+M" FontWeight="Bold" Margin="0,2"/>
-                                <TextBlock Grid.Row="12" Grid.Column="1" Text="最小化 / 还原窗口（全局）" Margin="0,2"/>
+                                <TextBlock Grid.Row="5" Grid.Column="0" Text="Ctrl+←" FontWeight="Bold" Margin="0,2"/>
+                                <TextBlock Grid.Row="5" Grid.Column="1" Text="上一段（跳段，仅顺序/一句结束模式）" Margin="0,2"/>
+                                <TextBlock Grid.Row="6" Grid.Column="0" Text="Ctrl+→" FontWeight="Bold" Margin="0,2"/>
+                                <TextBlock Grid.Row="6" Grid.Column="1" Text="下一段（跳段，仅顺序/一句结束模式）" Margin="0,2"/>
+                                <TextBlock Grid.Row="7" Grid.Column="0" Text="Ctrl+T" FontWeight="Bold" Margin="0,2"/>
+                                <TextBlock Grid.Row="7" Grid.Column="1" Text="发送图片成绩" Margin="0,2"/>
+                                <TextBlock Grid.Row="8" Grid.Column="0" Text="Ctrl+B" FontWeight="Bold" Margin="0,2"/>
+                                <TextBlock Grid.Row="8" Grid.Column="1" Text="击键评定" Margin="0,2"/>
+                                <TextBlock Grid.Row="9" Grid.Column="0" Text="Ctrl+E" FontWeight="Bold" Margin="0,2"/>
+                                <TextBlock Grid.Row="9" Grid.Column="1" Text="速度分析" Margin="0,2"/>
+                                <TextBlock Grid.Row="10" Grid.Column="0" Text="Ctrl+G" FontWeight="Bold" Margin="0,2"/>
+                                <TextBlock Grid.Row="10" Grid.Column="1" Text="跟打报告" Margin="0,2"/>
+                                <TextBlock Grid.Row="11" Grid.Column="0" Text="Ctrl+Q" FontWeight="Bold" Margin="0,2"/>
+                                <TextBlock Grid.Row="11" Grid.Column="1" Text="将目前文章乱序" Margin="0,2"/>
+                                <TextBlock Grid.Row="12" Grid.Column="0" Text="Ctrl+W" FontWeight="Bold" Margin="0,2"/>
+                                <TextBlock Grid.Row="12" Grid.Column="1" Text="英文标点换中文" Margin="0,2"/>
+                                <TextBlock Grid.Row="13" Grid.Column="0" Text="Ctrl+M" FontWeight="Bold" Margin="0,2"/>
+                                <TextBlock Grid.Row="13" Grid.Column="1" Text="最小化 / 还原窗口（全局）" Margin="0,2"/>
                             </Grid>
                         </StackPanel>
                     </Border>
