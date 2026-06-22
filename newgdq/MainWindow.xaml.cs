@@ -101,6 +101,7 @@ namespace newgdq
         private void ScrollCompareToCursor(int len)
         {
             if (_charRuns.Count == 0) return;
+            if (_imeComposing) return;   // 拼音合成期不滚动，避免合成窗口内触发布局变更；上屏后下一次 TextChanged 会补滚
             int idx = Math.Min(Math.Max(len, 0), _charRuns.Count - 1);
             // 延迟到 Background 优先级 → 等 WPF 完成本轮 Measure/Arrange 再取 rect，
             // 否则 IME 一次性上屏多字时 GetCharacterRect 会返回 IsEmpty，导致只能 BringIntoView
@@ -121,13 +122,19 @@ namespace newgdq
                     double anchorY = RtbCompare.ActualHeight * targetTopRatio;
                     double delta = rect.Top - anchorY;
                     if (Math.Abs(delta) < 4) return;
-                    double newOffset = RtbCompare.VerticalOffset + delta;
+                    var sv = GetCompareScrollViewer();
+                    if (sv == null) return;
+                    double newOffset = sv.VerticalOffset + delta;
                     if (newOffset < 0) newOffset = 0;
-                    RtbCompare.ScrollToVerticalOffset(newOffset);
+                    sv.ScrollToVerticalOffset(newOffset);
                 }
                 catch { }
             }), System.Windows.Threading.DispatcherPriority.Background);
         }
+
+        // FlowDocumentScrollViewer 不直接暴露滚动 API，取模板内部 ScrollViewer 部件 PART_ContentHost 操作（bug18 改 FDSV 后的等价滚动入口）。
+        private ScrollViewer GetCompareScrollViewer()
+            => RtbCompare.Template?.FindName("PART_ContentHost", RtbCompare) as ScrollViewer;
 
         /// <summary>结算时统一染色：先涂回改(浅黄)，再涂慢字(浅绿)，错字红色已由 TextChanged 维护。
         /// 慢字背景优先级高于回改（最近一次输入的"慢"事件覆盖之前的"回改"标记）。</summary>
@@ -1279,7 +1286,7 @@ namespace newgdq
             // 新段载入后把对照区滚回顶部 (BringIntoView 在 Loaded 之前可能没生效，用 Dispatcher 延后一帧)
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                try { RtbCompare.ScrollToHome(); } catch { }
+                try { GetCompareScrollViewer()?.ScrollToHome(); } catch { }
                 try { TbxInput.ScrollToHome(); } catch { }
             }), System.Windows.Threading.DispatcherPriority.Loaded);
 
