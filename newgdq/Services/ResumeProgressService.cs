@@ -56,6 +56,23 @@ namespace newgdq.Services
             };
         }
 
+        /// <summary>判定两条记录是否同一"续打身份"（来源/文章/切法全一致，不含段号/标题/时间）。</summary>
+        public static bool SameIdentity(SendResumeProgress a, SendResumeProgress b)
+        {
+            if (a == null || b == null) return false;
+            if (a.Type != b.Type) return false;
+            if (a.IsRandom || b.IsRandom) return false;
+            if (!StrEqIgnoreCase(a.ArticleKind, b.ArticleKind)) return false;
+            if (!StrEqIgnoreCase(a.ArticleId, b.ArticleId)) return false;
+            if (!StrEqOrdinal(a.TextHash, b.TextHash)) return false;
+            if (a.CountPerSeg != b.CountPerSeg) return false;
+            if (a.OneSentenceEnd != b.OneSentenceEnd) return false;
+            if (a.StartSeg != b.StartSeg) return false;
+            if (a.InitialMark != b.InitialMark) return false;
+            if (a.TickOut != b.TickOut) return false;
+            return true;
+        }
+
         /// <summary>判定记录 rec 对当前会话身份 current 是否构成有效续打。
         /// totalSegments = 当前会话可枚举的总段数（SendingService.EnumerateSegments().Count）。
         /// 任一身份/切法不符、段号越界 → false。</summary>
@@ -63,16 +80,7 @@ namespace newgdq.Services
         {
             if (rec == null || current == null) return false;
             if (current.Type != (int)SendingTextType.Article) return false;
-            if (rec.Type != (int)SendingTextType.Article) return false;
-            if (rec.IsRandom || current.IsRandom) return false;
-            if (!StrEqIgnoreCase(rec.ArticleKind, current.ArticleKind)) return false;
-            if (!StrEqIgnoreCase(rec.ArticleId, current.ArticleId)) return false;
-            if (!StrEqOrdinal(rec.TextHash, current.TextHash)) return false;
-            if (rec.CountPerSeg != current.CountPerSeg) return false;
-            if (rec.OneSentenceEnd != current.OneSentenceEnd) return false;
-            if (rec.StartSeg != current.StartSeg) return false;
-            if (rec.InitialMark != current.InitialMark) return false;
-            if (rec.TickOut != current.TickOut) return false;
+            if (!SameIdentity(rec, current)) return false;
             int first = rec.StartSeg;
             int last  = rec.StartSeg + totalSegments - 1;
             if (rec.ResumeSegNo < first) return false;

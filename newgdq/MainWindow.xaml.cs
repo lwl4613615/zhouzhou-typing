@@ -1649,6 +1649,7 @@ namespace newgdq
         {
             var s = _sending.State;
             if (s.Type != SendingTextType.Article || s.IsRandom) return;     // 乱序/词组/单字不写
+            if (s.ArticleKind != "CustomFile") return;                       // 续打仅限自定义文章；自带/剪切板不记录
             if (s.InitialMark != 0) return;                                  // 仅起始位置=0 才能经 JumpToSeg(从0重切)精确复现，自定义起始位置不记
             if (Services.CloudMatchService.IsMatchArticleLoaded) return;     // 群比赛云文不写
             var rec = Services.ResumeProgressService.BuildIdentity(s);
@@ -1658,10 +1659,13 @@ namespace newgdq
             try { Services.SettingsService.Save(); } catch { }
         }
 
-        /// <summary>清除续打进度（全部发完时调用）。</summary>
+        /// <summary>清除续打进度（当前这篇全部发完时调用）。仅清除属于当前会话这篇的记录，避免发送其它来源/文章时误删自定义文章续打记忆。</summary>
         private void ClearResumeProgress()
         {
-            if (Services.SettingsService.Instance.SendResumeProgress == null) return;
+            var rec = Services.SettingsService.Instance.SendResumeProgress;
+            if (rec == null) return;
+            var cur = Services.ResumeProgressService.BuildIdentity(_sending.State);
+            if (!Services.ResumeProgressService.SameIdentity(rec, cur)) return;
             Services.SettingsService.Instance.SendResumeProgress = null;
             try { Services.SettingsService.Save(); } catch { }
         }
@@ -1674,6 +1678,7 @@ namespace newgdq
             // 范围守卫：仅 文章 + 顺序（发文流程本身即非群比赛文，故不查 IsMatchArticleLoaded —
             // 该标记此刻反映的是上一篇载入态，尚未被本会话首段 LoadArticle 清除）
             if (s.Type != SendingTextType.Article || s.IsRandom) return false;
+            if (s.ArticleKind != "CustomFile") return false;                 // 续打仅限自定义文章
             var rec = Services.SettingsService.Instance.SendResumeProgress;
             if (rec == null) return false;
             var cur = Services.ResumeProgressService.BuildIdentity(s);
