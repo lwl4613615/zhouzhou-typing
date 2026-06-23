@@ -3061,6 +3061,10 @@ namespace newgdq
                         Services.Toast.Info($"交得太快啦，{result.RetryAfterSeconds} 秒后可再上传；本次本地成绩已结算", 4);
                         ShowCloudScoreCard(speed, jj, mc, cz, sec, result, null, submitToken);
                         return;
+                    case "local_in_flight":
+                        Services.Toast.Info("上一卷正在上传，请稍候再交；本次本地成绩已结算", 4);
+                        ShowCloudScoreCard(speed, jj, mc, cz, sec, result, null, submitToken);
+                        return;
                     case "mode_mismatch":
                         Services.Toast.Error("文章模式不符，请用正确入口重新抓取", 4);
                         return;

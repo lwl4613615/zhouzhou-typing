@@ -50,6 +50,9 @@ namespace newgdq.Services
         private const int DailyMinIntervalMs = 5000;
         // 上次 daily 成功提交的时间戳（用于 daily 最小间隔护栏；match 提交不写，跨模式隔离）。
         private static DateTime _lastDailySubmitUtc = DateTime.MinValue;
+        // bug24：daily 上传在途锁。发起即置位，所有返回/异常出口在 finally 释放；在途期间再次
+        // daily 上传直接本地返回 local_in_flight、不发 POST（防在途窗口重复云调用 + 重复扣次数）。
+        private static bool _dailyInFlight = false;
 
         // 本机本次运行已成功交卷的口令集合（防重复上传；仅 match 模式记录/拦截）。
         private static readonly HashSet<string> _submittedTokens = new HashSet<string>(StringComparer.Ordinal);
@@ -68,6 +71,7 @@ namespace newgdq.Services
             public string Code;            // 统一返回码（分流一律基于此机器码，不基于中文 err）
             public bool DailyOverLimit;    // 429 daily_over_limit
             public bool LocalTooFast;      // 本地 daily 护栏拦截（未发云请求）
+            public bool LocalInFlight;     // bug24：本地 daily 在途拦截（上一卷上传中，未发云请求）
             public bool Retryable;         // 可重试（write_conflict / rate_limited）
             public int RetryAfterSeconds;  // 建议重试等待秒数
             public int? MyNo;              // 云端回的当前名次（null=未上榜/未刷新）
@@ -247,6 +251,21 @@ namespace newgdq.Services
             if (!isDaily && _submittedTokens.Contains(token))
                 throw new InvalidOperationException("本场你已交过卷了（一场只能交一次）");
 
+            // bug24：daily 在途锁。上一卷 POST 已发未返回时，再次 daily 上传直接本地返回、不发 POST、
+            // 不加新重试（纯客户端），防在途窗口重复云调用 + 重复扣 daily 次数。
+            if (isDaily && _dailyInFlight)
+            {
+                return new UploadResult
+                {
+                    Ok = false,
+                    IsDaily = true,
+                    Code = "local_in_flight",
+                    LocalInFlight = true,
+                    Name = name,
+                    New = speed,
+                };
+            }
+
             // daily 护栏：客户端最小提交间隔，防脚本式/轮询式自动连发。
             // bug15 并入 bug16：超频不抛异常、不向云端发请求（省钱），返回统一 local_too_fast code。
             if (isDaily)
@@ -268,6 +287,10 @@ namespace newgdq.Services
                 }
             }
 
+            // bug24：5 秒护栏已通过，此处置 daily 在途锁；从 payload 构造到方法所有出口由下面 try/finally 兜底释放。
+            if (isDaily) _dailyInFlight = true;
+            try
+            {
             var payload = new
             {
                 deviceId = deviceId,
@@ -410,6 +433,11 @@ namespace newgdq.Services
                 }
 
                 return result;
+            }
+            }
+            finally
+            {
+                if (isDaily) _dailyInFlight = false;   // bug24：所有出口（含连不上云的 throw）都经此释放在途锁，避免永久锁死
             }
         }
 
