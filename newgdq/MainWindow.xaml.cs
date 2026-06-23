@@ -1582,6 +1582,11 @@ namespace newgdq
                 Services.Toast.Info("当前模式不支持跳段（乱序）");
                 return;
             }
+            if (s.InitialMark != 0)
+            {
+                Services.Toast.Info("自定义起始位置下不支持跳段");
+                return;
+            }
 
             int total = _sending.EnumerateSegments().Count;   // 总段数（仅顺序/一句结束可枚举）
             if (total <= 0)
@@ -2049,6 +2054,11 @@ namespace newgdq
             if (!_sending.State.Active)
             {
                 Services.Toast.Info("尚未开启发文，请先菜单 → 发文 → 发文...");
+                return;
+            }
+            if (_sending.State.InitialMark != 0)
+            {
+                Services.Toast.Info("自定义起始位置下不支持跳段");
                 return;
             }
             var segs = _sending.EnumerateSegments(previewLen: 14, maxCount: 300);
