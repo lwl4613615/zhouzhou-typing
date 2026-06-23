@@ -740,10 +740,12 @@ namespace newgdq
             double cellW = _mapW / total;
             double drawCellW = Math.Max(cellW, 1.5);
 
-            // 三层高度分配（总高 32）：上 12 = 刻度，中 8 = 标记，下 12 = 色块
-            // 三层高度：顶 14 刻度 / 中 32 标签堆叠区(2-3 行 ms 标签) / 下 14 色块
-            const double TopH = 14, MidH = 32, BotH = 14;
-            double topY = 0, midY = TopH, botY = TopH + MidH;
+            // 三层高度按容器实际高度(_mapH)自适应分配，不写死 60：上=刻度、中=慢字标记堆叠、下=色块。
+            // 字号固定(10)，故上层刻度/下层色块取固定高度保证可读，中层取余下空间随容器伸缩；
+            // 标签行数多时由下方 needH 撑高容器，自适应同样生效（40px 下三层不重叠）。
+            const double TopH = 12, BotH = 8;
+            double topY = 0, midY = TopH, botY = _mapH - BotH;
+            double MidH = botY - midY;
 
             // ===== 第 1 层：顶部刻度（0%/25%/50%/75%/100%）=====
             var tickColor = new SolidColorBrush(Color.FromArgb(0x88, 0xFF, 0xFF, 0xFF));
@@ -839,9 +841,9 @@ namespace newgdq
                 MapCanvas.Children.Add(info.lbl);
             }
 
-            // 如果标签层数超过 1，动态加高容器（让标签不被裁）
+            // 如果标签层数超过 1，动态加高容器（让标签不被裁）：刻度 + N 行标签 + 三角(6) + 色块 + 边距
             int neededRows = rows.Count;
-            double needH = topY + neededRows * LineH + MidH + BotH + 2;
+            double needH = TopH + neededRows * LineH + 6 + BotH + 2;
             if (MapPanel.Height < needH) MapPanel.Height = needH;
 
             // ===== 第 3 层：色块条 =====

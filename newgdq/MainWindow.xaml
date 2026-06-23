@@ -683,7 +683,7 @@
         </Border>
 
         <!-- 5. 底部：标记栏（贴底） -->
-        <Border DockPanel.Dock="Bottom" x:Name="MarkerBar" Background="{DynamicResource PanelBG}" Padding="4,2">
+        <Border DockPanel.Dock="Bottom" x:Name="MarkerBar" Background="{DynamicResource PanelBG}" Padding="3,1">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <ToggleButton x:Name="TogImage" Style="{StaticResource MarkerText}" Content="图片"
                               ToolTip="完成段时自动复制成绩图到剪贴板"/>
@@ -715,7 +715,7 @@
         <!-- 6. 节奏热力条（贴底标记栏上方）：每格=1字，绿→红 = 该字耗时 -->
         <Border DockPanel.Dock="Bottom" x:Name="MapPanel" Visibility="Collapsed"
                 Background="{DynamicResource AltRowBG}" BorderBrush="{DynamicResource GridLine}" BorderThickness="0,1,0,0"
-                Height="60" ToolTip="节奏热力条：上=刻度(0-100%)，中=慢字标记(纵向堆叠避免重叠)，下=色块（绿快/红卡）">
+                Height="40" ToolTip="节奏热力条：上=刻度(0-100%)，中=慢字标记(纵向堆叠避免重叠)，下=色块（绿快/红卡）">
             <Canvas x:Name="MapCanvas" ClipToBounds="True" SizeChanged="MapCanvas_SizeChanged"/>
         </Border>
 
@@ -767,7 +767,7 @@
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="18"/>
-                        <RowDefinition Height="14"/>
+                        <RowDefinition Height="12"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" MinWidth="72"/>             <!-- 时间 -->
