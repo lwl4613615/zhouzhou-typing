@@ -2348,6 +2348,8 @@ namespace newgdq
             bool isEnter     = vk == 0x0D;
             bool isBackspace = vk == 0x08;
             bool isSpace     = vk == 0x20;
+            // bug26: Ctrl 组合键（未被上面快捷键 switch 命中的，如 Ctrl+A/C/S）不计入击键，否则键数虚高
+            if (IsCtrlDown()) return;
             if (!(isAlpha || isDigit || isNumpad || isPunct || isEnter || isBackspace || isSpace))
                 return;
 
@@ -2415,6 +2417,8 @@ namespace newgdq
             bool isEnter     = vk == 0x0D;
             bool isBackspace = vk == 0x08;
             bool isSpace     = vk == 0x20;
+            // bug26: Ctrl 组合键不计入击键（与 KeyHook 串行路径口径一致）
+            if ((System.Windows.Input.Keyboard.Modifiers & System.Windows.Input.ModifierKeys.Control) != 0) return;
             if (!(isAlpha || isDigit || isNumpad || isPunct || isEnter || isBackspace || isSpace)) return;
 
             _session.Keys++;
