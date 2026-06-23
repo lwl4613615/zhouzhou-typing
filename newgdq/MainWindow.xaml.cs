@@ -1517,12 +1517,20 @@ namespace newgdq
                 Services.Toast.Info("尚未开启发文，请先菜单 → 发文 → 发文...");
                 return;
             }
+            var savedRandom = _sending.State.IsRandom;
             _sending.State.IsRandom = true;
             // 如果之前是顺序表刷文章，乱序只对 Single 生效。处理：强制按 Single 模式抽。
             var origType = _sending.State.Type;
             _sending.State.Type = SendingTextType.Single;
-            SendNext();
-            _sending.State.Type = origType;
+            try
+            {
+                SendNext();
+            }
+            finally
+            {
+                _sending.State.Type = origType;
+                _sending.State.IsRandom = savedRandom;
+            }
         }
 
         // 供 SendStatusWindow 调用的公共入口
