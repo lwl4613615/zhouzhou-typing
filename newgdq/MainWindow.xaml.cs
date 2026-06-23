@@ -177,6 +177,12 @@ namespace newgdq
             InitializeComponent();
             TbxInput.TextChanged += TbxInput_TextChanged;
             TbxInput.PreviewKeyDown += TbxInput_PreviewKeyDown;
+            // bug19：跟打/比赛态全程禁止粘贴 / 剪切 / 撤销 / 重做 / 拖放（保留复制），防止整段粘贴绕过逐键污染统计。
+            // DataObject.Pasting 拦所有粘贴入口（Ctrl+V / Shift+Insert / 右键 / 编程）；命令钩子拦剪切/撤销/重做（及粘贴冗余）；拖放单独拦。
+            System.Windows.DataObject.AddPastingHandler(TbxInput, TbxInput_Pasting);
+            System.Windows.Input.CommandManager.AddPreviewExecutedHandler(TbxInput, TbxInput_PreviewExecuted);
+            TbxInput.PreviewDragOver += TbxInput_PreviewDragOverOrDrop;
+            TbxInput.PreviewDrop += TbxInput_PreviewDragOverOrDrop;
             // IME 合成态侦测（方案 A'）：用 WPF TSF 合成事件维护 _imeComposing，
             // 合成中（拼音未上屏）才保护尾部占位串；非合成（英文直打/已上屏）则逐字判错。
             System.Windows.Input.TextCompositionManager.AddPreviewTextInputStartHandler(TbxInput, TbxInput_TextInputStart);
@@ -2389,6 +2395,50 @@ namespace newgdq
 
             _session.Keys++;
             App.Diag("TBOX", $"vk=0x{vk:X2} key={k} Keys={_session.Keys} Last={_session.LastInputLen} rawLen={(TbxInput.Text?.Length ?? 0)}");
+        }
+
+        // ===== bug19：跟打输入框禁止粘贴 / 剪切 / 撤销 / 重做 / 拖放（保留复制）=====
+        // 禁止状态 = 输入框处于"可跟打态"：已载入文本且非只读。D1=B：所有跟打态全程禁（比赛态同样满足故一并禁），
+        // 不依赖只在比赛态为真的标志。正常逐键输入 / 退格 / IME 合成上屏均不触发以下任何 handler，故不受影响。
+        private bool IsTypingEditLocked() => _session.TypeText.Length > 0 && !TbxInput.IsReadOnly;
+
+        // 提示文案按是否比赛态区分；用现有右上角 Toast。
+        private void WarnTypingEditBlocked(string action)
+        {
+            bool isMatch = Services.CloudMatchService.IsMatchArticleLoaded
+                        && !Services.CloudMatchService.IsDailyArticle;
+            Services.Toast.Warning((isMatch ? "比赛中禁止" : "跟打输入框禁止") + action, 2);
+        }
+
+        // 最关键一道：DataObject.Pasting 覆盖所有粘贴入口（Ctrl+V / Shift+Insert / 右键粘贴 / 编程 Paste），禁止态一律取消。
+        private void TbxInput_Pasting(object sender, DataObjectPastingEventArgs e)
+        {
+            if (!IsTypingEditLocked()) return;
+            e.CancelCommand();
+            WarnTypingEditBlocked("粘贴");
+        }
+
+        // 编辑命令拦截：禁止态下拦掉 粘贴 / 剪切 / 撤销 / 重做（含右键菜单与组合键）；复制（Copy）及其它命令放行。
+        private void TbxInput_PreviewExecuted(object sender, System.Windows.Input.ExecutedRoutedEventArgs e)
+        {
+            if (!IsTypingEditLocked()) return;
+            var cmd = e.Command;
+            string action;
+            if (cmd == System.Windows.Input.ApplicationCommands.Paste) action = "粘贴";
+            else if (cmd == System.Windows.Input.ApplicationCommands.Cut) action = "剪切";
+            else if (cmd == System.Windows.Input.ApplicationCommands.Undo) action = "撤销";
+            else if (cmd == System.Windows.Input.ApplicationCommands.Redo) action = "重做";
+            else return;
+            e.Handled = true;
+            WarnTypingEditBlocked(action);
+        }
+
+        // 拖入文本：禁止态下取消接收（Effects=None + Handled），不让拖一段文本绕过逐键。
+        private void TbxInput_PreviewDragOverOrDrop(object sender, DragEventArgs e)
+        {
+            if (!IsTypingEditLocked()) return;
+            e.Effects = DragDropEffects.None;
+            e.Handled = true;
         }
 
         // ===== IME 合成态侦测（方案 A'）=====
