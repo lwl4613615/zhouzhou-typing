@@ -14,7 +14,7 @@ using OxyPlot.Series;
 namespace newgdq.Views
 {
     /// <summary>
-    /// 成绩趋势内嵌视图 —— 与 TrendWindow 同源逻辑，用于在主窗口内容区内嵌展示（E：分析页内嵌）。
+    /// 成绩趋势内嵌视图 —— 用于在主窗口内容区内嵌展示（E：分析页内嵌）。
     /// </summary>
     public partial class TrendView : UserControl
     {

@@ -10,7 +10,7 @@ using newgdq.Models;
 namespace newgdq.Views
 {
     /// <summary>
-    /// 速度分析内嵌视图 —— 与 SpeedAnalysisWindow 同源逻辑，用于在主窗口内容区内嵌展示（E：分析页内嵌）。
+    /// 速度分析内嵌视图 —— 用于在主窗口内容区内嵌展示（E：分析页内嵌）。
     /// </summary>
     public partial class SpeedAnalysisView : UserControl
     {

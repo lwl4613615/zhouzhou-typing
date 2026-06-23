@@ -12,7 +12,7 @@ using newgdq.Services;
 namespace newgdq.Views
 {
     /// <summary>
-    /// 错字本内嵌视图 —— 与 ErrorBookWindow 同源逻辑，用于在主窗口内容区内嵌展示（E：分析页内嵌）。
+    /// 错字本内嵌视图 —— 用于在主窗口内容区内嵌展示（E：分析页内嵌）。
     /// 「生成练习」闭环：调用主窗 LoadPracticeText 后退出分析页回到跟打区。
     /// </summary>
     public partial class ErrorBookView : UserControl

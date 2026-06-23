@@ -5,7 +5,7 @@ using newgdq.Services;
 namespace newgdq.Views
 {
     /// <summary>
-    /// 平均成绩内嵌视图 —— 与 AverageWindow 同源逻辑，用于在主窗口内容区内嵌展示（E：分析页内嵌）。
+    /// 平均成绩内嵌视图 —— 用于在主窗口内容区内嵌展示（E：分析页内嵌）。
     /// </summary>
     public partial class AverageView : UserControl
     {

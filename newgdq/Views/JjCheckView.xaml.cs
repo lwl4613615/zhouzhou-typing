@@ -9,7 +9,7 @@ using newgdq.Services;
 namespace newgdq.Views
 {
     /// <summary>
-    /// 击键评定内嵌视图 —— 与 JjCheckWindow 同源逻辑，用于在主窗口内容区内嵌展示（E：分析页内嵌）。
+    /// 击键评定内嵌视图 —— 用于在主窗口内容区内嵌展示（E：分析页内嵌）。
     /// </summary>
     public partial class JjCheckView : UserControl
     {
