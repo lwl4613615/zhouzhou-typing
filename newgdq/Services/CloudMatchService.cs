@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -23,6 +24,9 @@ namespace newgdq.Services
 
         // 抓来的发文内容上限：防云端被攻破/中间人返回超大正文撑爆内存。
         private const int MaxArticleContentLength = 100_000;
+
+        // 抓文响应体字节上限：拿到响应头先按 Content-Length 预检，缺失时流式累计超限即中止，防超大响应 OOM。
+        private const int MaxResponseBytes = 1_048_576; // 1MB
 
         // 当前 F4 抓到的比赛文对应的本场口令（非空 = 当前正在跟打云比赛文）。
         public static string CurrentArticleToken { get; private set; }
@@ -133,15 +137,41 @@ namespace newgdq.Services
             string body;
             try
             {
-                using (var resp = await _http.GetAsync(reqUrl).ConfigureAwait(false))
+                // ResponseHeadersRead：拿到响应头即返回，不预先缓冲整个正文（防超大响应 OOM）。
+                using (var resp = await _http.GetAsync(reqUrl, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false))
                 {
-                    body = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    // 先按响应头里的 Content-Length 预检：声明超过 1MB 直接拒绝，不读正文。
+                    long? declaredLen = resp.Content.Headers.ContentLength;
+                    if (declaredLen.HasValue && declaredLen.Value > MaxResponseBytes)
+                    {
+                        body = null;
+                    }
+                    else
+                    {
+                        // Content-Length 缺失/不可信：流式累计读取，超过 1MB 立即中止，不把超大内容读进内存。
+                        using (var stream = await resp.Content.ReadAsStreamAsync().ConfigureAwait(false))
+                        using (var ms = new MemoryStream())
+                        {
+                            var buffer = new byte[8192];
+                            bool tooLarge = false;
+                            int read;
+                            while ((read = await stream.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false)) > 0)
+                            {
+                                if (ms.Length + read > MaxResponseBytes) { tooLarge = true; break; }
+                                ms.Write(buffer, 0, read);
+                            }
+                            body = tooLarge ? null : Encoding.UTF8.GetString(ms.ToArray());
+                        }
+                    }
                 }
             }
             catch (Exception ex)
             {
                 throw new InvalidOperationException("连不上云服务器：" + ex.Message);
             }
+            // body == null 表示响应体超过上限（预检拒绝或流式中止）：直接拒绝，不重试、不重新抓文。
+            if (body == null)
+                throw new InvalidOperationException($"服务器响应过大（超过 {MaxResponseBytes} 字节），已拒绝载入");
 
             JsonDocument doc;
             try { doc = JsonDocument.Parse(body); }
