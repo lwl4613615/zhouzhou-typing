@@ -1700,7 +1700,10 @@ namespace newgdq
             var rec = Services.SettingsService.Instance.SendResumeProgress;
             if (rec == null) return false;
             var cur = Services.ResumeProgressService.BuildIdentity(s);
-            int total = _sending.EnumerateSegments().Count;
+            // 续打校验要真实总段数，须与写入端(FinishTyping 的 Mark 判定)一致：去掉默认 500 上限，
+            // 否则 >500 段时 total 被截断、写入端记录的第 501 段会被 IsResumeValid 判越界而读不出。
+            // previewLen:1 省去无用的预览 substring 开销（此处只取 .Count）。续打仅开发文时触发一次，低频。
+            int total = _sending.EnumerateSegments(previewLen: 1, maxCount: int.MaxValue).Count;
             if (!Services.ResumeProgressService.IsResumeValid(rec, cur, total)) return false;
 
             int n = rec.ResumeSegNo;
@@ -2084,6 +2087,7 @@ namespace newgdq
                     if (seg == null) { Services.Toast.Warning("跳转失败"); return; }
                     LoadArticle(seg, $"{_sending.State.Title} · 第 {captured} 段");
                     _currentSegNo = captured;
+                    RecordResumeProgress(captured);   // 与 Ctrl+←/→ 跳段一致：补记续打（内部自带范围守卫）
                 };
                 menu.Items.Add(mi);
             }
@@ -2861,6 +2865,21 @@ namespace newgdq
                 RestoreAfterCloudFinish();
             else if (restoreAfter)
                 ShowSessionSlowSummary();   // 普通练习结算：对照区一角浮现"本场最卡字"（云结算随后会复位/清空，不展示）
+
+            // 自定义文章续打：正常打完当前段后把续打记录推进到"下次应载入段"。
+            // 仅正常完成（restoreAfter）且当前确为发文段（_currentSegNo>0）才推进；强制结算/换文/复位走
+            // FinishTyping(false) 不在此推进。
+            // 用 Mark 判是否还有下一段：Mark 是发文推进的真实偏移（载入第 N 段后即"第 N 段末尾"），
+            // 也是 NextSegment 判 null 的依据。不受"停止发文"(Active=false 致 EnumerateSegments 返空)
+            // 与 EnumerateSegments 的 500 段上限影响。CustomFile/InitialMark/群比赛等范围由
+            // RecordResumeProgress/ClearResumeProgress 内部守卫处理。
+            if (restoreAfter && _currentSegNo > 0)
+            {
+                if (_sending.State.Mark < _sending.State.FullText.Length)
+                    RecordResumeProgress(_currentSegNo + 1);   // 还有下一段 → 推进
+                else
+                    ClearResumeProgress();                     // 当前是末段 → 清除
+            }
         }
 
         /// <summary>群比赛/每日文打完并已触发交卷后，解除"完成只读冻结"，把界面复位成可重新开始的状态。
