@@ -2304,7 +2304,10 @@ namespace newgdq
                 }
             }
 
-            if (!_session.Started) return;
+            // bug20: 段首首键/首个 IME 音节漏计修复。Started 要等 TextChanged 见到首个 committed
+            // 字符才置 true，触发首字的物理键此刻 Started==false，原"未 Started 即 return"会整串跳过。
+            // 放行到下方"计 Keys"，但补齐 Started 隐含前置：已载入文本且非只读（Started==true 行为不变）。
+            if (!_session.Started && (_session.TypeText.Length == 0 || TbxInput.IsReadOnly)) return;
             if (!TbxInput.IsKeyboardFocused) return;
 
             // 击键只计字母 / 数字 / 标点 / 回车 / 退格 / 空格（与原版一致，排除修饰键、功能键、方向键、Tab、Esc、Win 等）
@@ -2329,6 +2332,10 @@ namespace newgdq
                 _session.Keys++;
                 App.Diag("COUNT", $"hook vk=0x{vk:X2} Keys={_session.Keys}");
             }
+
+            // bug20: 选重 / 左右手等其余统计仍按原约定等到 Started 之后再计——本单只补回首键 Keys，
+            // 不动其它统计项（未 Started 时 LastInputLen=0，提前算选重会误判）。
+            if (!_session.Started) return;
 
             // 选重计数（对齐老版）：按 ; (0xBA) / ' (0xDE) / 0-9 数字主键 时，
             // 若原文当前位置的字符不是这些"选重键字符"，认为用户在挑候选 → +1
@@ -2355,7 +2362,9 @@ namespace newgdq
             // Esc 取消合成 → 清状态机，避免残留 _imeComposing=true（不依赖 _session.Started）
             if (e.Key == System.Windows.Input.Key.Escape) ResetImeCompose();
 
-            if (!_session.Started) return;
+            // bug20: 并击口径在此累加 Keys；未 Started（首字未提交）时也放行，否则段首首键/首音节漏计。
+            // 补齐 Started 隐含前置：已载入文本且非只读（Started==true 行为不变）。
+            if (!_session.Started && (_session.TypeText.Length == 0 || TbxInput.IsReadOnly)) return;
 
             // 回改 Hg 由 TextChanged 的 back-range 分支统一计（committed 文本变短才算真回改，避免钩子时序竞争）。
             // 这里只负责并击模式下的 Keys 累加；串行模式不在这里计。
