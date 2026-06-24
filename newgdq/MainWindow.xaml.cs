@@ -346,9 +346,9 @@ namespace newgdq
 
             // 字体
             if (!string.IsNullOrEmpty(s.CompareFontFamily))
-                RtbCompare.FontFamily = new FontFamily(s.CompareFontFamily);
+                RtbCompare.Document.FontFamily = new FontFamily(s.CompareFontFamily);
             if (s.CompareFontSize is double cfs && cfs >= 8 && cfs <= 96)
-                RtbCompare.FontSize = cfs;
+                RtbCompare.Document.FontSize = cfs;
             if (!string.IsNullOrEmpty(s.InputFontFamily))
                 TbxInput.FontFamily = new FontFamily(s.InputFontFamily);
             if (s.InputFontSize is double ifs && ifs >= 8 && ifs <= 96)
