@@ -136,6 +136,15 @@ namespace newgdq
         private ScrollViewer GetCompareScrollViewer()
             => RtbCompare.Template?.FindName("PART_ContentHost", RtbCompare) as ScrollViewer;
 
+        // 反馈7：对照区可选中复制但禁止粘贴——拦 Ctrl+V / Shift+Insert（只读 FDSV 本就不接受正文粘贴，此为明确语义+防御）。
+        private void RtbCompare_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            var mods = System.Windows.Input.Keyboard.Modifiers;
+            bool ctrlV = (mods & System.Windows.Input.ModifierKeys.Control) != 0 && e.Key == System.Windows.Input.Key.V;
+            bool shiftInsert = (mods & System.Windows.Input.ModifierKeys.Shift) != 0 && e.Key == System.Windows.Input.Key.Insert;
+            if (ctrlV || shiftInsert) e.Handled = true;
+        }
+
         /// <summary>结算时统一染色：先涂回改(浅黄)，再涂慢字(浅绿)，错字红色已由 TextChanged 维护。
         /// 慢字背景优先级高于回改（最近一次输入的"慢"事件覆盖之前的"回改"标记）。</summary>
         private void ApplyResultMarks()
@@ -188,6 +197,8 @@ namespace newgdq
             System.Windows.Input.TextCompositionManager.AddPreviewTextInputStartHandler(TbxInput, TbxInput_TextInputStart);
             System.Windows.Input.TextCompositionManager.AddPreviewTextInputHandler(TbxInput, TbxInput_TextInputDone);
             TbxInput.LostFocus += (s, e) => { ResetImeCompose(); PauseType(); };
+            // 反馈7：对照区(只读 FlowDocumentScrollViewer)可选中复制，但拦粘贴入口（Ctrl+V / Shift+Insert）。
+            RtbCompare.PreviewKeyDown += RtbCompare_PreviewKeyDown;
             _flashTimer.Tick += FlashTimer_Tick;
             _hgFlashTimer.Tick += HgFlashTimer_Tick;
             _autoRepeatTimer.Tick += AutoRepeatTimer_Tick;
@@ -742,8 +753,8 @@ namespace newgdq
 
             // 三层高度按容器实际高度(_mapH)自适应分配，不写死 60：上=刻度、中=慢字标记堆叠、下=色块。
             // 字号固定(10)，故上层刻度/下层色块取固定高度保证可读，中层取余下空间随容器伸缩；
-            // 标签行数多时由下方 needH 撑高容器，自适应同样生效（40px 下三层不重叠）。
-            const double TopH = 12, BotH = 8;
+            // 标签行数多时由下方 needH 撑高容器，自适应同样生效（34px 下三层不重叠）。
+            const double TopH = 10, BotH = 6;
             double topY = 0, midY = TopH, botY = _mapH - BotH;
             double MidH = botY - midY;
 
@@ -844,7 +855,11 @@ namespace newgdq
             // 如果标签层数超过 1，动态加高容器（让标签不被裁）：刻度 + N 行标签 + 三角(6) + 色块 + 边距
             int neededRows = rows.Count;
             double needH = TopH + neededRows * LineH + 6 + BotH + 2;
-            if (MapPanel.Height < needH) MapPanel.Height = needH;
+            // 反馈8：needH 只由标签行数决定（不依赖当前高度），故 targetH 收敛到固定值——慢字少回落基准、慢字多临时撑高，
+            // 下次重画 targetH 不变即不再赋值，幂等不震荡（避免改高度→SizeChanged→重画 的来回跳）。
+            const double BaseMapH = 34;   // 与 XAML MapPanel Height 一致
+            double targetH = Math.Max(BaseMapH, needH);
+            if (Math.Abs(MapPanel.Height - targetH) > 0.5) MapPanel.Height = targetH;
 
             // ===== 第 3 层：色块条 =====
             for (int i = 0; i < total; i++)
