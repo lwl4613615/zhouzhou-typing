@@ -246,6 +246,16 @@ namespace newgdq.Views
                 .ToList();
         }
 
+        private List<string> SelectedErrorChars()
+        {
+            return Grid.SelectedItems
+                .OfType<Row>()
+                .Select(r => r.Correct)
+                .Where(c => !string.IsNullOrWhiteSpace(c))
+                .Distinct()
+                .ToList();
+        }
+
         private void BtnCopyChars_Click(object sender, RoutedEventArgs e)
         {
             string text = string.Concat(CurrentErrorChars());
@@ -262,7 +272,9 @@ namespace newgdq.Views
 
         private void BtnGenPractice_Click(object sender, RoutedEventArgs e)
         {
-            var chars = CurrentErrorChars();
+            var selected = SelectedErrorChars();
+            bool useSelected = selected.Count > 0;
+            var chars = useSelected ? selected : CurrentErrorChars();
             if (chars.Count == 0)
             {
                 Services.Toast.Info("当前范围没有错字可练");
@@ -274,8 +286,8 @@ namespace newgdq.Views
                 Services.Toast.Warning("无法定位主窗口，请从主窗菜单打开错字本");
                 return;
             }
-            const int MaxChars = 30;
-            var pick = chars.Take(MaxChars).ToList();
+            int maxChars = useSelected ? 100 : 30;
+            var pick = chars.Take(maxChars).ToList();
             int repeat = Math.Max(2, Math.Min(6, (int)Math.Ceiling(80.0 / pick.Count)));
             var sb = new StringBuilder();
             for (int r = 0; r < repeat; r++)
@@ -283,7 +295,8 @@ namespace newgdq.Views
             string text = sb.ToString();
             string title = $"错字针对练习 · {pick.Count}字×{repeat}遍";
             if (!main.LoadPracticeText(text, title)) return;   // 用户在“覆盖确认”里取消 → 不退出分析页
-            Services.Toast.Success($"已生成 {text.Length} 字练习，去主窗开打");
+            string scope = useSelected ? $"选中 {pick.Count} 个错字" : "全部错字";
+            Services.Toast.Success($"已用{scope}生成 {text.Length} 字练习，去主窗开打");
             main.CloseAnalysis();   // 退出分析页，回到跟打区
         }
 

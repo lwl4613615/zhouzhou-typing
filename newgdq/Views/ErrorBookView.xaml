@@ -51,6 +51,7 @@
                       HeadersVisibility="Column" GridLinesVisibility="Horizontal"
                       HorizontalGridLinesBrush="{DynamicResource GridLine}"
                       CanUserAddRows="False" CanUserDeleteRows="False"
+                      SelectionMode="Extended"
                       RowHeight="28" FontSize="13"
                       Background="{DynamicResource CellBG}" Foreground="{DynamicResource ValueFG}"
                       RowBackground="{DynamicResource CellBG}"
