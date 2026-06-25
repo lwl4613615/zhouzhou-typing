@@ -2775,6 +2775,7 @@ namespace newgdq
             // 完成时按"全文长度"算，不再被 IME junk 干扰
             int total = _session.TypeText.Length;
             _session.LastInputLen = total;
+            if (_session.EndTime == null) _session.EndTime = DateTime.Now;
 
             // 出成绩时统一染色：回改位置浅黄，慢字位置浅绿（错字仍是红色，由 TextChanged 持续维护）
             ApplyResultMarks();

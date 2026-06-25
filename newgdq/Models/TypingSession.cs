@@ -17,6 +17,7 @@ namespace newgdq.Models
         public bool     Started  { get; set; }
         public bool     Finished { get; set; }
         public DateTime StartTime;
+        public DateTime? EndTime;   // 完成时刻；非 null 表示已冻结用时
 
         public int Keys;        // 击键数（来自键钩子）
         public int Hg;          // 回改：退格累计
@@ -48,6 +49,7 @@ namespace newgdq.Models
         {
             Started = false;
             Finished = false;
+            EndTime = null;
             Keys = 0;
             Hg = 0;
             Cz = 0;
@@ -71,7 +73,7 @@ namespace newgdq.Models
         /// </summary>
         public (double speed, double speed2, double jj, double mc, double sec) ComputeStats(int inputLen)
         {
-            double sec = (DateTime.Now - StartTime).TotalSeconds;
+            double sec = ((EndTime ?? DateTime.Now) - StartTime).TotalSeconds;
             if (sec <= 0.001 || inputLen <= 0) return (0, 0, 0, 0, 0);
 
             int validLen = inputLen - Cz;  // 已打 - 错字 = 有效字数
