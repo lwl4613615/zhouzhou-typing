@@ -220,6 +220,16 @@ namespace newgdq.Views
             }
         }
 
+        private void BtnPickTxtFile_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new Microsoft.Win32.OpenFileDialog
+            {
+                Filter = "文本文件|*.txt|所有文件|*.*"
+            };
+            if (dlg.ShowDialog() == true)
+                LoadCustomFile(dlg.FileName);
+        }
+
         private void BtnRefreshTree_Click(object sender, RoutedEventArgs e)
         {
             var folder = SettingsService.Instance.LastCustomFolder;
@@ -304,6 +314,12 @@ namespace newgdq.Views
         private void TrvCustom_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             if (!(e.NewValue is TreeViewItem item) || !(item.Tag is string path)) return; // 目录节点 Tag 是 DirTag
+            LoadCustomFile(path);
+        }
+
+        /// <summary>读入单个 TXT 文件并载入为当前自定义文章（树节点选中与"选择TXT文件"共用）。</summary>
+        private void LoadCustomFile(string path)
+        {
             try
             {
                 string text = ArticleLoader.LoadFromFile(path);

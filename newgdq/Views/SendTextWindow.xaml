@@ -107,6 +107,7 @@
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,4">
                         <ui:Button Content="选择文件夹" Click="BtnPickFolder_Click" Margin="0,0,4,0"/>
+                        <ui:Button x:Name="BtnPickTxtFile" Content="选择TXT文件" Click="BtnPickTxtFile_Click" Margin="0,0,4,0"/>
                         <ui:Button Content="刷新" Click="BtnRefreshTree_Click" Margin="0,0,8,0"/>
                         <TextBlock x:Name="TxtCustomFolder" Text="（未选择文件夹）" VerticalAlignment="Center"
                                    Foreground="{DynamicResource LabelFG}" TextTrimming="CharacterEllipsis" MaxWidth="380"/>
