@@ -444,6 +444,13 @@
                             <TextBlock Text="发送图片成绩" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
+                    <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_ClearHistory_Click"
+                            ToolTip="清空全部历史成绩（不影响错字本/慢字本）">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Delete24" FontSize="16" Margin="0,0,10,0"/>
+                            <TextBlock Text="清除历史" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
 
                     <!-- 文章 / 词典 -->
                     <TextBlock Text="文章 / 词典" Style="{StaticResource NavSection}"/>

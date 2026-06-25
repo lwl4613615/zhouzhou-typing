@@ -194,6 +194,31 @@ FROM type_record ORDER BY id DESC LIMIT @lim;";
             catch { return 0; }
         }
 
+        /// <summary>清空全部历史成绩：只删 type_record（不碰错字本/慢字本等其它库）。失败仅 Debug.WriteLine，不抛。</summary>
+        public static void ClearAll()
+        {
+            if (!_initialized) return;
+            try
+            {
+                using (var conn = new SQLiteConnection(ConnStr))
+                {
+                    conn.Open();
+                    using (var cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = "DELETE FROM type_record;";
+                        cmd.ExecuteNonQuery();
+                    }
+                    // 重置自增 id；旧库无 sqlite_sequence（从未用过 AUTOINCREMENT）则吞异常
+                    try { using (var c2 = conn.CreateCommand()) { c2.CommandText = "DELETE FROM sqlite_sequence WHERE name='type_record';"; c2.ExecuteNonQuery(); } }
+                    catch { /* 无 sqlite_sequence 表 */ }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("[HistoryRepository.ClearAll] " + ex.Message);
+            }
+        }
+
         /// <summary>汇总统计：(今日字数, 今日用时秒, 今日段数, 累计字数, 累计段数, 训练天数)。</summary>
         public static (int todayWords, double todaySec, int todaySegs, int totalWords, int totalSegs, int days) LoadSummary()
         {

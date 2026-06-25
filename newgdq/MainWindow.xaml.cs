@@ -1924,6 +1924,20 @@ namespace newgdq
             ShowAnalysis(new Views.SlowCharBookView(), "慢字本");
         }
 
+        /// <summary>清空全部历史成绩（仅 type_record；不影响错字本/慢字本）。破坏性操作，先二次确认。</summary>
+        private void MenuItem_ClearHistory_Click(object sender, RoutedEventArgs e)
+        {
+            var r = System.Windows.MessageBox.Show(
+                "确定清空全部历史成绩吗？此操作不可恢复，但不影响错字本/慢字本。", "清除历史",
+                System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Warning);
+            if (r != System.Windows.MessageBoxResult.Yes) return;
+            HistoryRepository.ClearAll();
+            History.Clear();
+            _historyIndex = 0;
+            RefreshSummaryCache();
+            Services.Toast.Success("历史成绩已清空");
+        }
+
         /// <summary>错字本闭环：把给定文本作为针对练习载入跟打区并激活主窗。</summary>
         /// <returns>用户是否确认载入（正打到一半时取消则返回 false，原内容保留）。</returns>
         public bool LoadPracticeText(string text, string title)
