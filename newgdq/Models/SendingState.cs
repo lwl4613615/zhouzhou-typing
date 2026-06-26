@@ -47,6 +47,7 @@ namespace newgdq.Models
         public bool RandomNoRepeat;      // 乱序全段不重复
         public bool OneSentenceEnd;      // 文章模式：以一句结束
         public bool AutoAdvance;         // 打完一段自动发下一段
+        public bool AutoShuffle;         // 打完一段自动把当前段打乱重打（反复练同一组字）
 
         // 进度
         public int StartSeg = 1;         // 起始段号

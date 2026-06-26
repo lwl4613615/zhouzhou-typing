@@ -256,7 +256,7 @@
                 <ContextMenu>
                     <MenuItem Header="显示主窗口" Click="TrayMenu_Show_Click"/>
                     <MenuItem Header="重打"      InputGestureText="F3" Click="MenuItem_Repeat_Click"/>
-                    <MenuItem Header="发下一段" InputGestureText="F6 / Ctrl+R" Click="MenuItem_SendNext_Click"/>
+                    <MenuItem Header="发下一段" InputGestureText="Ctrl+R" Click="MenuItem_SendNext_Click"/>
                     <Separator/>
                     <MenuItem Header="退出" Click="TrayMenu_Exit_Click"/>
                 </ContextMenu>
@@ -330,7 +330,7 @@
                     </Button>
                     <!-- 操作 -->
                     <TextBlock Text="操作" Style="{StaticResource NavSection}"/>
-                    <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_SendNext_Click" ToolTip="F6 / Ctrl+R">
+                    <Button Style="{StaticResource NavRowBtn}" Click="MenuItem_SendNext_Click" ToolTip="Ctrl+R">
                         <StackPanel Orientation="Horizontal">
                             <ui:SymbolIcon Symbol="ArrowNext24" FontSize="16" Margin="0,0,10,0"/>
                             <TextBlock Text="发下一段" VerticalAlignment="Center"/>
@@ -464,7 +464,7 @@
                         </Grid>
                         <Button.ContextMenu>
                             <ContextMenu>
-                                <MenuItem Header="将目前文章乱序"     InputGestureText="Ctrl+Q" Click="MenuItem_ShuffleArticle_Click"/>
+                                <MenuItem Header="将目前文章乱序"     InputGestureText="Ctrl+Q / F6" Click="MenuItem_ShuffleArticle_Click"/>
                                 <MenuItem Header="英文标点换中文标点" InputGestureText="Ctrl+W" Click="MenuItem_En2CnPunct_Click"/>
                                 <MenuItem Header="删除空格（包含全角）"   Click="MenuItem_StripSpace_Click"/>
                             </ContextMenu>
@@ -732,7 +732,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="2*" MinHeight="120"/>
                 <RowDefinition Height="4"/>
-                <RowDefinition Height="3*" MinHeight="220"/>
+                <RowDefinition Height="3*" MinHeight="100"/>
             </Grid.RowDefinitions>
 
             <!-- 对照区（卡片化：圆角纸面 + 内边距 + 四周留白，仅视觉，阅读逻辑不变） -->

@@ -60,12 +60,28 @@ namespace newgdq.Services
             return Build(drill, mix, null, "本场");
         }
 
+        /// <summary>从选中的字列表生成：去空去重后每字等权入练（无易混项/上下文），复用统一成文管线。空集返回 ("", "")。</summary>
+        public static (string text, string title) BuildFromChars(IEnumerable<string> chars)
+        {
+            if (chars == null) return ("", "");
+            var weak = new List<SlowRankRow>();
+            var seen = new HashSet<string>();
+            foreach (var c in chars)
+            {
+                if (string.IsNullOrWhiteSpace(c) || !seen.Add(c)) continue;
+                weak.Add(new SlowRankRow { Ch = c, WeakScore = 1 });
+            }
+            if (weak.Count == 0) return ("", "");
+            return Build(weak, new List<string>(), null, "选中", int.MaxValue);
+        }
+
         /// <summary>统一成文：弱项字按权重映射 2~6 遍（超核心预算才压缩），串入高分上下文，按 ~20% 比例匀撒易混项。</summary>
         private static (string text, string title) Build(
             IReadOnlyList<SlowRankRow> weak,
             IReadOnlyList<string> mixCandidates,
             IReadOnlyList<string> contexts,
-            string seg)
+            string seg,
+            int maxWeak = MaxWeak)
         {
             var pool = new List<SlowRankRow>();
             if (weak != null)
@@ -73,7 +89,7 @@ namespace newgdq.Services
                     if (r != null && !string.IsNullOrEmpty(r.Ch)) pool.Add(r);
             if (pool.Count == 0) return ("", "");
 
-            int drillCount = Math.Min(pool.Count, MaxWeak);
+            int drillCount = Math.Min(pool.Count, maxWeak);
             var drill = pool.GetRange(0, drillCount);
 
             var featured = new HashSet<string>();

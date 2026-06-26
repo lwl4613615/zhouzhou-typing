@@ -130,13 +130,27 @@ namespace newgdq.Views
             Refresh();
         }
 
-        /// <summary>慢字闭环：按当前范围生成专项练习，送进主窗跟打区。空弱项则提示。</summary>
+        private System.Collections.Generic.List<string> SelectedChars()
+        {
+            return Grid.SelectedItems
+                .OfType<Row>()
+                .Select(r => r.Ch)
+                .Where(c => !string.IsNullOrWhiteSpace(c))
+                .Distinct()
+                .ToList();
+        }
+
+        /// <summary>慢字闭环：有选中则练选中的字，否则练当前范围全部弱项，送进主窗跟打区。空集则提示。</summary>
         private void BtnGenPractice_Click(object sender, RoutedEventArgs e)
         {
-            var (text, title) = SlowCharDrillBuilder.BuildFromRange(CurrentRange());
+            var selected = SelectedChars();
+            bool useSelected = selected.Count > 0;
+            var (text, title) = useSelected
+                ? SlowCharDrillBuilder.BuildFromChars(selected)
+                : SlowCharDrillBuilder.BuildFromRange(CurrentRange());
             if (string.IsNullOrEmpty(text))
             {
-                Services.Toast.Info("当前范围暂无弱项可练");
+                Services.Toast.Info(useSelected ? "选中的字无法生成练习" : "当前范围暂无弱项可练");
                 return;
             }
             var main = System.Windows.Window.GetWindow(this) as newgdq.MainWindow;
@@ -146,7 +160,7 @@ namespace newgdq.Views
                 return;
             }
             if (!main.LoadPracticeText(text, title)) return;   // 用户在"覆盖确认"里取消 → 不退出分析页
-            Services.Toast.Success($"已生成 {text.Length} 字练习，去主窗开打");
+            Services.Toast.Success($"已用{(useSelected ? $"选中 {selected.Count} 个字" : "全部弱项")}生成 {text.Length} 字练习，去主窗开打");
             main.CloseAnalysis();   // 退出分析页，回到跟打区
         }
 

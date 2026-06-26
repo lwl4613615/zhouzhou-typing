@@ -1499,6 +1499,7 @@ namespace newgdq
                 _sending.State.RandomNoRepeat = state.RandomNoRepeat;
                 _sending.State.OneSentenceEnd = state.OneSentenceEnd;
                 _sending.State.AutoAdvance    = state.AutoAdvance;
+                _sending.State.AutoShuffle    = false;   // 新会话默认关自动乱序；文章模式也不会误禁自动发下段
                 _sending.State.CountPerSeg    = state.CountPerSeg;
                 _sending.State.Mark           = state.Mark;
                 _sending.State.StartSeg       = state.StartSeg;
@@ -1554,7 +1555,7 @@ namespace newgdq
 
         // 供 SendStatusWindow 调用的公共入口
         public Models.SendingState GetSendingState() => _sending.State;
-        public void StopSending() { CancelAutoAdvance(); _sending.Stop(); _sendStatusWin?.Refresh(); }
+        public void StopSending() { CancelAutoAdvance(); _sending.Stop(); _sending.State.AutoShuffle = false; _sendStatusWin?.Refresh(); }
         public void SendNextSegment() => SendNext();
 
         /// <summary>停止后是否还能"继续发文"：有文本且仍有未发内容（乱序无限池视为始终可继续）。</summary>
@@ -1585,7 +1586,19 @@ namespace newgdq
         public void SetAutoAdvance(bool on)
         {
             _sending.State.AutoAdvance = on;
+            if (on) _sending.State.AutoShuffle = false;
             if (!on) CancelAutoAdvance();
+            _sendStatusWin?.Refresh();
+        }
+        /// <summary>发文状态窗里切换"打完自动乱序当前段"。与自动发下一段互斥；关闭时取消任何挂起的续发。</summary>
+        public void SetAutoShuffle(bool on)
+        {
+            // 文章模式禁止开启自动乱序（fail-closed）：避免残留状态误禁"自动发下段"
+            if (on && _sending.State.Type == SendingTextType.Article) on = false;
+            _sending.State.AutoShuffle = on;
+            if (on) _sending.State.AutoAdvance = false;
+            if (!on) CancelAutoAdvance();
+            _sendStatusWin?.Refresh();
         }
         /// <summary>Ctrl+← / Ctrl+→ 相对跳段：仅顺序 / 一句结束模式支持。</summary>
         private void JumpSegRelative(int delta)
@@ -1752,7 +1765,7 @@ namespace newgdq
         /// <summary>由"正常打完"分支调用：若发文会话开启了自动续发，安排延迟发下一段。</summary>
         private void ScheduleAutoAdvance()
         {
-            if (!_sending.State.Active || !_sending.State.AutoAdvance) return;
+            if (!_sending.State.Active || (!_sending.State.AutoAdvance && !_sending.State.AutoShuffle)) return;
             // 重启计时器，单次触发
             _autoAdvanceTimer.Stop();
             _autoAdvanceTimer.Start();
@@ -1766,8 +1779,12 @@ namespace newgdq
             _autoAdvanceTimer.Stop();
             if (_practiceMode) return;
             // 二次校验：计时器排队期间状态可能已变（用户手动跳段/停发文/重开）
-            if (!_sending.State.Active || !_sending.State.AutoAdvance) return;
-            SendNext();
+            if (!_sending.State.Active || (!_sending.State.AutoAdvance && !_sending.State.AutoShuffle)) return;
+            // 自动乱序：把当前段打乱重打（文章模式不参与，作二次保险）；否则发下一段
+            if (_sending.State.AutoShuffle && _sending.State.Type != SendingTextType.Article)
+                MenuItem_ShuffleArticle_Click(null, null);
+            else if (_sending.State.AutoAdvance)
+                SendNext();
         }
 
         private void MnuSmartCi_Click(object sender, RoutedEventArgs e)
@@ -2267,7 +2284,7 @@ namespace newgdq
             if (!this.IsActive) return;
 
             // 内嵌分析页（AnalysisHost）显示时：底层跟打区被盖住、用户看不见，
-            // 此时若误触会改动底层内容/进度的功能键（F2 发文 / F3 重打 / F4 抓文 / F6 发下一段），
+            // 此时若误触会改动底层内容/进度的功能键（F2 发文 / F3 重打 / F4 抓文 / F6 乱序当前段），
             // 会在背后悄悄清掉当前进度或换文 → 关掉分析页回去时数据已丢。一律拦掉并提示。
             if (AnalysisHost != null && AnalysisHost.Visibility == Visibility.Visible)
             {
@@ -2280,7 +2297,7 @@ namespace newgdq
             }
 
             // 群比赛模式（F4 抓来的云比赛文）：锁掉除 F8 暂停以外的所有功能键 / Ctrl 组合键，
-            // 防止 F3 重打 / F6 发下一段 / Ctrl+Q 乱序等"重打刷分"，比赛只许打一遍。
+            // 防止 F3 重打 / F6 乱序当前段 / Ctrl+Q 乱序等"重打刷分"，比赛只许打一遍。
             // 注意：只拦功能键与 Ctrl 组合，下方的逐字击键计数不受影响（正常打字照常）。
             if (Services.CloudMatchService.IsMatchArticleLoaded && !Services.CloudMatchService.IsDailyArticle)
             {
@@ -2313,8 +2330,8 @@ namespace newgdq
                 case 0x73: // F4 群比赛抓文（凭本场口令从云端拉取比赛文）
                     Dispatcher.BeginInvoke(new Action(FetchMatchArticle));
                     return;
-                case 0x75: // F6 发下一段
-                    Dispatcher.BeginInvoke(new Action(SendNext));
+                case 0x75: // F6 乱序当前段（同 Ctrl+Q）
+                    Dispatcher.BeginInvoke(new Action(() => MenuItem_ShuffleArticle_Click(null, null)));
                     return;
                 case 0x77: // F8 暂停 / 继续
                     Dispatcher.BeginInvoke(new Action(TogglePause));

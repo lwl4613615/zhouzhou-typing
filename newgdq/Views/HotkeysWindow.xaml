@@ -46,7 +46,7 @@
                                 <TextBlock Grid.Row="1" Grid.Column="0" Text="F3" FontWeight="Bold" Margin="0,2"/>
                                 <TextBlock Grid.Row="1" Grid.Column="1" Text="重打当前段" Margin="0,2"/>
                                 <TextBlock Grid.Row="2" Grid.Column="0" Text="F6" FontWeight="Bold" Margin="0,2"/>
-                                <TextBlock Grid.Row="2" Grid.Column="1" Text="发下一段" Margin="0,2"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1" Text="乱序当前段（同 Ctrl+Q）" Margin="0,2"/>
                                 <TextBlock Grid.Row="3" Grid.Column="0" Text="F8" FontWeight="Bold" Margin="0,2"/>
                                 <TextBlock Grid.Row="3" Grid.Column="1" Text="暂停 / 继续" Margin="0,2"/>
                             </Grid>
@@ -80,7 +80,7 @@
                                 <TextBlock Grid.Row="0" Grid.Column="0" Text="F9" FontWeight="Bold" Margin="0,2"/>
                                 <TextBlock Grid.Row="0" Grid.Column="1" Text="复制最新一段成绩" Margin="0,2"/>
                                 <TextBlock Grid.Row="1" Grid.Column="0" Text="Ctrl+R" FontWeight="Bold" Margin="0,2"/>
-                                <TextBlock Grid.Row="1" Grid.Column="1" Text="发下一段（同 F6）" Margin="0,2"/>
+                                <TextBlock Grid.Row="1" Grid.Column="1" Text="发下一段" Margin="0,2"/>
                                 <TextBlock Grid.Row="2" Grid.Column="0" Text="Ctrl+U" FontWeight="Bold" Margin="0,2"/>
                                 <TextBlock Grid.Row="2" Grid.Column="1" Text="重打当前段（同 F3）" Margin="0,2"/>
                                 <TextBlock Grid.Row="3" Grid.Column="0" Text="Ctrl+J" FontWeight="Bold" Margin="0,2"/>
@@ -100,7 +100,7 @@
                                 <TextBlock Grid.Row="10" Grid.Column="0" Text="Ctrl+G" FontWeight="Bold" Margin="0,2"/>
                                 <TextBlock Grid.Row="10" Grid.Column="1" Text="跟打报告" Margin="0,2"/>
                                 <TextBlock Grid.Row="11" Grid.Column="0" Text="Ctrl+Q" FontWeight="Bold" Margin="0,2"/>
-                                <TextBlock Grid.Row="11" Grid.Column="1" Text="将目前文章乱序" Margin="0,2"/>
+                                <TextBlock Grid.Row="11" Grid.Column="1" Text="将目前文章乱序（同 F6）" Margin="0,2"/>
                                 <TextBlock Grid.Row="12" Grid.Column="0" Text="Ctrl+W" FontWeight="Bold" Margin="0,2"/>
                                 <TextBlock Grid.Row="12" Grid.Column="1" Text="英文标点换中文" Margin="0,2"/>
                                 <TextBlock Grid.Row="13" Grid.Column="0" Text="Ctrl+M" FontWeight="Bold" Margin="0,2"/>

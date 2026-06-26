@@ -96,6 +96,7 @@ namespace newgdq.Views
                 BtnStop.IsEnabled = false;
                 BtnSendNext.IsEnabled = false;
                 ChkAutoAdvance.IsEnabled = false;
+                ChkAutoShuffle.IsEnabled = false;
                 // 停止后：若仍有未发内容，把"停止发文"按钮变身为绿色"继续发文"
                 ApplyStopResumeButton(active: false);
                 return;
@@ -123,7 +124,8 @@ namespace newgdq.Views
             TxtPct.Text = pct.ToString("0.0") + "%";
             BtnStop.IsEnabled = true;
             BtnSendNext.IsEnabled = true;
-            ChkAutoAdvance.IsEnabled = true;
+            ChkAutoAdvance.IsEnabled = !st.AutoShuffle;
+            ChkAutoShuffle.IsEnabled = (st.Type != Models.SendingTextType.Article) && !st.AutoAdvance;
             // 发文中：按钮为红色"停止发文"
             ApplyStopResumeButton(active: true);
             // 反向同步开关状态（避免 Click 处理在赋值时被重入触发）
@@ -132,6 +134,12 @@ namespace newgdq.Views
                 _suppressAutoChk = true;
                 ChkAutoAdvance.IsChecked = st.AutoAdvance;
                 _suppressAutoChk = false;
+            }
+            if (ChkAutoShuffle.IsChecked != st.AutoShuffle)
+            {
+                _suppressShuffleChk = true;
+                ChkAutoShuffle.IsChecked = st.AutoShuffle;
+                _suppressShuffleChk = false;
             }
         }
 
@@ -176,6 +184,13 @@ namespace newgdq.Views
         {
             if (_suppressAutoChk) return;
             _owner?.SetAutoAdvance(ChkAutoAdvance.IsChecked == true);
+        }
+
+        private bool _suppressShuffleChk;
+        private void ChkAutoShuffle_Click(object sender, RoutedEventArgs e)
+        {
+            if (_suppressShuffleChk) return;
+            _owner?.SetAutoShuffle(ChkAutoShuffle.IsChecked == true);
         }
     }
 }

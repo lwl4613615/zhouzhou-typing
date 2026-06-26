@@ -231,15 +231,19 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <CheckBox x:Name="ChkAutoAdvance" Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,8"
-                      Content="打完自动发下一段" Foreground="{DynamicResource ValueFG}"
+            <CheckBox x:Name="ChkAutoAdvance" Grid.Row="0" Grid.Column="0" Margin="0,0,0,8"
+                      Content="自动发下段" Foreground="{DynamicResource ValueFG}"
                       ToolTip="勾选后每打完一段约 0.7 秒自动载入下一段（发完最后一段自动停止）"
                       Click="ChkAutoAdvance_Click"/>
+            <CheckBox x:Name="ChkAutoShuffle" Grid.Row="0" Grid.Column="1" Margin="0,0,0,8"
+                      Content="自动乱序" Foreground="{DynamicResource ValueFG}"
+                      ToolTip="勾选后每打完一段自动把当前段打乱重打，反复练同一组字（文章模式不可用；与自动发下一段互斥）"
+                      Click="ChkAutoShuffle_Click"/>
             <Button x:Name="BtnStop" Grid.Row="1" Grid.Column="0" Style="{StaticResource GlowBtn}"
                     Content="■ 停止发文" Margin="0,0,4,0" Click="BtnStop_Click"
                     BorderBrush="#7E2828" Background="{StaticResource StopBg}"/>
             <Button x:Name="BtnSendNext" Grid.Row="1" Grid.Column="1" Style="{StaticResource GlowBtn}"
-                    Content="▶ 发下一段 (F6)" Margin="4,0,0,0" Click="BtnSendNext_Click"
+                    Content="▶ 发下一段 (Ctrl+R)" Margin="4,0,0,0" Click="BtnSendNext_Click"
                     BorderBrush="#2A6FB8">
                 <Button.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">

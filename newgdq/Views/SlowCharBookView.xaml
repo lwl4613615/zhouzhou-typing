@@ -41,6 +41,7 @@
 
             <!-- 弱项排行表（按弱项分倒序，慢/回改/高键耗分列） -->
             <DataGrid x:Name="Grid" Grid.Column="0" AutoGenerateColumns="False" IsReadOnly="True"
+                      SelectionMode="Extended"
                       HeadersVisibility="Column" GridLinesVisibility="Horizontal"
                       HorizontalGridLinesBrush="{DynamicResource GridLine}"
                       CanUserAddRows="False" CanUserDeleteRows="False"
