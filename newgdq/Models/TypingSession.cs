@@ -49,6 +49,7 @@ namespace newgdq.Models
         {
             Started = false;
             Finished = false;
+            StartTime = default;
             EndTime = null;
             Keys = 0;
             Hg = 0;
@@ -62,6 +63,35 @@ namespace newgdq.Models
             LastInputLen = 0;
             EventIndex = 0;
             Report.Clear();
+        }
+
+        /// <summary>完成瞬间的深拷贝：冻结全部计数 + 文本 + 起止时刻 + 事件台账，
+        /// 供完成后（含被云端复位）展示报告/速度分析/成绩图，使展示按值定格、用时不再随时间增长。</summary>
+        public TypingSession Snapshot()
+        {
+            var s = new TypingSession
+            {
+                TypeText     = TypeText,
+                Title        = Title,
+                IsCjk        = IsCjk,
+                Started      = Started,
+                Finished     = Finished,
+                StartTime    = StartTime,
+                EndTime      = EndTime,
+                Keys         = Keys,
+                Hg           = Hg,
+                Cz           = Cz,
+                LeftHand     = LeftHand,
+                RightHand    = RightHand,
+                PauseTimes   = PauseTimes,
+                ImeBackspace = ImeBackspace,
+                Words        = Words,
+                Reselect     = Reselect,
+                LastInputLen = LastInputLen,
+                EventIndex   = EventIndex,
+            };
+            s.Report.AddRange(Report);
+            return s;
         }
 
         /// <summary>统计：(速度字/分, 错一罚五速度, 击键键/秒, 码长键/字, 用时秒)

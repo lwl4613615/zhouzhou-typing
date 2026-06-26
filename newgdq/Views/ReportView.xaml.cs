@@ -30,7 +30,7 @@ namespace newgdq.Views
 
             int total = _session.TypeText.Length;
             int len   = _session.LastInputLen;
-            int useLen = total > 0 ? total : len;
+            int useLen = len > 0 ? len : total;
             var (speed, speed2, jj, mc, sec) = _session.ComputeStats(useLen);
 
             TxtSpeed.Text  = speed.ToString("0.00");

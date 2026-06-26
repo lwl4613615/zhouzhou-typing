@@ -28,7 +28,7 @@ namespace newgdq.Views
             TxtTitle.Text = string.IsNullOrEmpty(_session.Title) ? "（未命名文段）" : _session.Title;
 
             int total  = _session.TypeText.Length;
-            int useLen = total > 0 ? total : _session.LastInputLen;
+            int useLen = _session.LastInputLen > 0 ? _session.LastInputLen : total;
             var (speed, speed2, _, _, sec) = _session.ComputeStats(useLen);
 
             var events = _session.Report;

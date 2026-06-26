@@ -21,6 +21,8 @@ namespace newgdq
     public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
     {
         private readonly TypingSession _session = new TypingSession();
+        /// <summary>完成瞬间（任何复位前）捕获的成绩快照，供报告/速度分析/成绩图按值展示，避免读到被复位的 live _session。</summary>
+        private TypingSession _lastFinished;
         private readonly List<Run>     _charRuns = new List<Run>();
         /// <summary>每个 Run 的当前染色状态缓存：0=默认 1=正确 2=错误。
         /// TextChanged 中只对状态变化的 Run 真正赋 Foreground/Background，省 95%+ 重绘。</summary>
@@ -2017,7 +2019,7 @@ namespace newgdq
                 Services.Toast.Info("当前没有可分析的跟打数据，先打一段试试");
                 return;
             }
-            ShowAnalysis(new Views.ReportView(_session), "跟打报告");
+            ShowAnalysis(new Views.ReportView(SnapshotForDisplay()), "跟打报告");
         }
 
         private void MenuItem_OpenJjCheck_Click(object sender, RoutedEventArgs e)
@@ -2087,7 +2089,7 @@ namespace newgdq
                 Services.Toast.Info("当前没有可分析的跟打数据，先打一段试试");
                 return;
             }
-            ShowAnalysis(new Views.SpeedAnalysisView(_session), "速度分析");
+            ShowAnalysis(new Views.SpeedAnalysisView(SnapshotForDisplay()), "速度分析");
         }
 
         // ===== 信息条段号点击 → 弹列表跳段 =====
@@ -2814,6 +2816,9 @@ namespace newgdq
             RefreshBmTips();
 
             var (speed, speed2, jj, mc, sec) = _session.ComputeStats(total);
+            // 完成瞬间冻结成绩快照：必须在任何 RestoreAfterCloudFinish/换文/复位清零 _session 之前，
+            // 供报告/速度分析/成绩图按值展示（比赛、每日文、普通练习三条完成路径都经此公共出口）。
+            _lastFinished = _session.Snapshot();
             // 个人最佳(PB)：必须在把当前成绩写库前取历史最高速，否则纪录里已含本段
             double oldBest = HistoryRepository.LoadAggregate().MaxSpeed;
             App.Diag("FINISH", $"chars={total} Keys={_session.Keys} Hg={_session.Hg} Cz={_session.Cz} ImeBs={_session.ImeBackspace} Waste={_session.ComputeWasteKeys()} Reselect={_session.Reselect} sec={sec:0.00} speed={speed:0.00} jj={jj:0.00} mc={mc:0.00}");
@@ -3457,12 +3462,19 @@ namespace newgdq
             HideSessionSlowSummary();
         }
 
+        /// <summary>展示成绩用的会话来源：正在跟打看 live _session；已完成（含被云端复位）看完成瞬间快照。</summary>
+        private TypingSession SnapshotForDisplay()
+        {
+            bool inProgress = _session.Started && !_session.Finished && _session.LastInputLen > 0;
+            return (!inProgress && _lastFinished != null) ? _lastFinished : _session;
+        }
+
         /// <summary>完成时若"图片"开启，渲染 ScoreCard UserControl 复制到剪贴板。</summary>
         private void AutoCopyResultImage()
         {
             try
             {
-                var card = new Views.ScoreCard(_session);
+                var card = new Views.ScoreCard(SnapshotForDisplay());
                 // 强制布局尺寸（UserControl 未挂到窗口树时不会自动 Measure/Arrange）
                 card.Measure(new Size(card.Width, card.Height));
                 card.Arrange(new Rect(0, 0, card.Width, card.Height));
