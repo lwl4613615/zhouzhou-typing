@@ -2542,6 +2542,23 @@ namespace newgdq
             return false;
         }
 
+        private static bool IsPinyinPlaceholderAscii(char c)
+        {
+            return (c >= 'A' && c <= 'Z')
+                || (c >= 'a' && c <= 'z')
+                || (c >= '0' && c <= '9')
+                || c == ' '
+                || c == '\'';
+        }
+
+        private static bool IsCjkIdeograph(char c)
+        {
+            return c == '\u3007'
+                || (c >= '\u3400' && c <= '\u4DBF')
+                || (c >= '\u4E00' && c <= '\u9FFF')
+                || (c >= '\uF900' && c <= '\uFAFF');
+        }
+
         private static string SafeText(string text)
         {
             if (string.IsNullOrEmpty(text)) return string.Empty;
@@ -2617,12 +2634,16 @@ namespace newgdq
                 int i = realLen - 1;
                 char inp = rawInput[i];
                 // 拼音合成串恒为 ASCII：字母 / 数字 / 空格 / 分隔符（微软拼音用单引号 ' 分隔音节）。
-                // 剥离条件：尾部是 ASCII，且 (原文该位是中文) 或 (位置已超出原文长度——多出来的 ASCII
-                // 只能是未上屏拼音)。后者关键：合成串把输入撑过原文长度时，尾部越界会让旧逻辑立即
-                // break，残留整串逐字染红（微软拼音多音节 shu'ru'kuang' 尤其容易触发）。
-                bool inpIsImeJunk = inp < 128;
-                bool srcIsCjkOrBeyond = i >= _session.TypeText.Length || _session.TypeText[i] > 127;
-                if (srcIsCjkOrBeyond && inpIsImeJunk) realLen--;
+                // Normalize 后与原文等价的字符优先保留；其余仅在中文原文位置或越界位置剥离拼音占位串。
+                bool sourceExists = i < _session.TypeText.Length;
+                char src = sourceExists ? _session.TypeText[i] : '\0';
+                bool normalizedMatch = sourceExists
+                    && Services.TextProcessor.NormalizeForCompare(inp) == Services.TextProcessor.NormalizeForCompare(src);
+                if (normalizedMatch) break;
+
+                bool inpIsImeJunk = IsPinyinPlaceholderAscii(inp);
+                bool srcNeedsImeFilter = !sourceExists || IsCjkIdeograph(src);
+                if (srcNeedsImeFilter && inpIsImeJunk) realLen--;
                 else break;
             }
             var input = realLen < rawInput.Length ? rawInput.Substring(0, realLen) : rawInput;

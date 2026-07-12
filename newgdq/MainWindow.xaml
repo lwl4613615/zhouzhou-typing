@@ -1018,6 +1018,7 @@
                         </ui:Button>
                     </Grid>
                     <ui:Button x:Name="BtnGenSlowDrill" DockPanel.Dock="Bottom" Appearance="Primary"
+                               Background="{DynamicResource AccentFG}" Foreground="#1A1F2B" FontWeight="SemiBold"
                                Margin="0,10,0,0" HorizontalAlignment="Stretch"
                                Click="BtnGenSlowDrill_Click" ToolTip="按本场最卡的字生成专项练习并载入跟打区">
                         <StackPanel Orientation="Horizontal">
