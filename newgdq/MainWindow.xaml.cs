@@ -2648,7 +2648,7 @@ namespace newgdq
             }
             var input = realLen < rawInput.Length ? rawInput.Substring(0, realLen) : rawInput;
 
-            // 双保险：如果输入长度等于上次染色长度且未回退，说明只是 IME 切换/光标移动，跳过
+            // 同长度事件仍需重算：IME 正式提交可能是同长度替换。
             if (input.Length == _session.LastInputLen && _session.Started)
             {
                 if (rawInput.Length < _prevRawLen)   // raw 变短而 committed 不变 → 删拼音
@@ -2656,9 +2656,7 @@ namespace newgdq
                     _session.ImeBackspace++;
                     App.Diag("TEXT", $"imebs++ rawLen={rawInput.Length} prevRaw={_prevRawLen} ImeBs={_session.ImeBackspace}");
                 }
-                App.Diag("TEXT", $"skip-same rawLen={rawInput.Length} realLen={realLen} len={input.Length} Last={_session.LastInputLen} Cz={_session.Cz} Hg={_session.Hg} ImeBs={_session.ImeBackspace} composing={_imeComposing}");
-                _prevRawLen = curRawLen;
-                return;
+                App.Diag("TEXT", $"recalc-same rawLen={rawInput.Length} realLen={realLen} len={input.Length} Last={_session.LastInputLen} Cz={_session.Cz} Hg={_session.Hg} ImeBs={_session.ImeBackspace} composing={_imeComposing}");
             }
 
             // 记录回改范围（输入变短）→ 主染色后再触发黄色闪烁，避免被主循环清回默认色
