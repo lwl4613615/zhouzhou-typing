@@ -50,6 +50,7 @@ namespace newgdq.Models
 
         // 主题："Dark" / "Light"。默认 Dark。
         [DataMember(EmitDefaultValue = false)] public string ThemeName { get; set; }
+        [DataMember(EmitDefaultValue = false)] public bool? InputDiagnosticsEnabled { get; set; }
 
         // 长时间未跟打自动重打：0 = 关闭，N 分钟无输入则触发 F3 重打（对齐老版 timer5 + StopUse）
         [DataMember(EmitDefaultValue = false)] public int? AutoRepeatMinutes { get; set; }

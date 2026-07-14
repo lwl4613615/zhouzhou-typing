@@ -25,8 +25,6 @@ namespace newgdq
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            DiagInput = string.Equals(Environment.GetEnvironmentVariable("NEWGDQ_INPUT_DIAG"), "1", StringComparison.OrdinalIgnoreCase)
-                || e.Args.Any(a => string.Equals(a, "--diag-input", StringComparison.OrdinalIgnoreCase));
             Services.KeyHook.DiagnosticLog = s => Diag("KEY", s);
 
             // 全局异常处理：UI 线程 + 非 UI 线程 + Task 内部
@@ -55,6 +53,10 @@ namespace newgdq
 
             // 主题：根据 settings.json 中 ThemeName 替换 App.xaml 里默认 Dark 资源字典
             Services.SettingsService.Load();
+            bool initialDiag = Services.SettingsService.Instance.InputDiagnosticsEnabled == true
+                || string.Equals(Environment.GetEnvironmentVariable("NEWGDQ_INPUT_DIAG"), "1", StringComparison.OrdinalIgnoreCase)
+                || e.Args.Any(a => string.Equals(a, "--diag-input", StringComparison.OrdinalIgnoreCase));
+            SetInputDiagnostics(initialDiag, clearOnEnable: false, out _);
             ApplyTheme(Services.SettingsService.Instance.ThemeName);
 
             // 跟随系统深浅色：当 ThemeName == "System" 时，系统切换深浅色后实时重应用
@@ -63,12 +65,10 @@ namespace newgdq
             // 全局界面缩放：确定初始倍数并钩住所有窗口，使各窗体字体/控件一起缩放
             Services.UiScaleManager.Initialize();
 
-            Diag("INIT", "input diagnostics enabled");
-
             base.OnStartup(e);
         }
 
-        private static readonly string LogPath = Path.Combine(
+        public static string LogPath { get; } = Path.Combine(
             Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? ".",
             "newgdq.log");
 
@@ -76,6 +76,37 @@ namespace newgdq
 
         /// <summary>诊断开关：true 时把输入/IME/键盘钩子的实时状态写入 newgdq.log（排错用，平时关）。</summary>
         public static bool DiagInput { get; private set; }
+
+        public static bool SetInputDiagnostics(bool enabled, bool clearOnEnable, out string error)
+        {
+            error = null;
+            lock (LogLock)
+            {
+                if (DiagInput == enabled) return true;
+                if (!enabled)
+                {
+                    DiagInput = false;
+                    return true;
+                }
+
+                try
+                {
+                    string line = $"[{DateTime.Now:HH:mm:ss.fff}] [INIT] input diagnostics enabled\r\n";
+                    if (clearOnEnable)
+                        File.WriteAllText(LogPath, line);
+                    else
+                        File.AppendAllText(LogPath, line);
+                    DiagInput = true;
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    DiagInput = false;
+                    error = $"{(clearOnEnable ? "清空并初始化" : "初始化")}输入诊断日志失败：{ex.Message}";
+                    return false;
+                }
+            }
+        }
 
         /// <summary>诊断日志：仅 DiagInput 为 true 时写入，失败静默。</summary>
         public static void Diag(string tag, string msg)

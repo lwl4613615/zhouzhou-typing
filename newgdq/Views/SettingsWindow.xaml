@@ -149,6 +149,8 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <TextBlock Grid.Row="0" Text="配置文件路径（便携模式：始终在 exe 同目录）" FontWeight="Bold"/>
@@ -160,7 +162,16 @@
                         <RadioButton x:Name="RdoThemeLight"  Content="浅色 Light"  GroupName="Theme" Margin="0,0,16,0"/>
                         <RadioButton x:Name="RdoThemeSystem" Content="跟随系统" GroupName="Theme"/>
                     </StackPanel>
-                    <TextBlock Grid.Row="4" Foreground="{DynamicResource LabelFG}" TextWrapping="Wrap" Margin="0,16,0,0"
+                    <CheckBox Grid.Row="4" x:Name="ChkInputDiagnostics" Content="开启输入诊断日志"
+                              Margin="0,16,0,0"
+                              ToolTip="用于排查输入法/符号问题；开启时会记录到程序目录 newgdq.log"/>
+                    <StackPanel Grid.Row="5" Orientation="Horizontal" Margin="0,8,0,0">
+                        <ui:Button x:Name="BtnOpenDiagnosticsFolder" Content="打开日志文件夹"
+                                   Padding="12,4" Click="BtnOpenDiagnosticsFolder_Click"/>
+                        <TextBlock Text="日志文件：newgdq.log" Foreground="{DynamicResource LabelFG}"
+                                   VerticalAlignment="Center" Margin="10,0,0,0"/>
+                    </StackPanel>
+                    <TextBlock Grid.Row="6" Foreground="{DynamicResource LabelFG}" TextWrapping="Wrap" Margin="0,16,0,0"
                                Text="整个程序文件夹（含 settings.json）拷哪都行：U 盘、其它电脑、新用户。换机就直接复制文件夹。&#10;主题切换后需要重启程序才能完全应用（确定后会提示）。"/>
                 </Grid>
             </TabItem>

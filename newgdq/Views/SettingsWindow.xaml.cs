@@ -1,4 +1,6 @@
 using System;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -70,6 +72,7 @@ namespace newgdq.Views
 
             // 存储 Tab
             TxtConfigPath.Text = SettingsService.FilePath;
+            ChkInputDiagnostics.IsChecked = s.InputDiagnosticsEnabled ?? false;
             if (string.Equals(s.ThemeName, "System", StringComparison.OrdinalIgnoreCase))
                 RdoThemeSystem.IsChecked = true;
             else if (string.Equals(s.ThemeName, "Light", StringComparison.OrdinalIgnoreCase))
@@ -167,7 +170,15 @@ namespace newgdq.Views
 
         private void BtnOk_Click(object sender, RoutedEventArgs e)
         {
+            bool requestedDiag = ChkInputDiagnostics.IsChecked == true;
+            if (!App.SetInputDiagnostics(requestedDiag, clearOnEnable: true, out string diagError))
+            {
+                Services.Toast.Error(diagError);
+                return;
+            }
+
             var s = SettingsService.Instance;
+            s.InputDiagnosticsEnabled = requestedDiag;
             s.CompareFontFamily = (CmbCompareFamily.Text ?? "宋体").Trim();
             s.CompareFontSize   = NudCompareSize.Value;
             s.InputFontFamily   = (CmbInputFamily.Text ?? "宋体").Trim();
@@ -199,6 +210,32 @@ namespace newgdq.Views
             }
             DialogResult = true;
             Close();
+        }
+
+        private void BtnOpenDiagnosticsFolder_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string log = App.LogPath;
+                string dir = Path.GetDirectoryName(log) ?? ".";
+                if (File.Exists(log))
+                {
+                    Process.Start(new ProcessStartInfo("explorer.exe")
+                    {
+                        Arguments = $"/select,\"{log}\"",
+                        UseShellExecute = true
+                    });
+                }
+                else
+                {
+                    Process.Start(new ProcessStartInfo(dir) { UseShellExecute = true });
+                    Services.Toast.Info("诊断日志尚未生成；开启后复现一次即可生成");
+                }
+            }
+            catch (Exception ex)
+            {
+                Services.Toast.Error("打开诊断日志文件夹失败：" + ex.Message);
+            }
         }
 
         private void BtnCancel_Click(object sender, RoutedEventArgs e)
